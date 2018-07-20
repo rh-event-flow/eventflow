@@ -29,8 +29,7 @@ public class ProcessorRunner implements Runnable {
     
     @Override
     public void run(){
-        BasicConfigurator.configure();
-        
+        //BasicConfigurator.configure();
         scanForComponents();
         startComponents();
         while(!stopFlag){

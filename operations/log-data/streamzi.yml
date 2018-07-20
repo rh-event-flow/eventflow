@@ -1,9 +1,9 @@
 ---
-id: random-data-source
-name: "Random Source"
-description: "Generates random data"
+id: log-data
+name: "Log Data"
+description: "Prints data to console"
 inputs:
+- "input.data"
 outputs:
-- "output.data"
-imageName: "cef-ops-random-data"
+imageName: "cef-ops-log-data"
 settings: {}
