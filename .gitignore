@@ -21,7 +21,7 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-/model/nbproject/
-/operations/nodejs/filter-events/nbproject/private/
-/operations/nodejs/filter-events/node_modules/
-*/target/
+nbproject/
+target/
+node_modules/
+.DS_Store
