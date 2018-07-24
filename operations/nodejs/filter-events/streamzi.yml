@@ -1,0 +1,10 @@
+---
+id: filter-event-data
+name: "Filter Events"
+description: "Applies a simple filter to a stream of events"
+inputs:
+- "inputdata"
+outputs:
+- "outputdata"
+imageName: "cef-ops-node-filter-event-data"
+settings: {}

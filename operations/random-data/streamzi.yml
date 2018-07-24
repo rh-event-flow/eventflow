@@ -1,0 +1,9 @@
+---
+id: random-data-source
+name: "Random Source"
+description: "Generates random data"
+inputs:
+outputs:
+- "output-data"
+imageName: "cef-ops-random-data"
+settings: {}
