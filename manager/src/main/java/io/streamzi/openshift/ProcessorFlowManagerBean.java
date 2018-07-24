@@ -60,9 +60,9 @@ public class ProcessorFlowManagerBean implements ProcessorFlowManager {
             ProcessorNodeTemplate nodeTemplate = reader.readTemplate();
 
             String imageName = nodeTemplate.getImageName();
-            IResource template = container.getClient().get(ResourceKind.IMAGE_STREAM, imageName, "hardcoded-test");
+            IResource template = container.getClient().get(ResourceKind.IMAGE_STREAM, imageName, container.getNamespace());
             if (template != null) {
-                IDeploymentConfig config = container.getClient().getResourceFactory().stub(ResourceKind.DEPLOYMENT_CONFIG, filename, "hardcoded-test");
+                IDeploymentConfig config = container.getClient().getResourceFactory().stub(ResourceKind.DEPLOYMENT_CONFIG, filename, container.getNamespace());
 
                 config.setReplicas(1);
                 config.addLabel("app", filename);
@@ -73,7 +73,7 @@ public class ProcessorFlowManagerBean implements ProcessorFlowManager {
 
                 IContainer c1 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
                 c1.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-                c1.setImage(new DockerImageURI("172.30.1.1:5000/hardcoded-test/" + imageName + ":latest"));
+                c1.setImage(new DockerImageURI("172.30.1.1:5000/" + container.getNamespace() + "/" + imageName + ":latest"));
 
 
                 config = container.getClient().create(config);

@@ -12,12 +12,9 @@ import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowWriter;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.jar.Attributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -26,7 +23,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 /**
@@ -45,7 +41,7 @@ public class API {
     @Path("/pods")
     @Produces("application/json")
     public List<String> listPods() {
-        List<IResource> pods = container.getClient().list(ResourceKind.POD, "hardcoded-test");
+        List<IResource> pods = container.getClient().list(ResourceKind.POD, container.getNamespace());
         List<String> results = new ArrayList<>();
         for(IResource r : pods){
             results.add(r.getName());
@@ -53,11 +49,11 @@ public class API {
         return results;
     }
 
+    /*
     @GET
     @Path("/deployments/{namespace}/create/{name}")
     @Produces("application/json")
     public String create(@PathParam("namespace")String namespace, @PathParam("name")String name){
-        /*
         // Find the template
         IResource template = container.getClient().get(ResourceKind.IMAGE_STREAM, name, namespace);
         if(template!=null){
@@ -84,41 +80,11 @@ public class API {
         } else {
             return "NOTHING";
         }
-        */
-        return "";
         
     }
-    
-    @POST
-    @Path("/dataflows")
-    @Produces("application/json")
-    public String deployProcessorFlow(SerializedFlow flow){
-        // Create a deployment config
-        logger.info("Deploying flow");
-        return "";
-    }
-    
-    @POST
-    @Path("/processors")
-    public String createProcessorDeployment(String processorId) throws Exception {
-        File yamlFile = new File(container.getTemplateDir(), processorId + ".yml");
-        if(yamlFile.exists()){
-            ProcessorTemplateYAMLReader reader = new ProcessorTemplateYAMLReader(yamlFile);
-            ProcessorNodeTemplate template = reader.readTemplate();
-            
-            // Create a new deployment
-            
-        }
-        return "";
-    }
-    
-    @POST
-    @Path("/dataflows/{uuid}")
-    @Produces("application/json")
-    public String updateProcessorFlow(@PathParam("uuid")String deploymentUuid, SerializedFlow flow){
-        return "";
-    }
-    
+    */
+
+
     @GET
     @Path("/dataflows/{uuid}")
     @Produces("application/json")
@@ -126,6 +92,27 @@ public class API {
         return "";
     }
     
+    @GET
+    @Path("/processors")
+    @Produces("application/json")
+    public List<String> listProcessors(){
+        List<String> results = new ArrayList<>();
+        
+        File[] templates = container.getTemplateDir().listFiles();
+        for(File f : templates){
+            try {
+                final ProcessorTemplateYAMLReader reader = new ProcessorTemplateYAMLReader(f);
+                final ProcessorNodeTemplate template = reader.readTemplate();
+                final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
+                results.add(writer.writeToYAMLString());
+            } catch (Exception e){
+                logger.log(Level.WARNING, "Error loading template: " + e.getMessage());
+            }
+        }
+        return results;
+    }
+    
+    /** Upload a definition for a processor node */
     @POST
     @Path("/processors")
     @Consumes("application/json")
@@ -145,6 +132,7 @@ public class API {
         
     }
     
+    /** Upload a new flow */
     @POST
     @Path("/flows")
     @Consumes("application/json")
@@ -162,7 +150,7 @@ public class API {
             logger.info("Flow written OK");
             
             // Now try and build a deployment
-            ProcessorFlowDeployer deployer = new ProcessorFlowDeployer(container.getClient(), "hardcoded-test", flow);
+            ProcessorFlowDeployer deployer = new ProcessorFlowDeployer(container.getClient(), container.getNamespace(), flow);
             IDeploymentConfig dc = deployer.buildDeploymentConfig();
             
             IResource existing;
@@ -170,7 +158,7 @@ public class API {
                 logger.info("Creating ConfigMap: " + map.getName());
                 logger.info(map.toJson());
                 try {
-                    existing = container.getClient().get(ResourceKind.CONFIG_MAP, map.getName(), "hardcoded-test");
+                    existing = container.getClient().get(ResourceKind.CONFIG_MAP, map.getName(), container.getNamespace());
                 } catch (Exception e){
                     logger.info("ConfigMap not found");
                     existing = null;

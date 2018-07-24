@@ -62,7 +62,7 @@ public class ProcessorFlowDeployer {
         HashMap<String, IContainer> configs = new HashMap<>();
         for(ProcessorNode node : flow.getNodes()){
             nodeContainer = config.addContainer("streamzi-processor-" + node.getUuid());
-            nodeContainer.addEnvVar(ProcessorConstants.NODE_UUID, "flow-consumer" /*node.getUuid()*/);
+            nodeContainer.addEnvVar(ProcessorConstants.NODE_UUID, node.getUuid());
 
             // Add environment variables for node settingds
             for(String key : node.getSettings().keySet()){

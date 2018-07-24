@@ -68,7 +68,7 @@ public class FunctioningFlowTest {
             flow.addProcessorNode(source);
             flow.addProcessorNode(logger);
             
-            flow.linkNodes(source, "output.data", logger, "input.data");
+            flow.linkNodes(source, "output-data", logger, "input-data");
             
             ProcessorFlowWriter writer = new ProcessorFlowWriter(flow);
             System.out.println(writer.writeToJsonString());

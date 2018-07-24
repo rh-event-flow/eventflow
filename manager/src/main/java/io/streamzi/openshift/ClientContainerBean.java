@@ -74,8 +74,12 @@ public class ClientContainerBean implements ClientContainer {
     public File getTemplateDir() {
         return new File(storageDir, "templates");
     }
-    
-    private void checkCRDs(){
-        
+
+
+    @Override
+    public String getNamespace() {
+        return "hardcoded-test";
     }
+    
+    
 }

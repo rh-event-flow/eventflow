@@ -92,7 +92,6 @@ public class ProcessorRunner implements Runnable {
         new Thread(runner).start();
         
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            runner.stop();
             System.out.println("SHUTDOWN");
             System.exit(0);
         }));                  
