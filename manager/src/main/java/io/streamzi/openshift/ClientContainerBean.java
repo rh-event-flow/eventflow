@@ -2,6 +2,9 @@ package io.streamzi.openshift;
 
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftClient;
+
 import java.io.File;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -22,6 +25,7 @@ public class ClientContainerBean implements ClientContainer {
     private static final Logger logger = Logger.getLogger(ClientContainerBean.class.getName());
     private File storageDir = new File("/storage");
     private IClient client;
+    private OpenShiftClient osClient;
 
     @PostConstruct
     public void init() {
@@ -31,10 +35,14 @@ public class ClientContainerBean implements ClientContainer {
         
         logger.info("Starting ClientContainer");
         client = new ClientBuilder(masterUrl)
-                
-                    .withUserName("system")
+                    .withUserName("developer")
                     .withPassword("admin")
                     .build();
+
+        osClient = new DefaultOpenShiftClient();
+        logger.info("URL:" + osClient.getOpenshiftUrl().toString());
+        logger.info("Namespace: " + osClient.getNamespace());
+
         // Storage folders
         File templateDir = new File(storageDir, "templates");
         if(!templateDir.exists()){
@@ -80,6 +88,9 @@ public class ClientContainerBean implements ClientContainer {
     public String getNamespace() {
         return "hardcoded-test";
     }
-    
-    
+
+    @Override
+    public OpenShiftClient getOSClient() {
+        return osClient;
+    }
 }

@@ -7,6 +7,8 @@ import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IConfigMap;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorLink;
@@ -14,6 +16,7 @@ import io.streamzi.openshift.dataflow.model.ProcessorNode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.json.JSONObject;
 
@@ -28,7 +31,7 @@ public class ProcessorFlowDeployer {
     private String namespace;
     private String kafkaClusterName = "my-cluster";
     private int kafkaPort = 9092;
-    private List<IConfigMap> topicMaps = new ArrayList<>();
+    private List<ConfigMap> topicMaps = new ArrayList<>();
     private String registryAddress = "172.30.1.1:5000";
     
     private IClient client;
@@ -53,7 +56,7 @@ public class ProcessorFlowDeployer {
         return config;
     }
     
-    public List<IConfigMap> getTopicMaps(){
+    public List<ConfigMap> getTopicMaps(){
         return topicMaps;
     }
     
@@ -81,7 +84,7 @@ public class ProcessorFlowDeployer {
     }
     
     private void populateTopicMaps(HashMap<String, IContainer> containers){
-        IConfigMap linkConfig;
+        final ConfigMap cm = new ConfigMap();
         String topicName;
         IContainer sourceContainer;
         IContainer targetContainer;
@@ -102,28 +105,25 @@ public class ProcessorFlowDeployer {
                 targetContainer = containers.get(link.getTarget().getParent().getUuid());
                 targetContainer.addEnvVar(link.getTarget().getName(), topicName);
             }
-            
-            JSONObject topicJson = new JSONObject();
-            topicJson.put("apiVersion", "v1");
-            topicJson.put("kind", "ConfigMap");
-            JSONObject metadata = new JSONObject();
-            
-            JSONObject labels = new JSONObject();
-            labels.put("strimzi.io/cluster", kafkaClusterName);
-            labels.put("strimzi.io/kind", "topic");
-            
-            metadata.put("labels", labels);
-            metadata.put("name", topicName);
-            metadata.put("namespace", namespace);
-            topicJson.put("metadata", metadata);
-            
-            JSONObject data = new JSONObject();
+
+            final Map<String, String> data = new HashMap<>();
             data.put("name", topicName);
             data.put("partitions", "2");
             data.put("replicas", "1");
-            topicJson.put("data", data);       
-            linkConfig = client.getResourceFactory().create(topicJson.toString());
-            topicMaps.add(linkConfig);
+
+            final Map<String, String> labels =new HashMap<>();
+            labels.put("strimzi.io/cluster", kafkaClusterName);
+            labels.put("strimzi.io/kind", "topic");
+
+            final ObjectMeta om  = new ObjectMeta();
+            om.setName(topicName);
+            om.setNamespace(namespace);
+            om.setLabels(labels);
+
+            cm.setMetadata(om);
+            cm.setData(data);
+
+            topicMaps.add(cm);
         }
     }
 }
