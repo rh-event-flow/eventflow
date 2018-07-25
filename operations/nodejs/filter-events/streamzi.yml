@@ -7,4 +7,6 @@ inputs:
 outputs:
 - "outputdata"
 imageName: "cef-ops-node-filter-event-data"
-settings: {}
+settings: {
+"threshold": 0.3
+}
