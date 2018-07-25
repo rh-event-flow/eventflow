@@ -38,6 +38,16 @@
         <dependency>
             <groupId>com.openshift</groupId>
             <artifactId>openshift-restclient-java</artifactId>
-        </dependency>                 
+        </dependency>
+
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>openshift-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
     </dependencies>
 </project>

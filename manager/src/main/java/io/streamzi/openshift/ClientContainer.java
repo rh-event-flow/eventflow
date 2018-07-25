@@ -2,6 +2,8 @@ package io.streamzi.openshift;
 
 
 import com.openshift.restclient.IClient;
+import io.fabric8.openshift.client.OpenShiftClient;
+
 import java.io.File;
 import javax.ejb.Local;
 
@@ -16,4 +18,5 @@ public interface ClientContainer {
     public File getStorageDir();
     public File getTemplateDir();
     public File getFlowsDir();
+    public OpenShiftClient getOSClient();
 }

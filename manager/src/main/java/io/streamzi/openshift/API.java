@@ -4,8 +4,11 @@ package io.streamzi.openshift;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IConfigMap;
+import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IResource;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
@@ -14,7 +17,9 @@ import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLR
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -153,25 +158,41 @@ public class API {
             ProcessorFlowDeployer deployer = new ProcessorFlowDeployer(container.getClient(), container.getNamespace(), flow);
             IDeploymentConfig dc = deployer.buildDeploymentConfig();
             
-            IResource existing;
-            for(IConfigMap map : deployer.getTopicMaps()){
-                logger.info("Creating ConfigMap: " + map.getName());
-                logger.info(map.toJson());
-                try {
-                    existing = container.getClient().get(ResourceKind.CONFIG_MAP, map.getName(), container.getNamespace());
-                } catch (Exception e){
-                    logger.info("ConfigMap not found");
-                    existing = null;
-                }
-                if(existing==null){
-                    container.getClient().create(map);
-                }
+            for(ConfigMap map : deployer.getTopicMaps()){
+                logger.info("Creating ConfigMap: " + map.getMetadata().getName());
+                logger.info(map.toString()) ;
+
+                container.getOSClient().configMaps().inNamespace(map.getMetadata().getNamespace()).withName(map.getMetadata().getName()).createOrReplace(map);
+
             }
-            
+
+            for(IContainer c : dc.getContainers()){
+                final String containerName = c.getName();
+                final String cmName = containerName + "-ev.cm";
+                final String namespace = dc.getNamespace().getName();
+                final Map<String, String> evs = c.getEnvVars();
+
+                final Map<String, String> labels =new HashMap<>();
+                labels.put("streamzi.io/kind", "ev");
+                labels.put("streamzi.io/target", containerName);
+
+                final ObjectMeta om  = new ObjectMeta();
+                om.setName(cmName);
+                om.setNamespace(namespace);
+                om.setLabels(labels);
+
+                final ConfigMap cm = new ConfigMap();
+                cm.setMetadata(om);
+                cm.setData(evs);
+
+                container.getOSClient().configMaps().inNamespace(namespace).withName(cmName).createOrReplace(cm);
+            }
+
+            //todo: remove the Environment Variables which are embedded in the DC once the mapping to multiple DCs is done.
             logger.info("Creating deployment: " + dc.getName());
             logger.info(dc.toJson());
             container.getClient().create(dc);
-            
+
         } catch (Exception e){
             logger.log(Level.SEVERE, "Error parsing JSON flow data: " + e.getMessage(), e);
         }
