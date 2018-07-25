@@ -9,10 +9,16 @@ setTimeout(function () {
     var nodeUuid = process.env.STREAMZI_NODE_UUID;
     var sourceTopic = process.env.inputdata;
     var targetTopic = process.env.outputdata;
+    var threshold = process.env.threshold;
+
+    if(threshold === undefined){
+        threshold = 0.5
+    }
 
     console.log("Host: " + kafkaHost);
     console.log("Input topic: " + sourceTopic);
     console.log("Output topic: " + targetTopic);
+    console.log("Threshold: " + threshold);
 
     var kafka = require("kafka-node");    
     var Producer = kafka.Producer;    
@@ -50,7 +56,7 @@ setTimeout(function () {
         var numberValue = cloudEvent.data.value;
         console.log(numberValue);
         
-        if(numberValue>0.5){
+        if(numberValue>threshold){
 
             var payloads = [
                 {
