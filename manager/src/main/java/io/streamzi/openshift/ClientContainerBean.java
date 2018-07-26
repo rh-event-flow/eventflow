@@ -5,13 +5,11 @@ import com.openshift.restclient.IClient;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 
-import java.io.File;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.EJB;
 import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import java.io.File;
+import java.util.logging.Logger;
 
 
 /**
@@ -86,7 +84,7 @@ public class ClientContainerBean implements ClientContainer {
 
     @Override
     public String getNamespace() {
-        return "hardcoded-test";
+        return getOSClient().getNamespace();
     }
 
     @Override

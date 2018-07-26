@@ -13,10 +13,7 @@ import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorLink;
 import io.streamzi.openshift.dataflow.model.ProcessorNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -48,11 +45,13 @@ public class ProcessorFlowDeployer {
         HashMap<String, IContainer> containers = new HashMap<>();
 
         for (ProcessorNode node : flow.getNodes()) {
+            Random r = new Random();
+            int x = r.nextInt(1000);
 
-            IDeploymentConfig config = client.getResourceFactory().stub(ResourceKind.DEPLOYMENT_CONFIG, "streamzi-processor-" + node.getUuid(), namespace);
+            IDeploymentConfig config = client.getResourceFactory().stub(ResourceKind.DEPLOYMENT_CONFIG, flow.getName() + "-" + node.getImageName() + "-" + x, namespace);
 
             // Basic metadata and settings
-            config.addLabel("app", node.getUuid());
+            config.addLabel("app", flow.getName());
             config.addLabel("streamzi.type", "processor-flow");
             config.addTemplateLabel("app", flow.getName());
             config.setReplicas(1);
@@ -74,7 +73,7 @@ public class ProcessorFlowDeployer {
     private IContainer populateNodeDeployments(ProcessorNode node, IDeploymentConfig config) {
         IContainer nodeContainer;
 
-        nodeContainer = config.addContainer("streamzi-processor-" + node.getUuid());
+        nodeContainer = config.addContainer(node.getImageName());
         nodeContainer.addEnvVar(ProcessorConstants.NODE_UUID, node.getUuid());
 
         // Add environment variables for node settingds
@@ -89,9 +88,7 @@ public class ProcessorFlowDeployer {
 
         for (ProcessorLink link : flow.getLinks()) {
             logger.info("Processing link");
-            String topicName = link.getSource().getParent().getUuid() + "-" + link.getSource().getName()
-                    + "." + link.getTarget().getParent().getUuid() + "-" + link.getTarget().getName();
-
+            String topicName = link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
             // Set the topic name in the source node container
             if (node.getUuid().equals(link.getSource().getParent().getUuid())) {
                 nodeContainer.addEnvVar(link.getSource().getName(), topicName);
@@ -116,8 +113,8 @@ public class ProcessorFlowDeployer {
 
         for (ProcessorLink link : flow.getLinks()) {
             logger.info("Processing link");
-            topicName = link.getSource().getParent().getUuid() + "-" + link.getSource().getName()
-                    + "." + link.getTarget().getParent().getUuid() + "-" + link.getTarget().getName();
+            topicName = link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
+
 
             // Set the topic name in the source node container
             if (containers.containsKey(link.getSource().getParent().getUuid())) {

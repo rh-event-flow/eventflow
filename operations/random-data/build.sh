@@ -6,5 +6,5 @@
 
 echo 'Building CONTAINER'
 docker build -t cef-ops-random-data .
-docker tag cef-ops-random-data:latest 172.30.1.1:5000/hardcoded-test/cef-ops-random-data:latest
-docker push 172.30.1.1:5000/hardcoded-test/cef-ops-random-data:latest
+docker tag cef-ops-random-data:latest 172.30.1.1:5000/myproject/cef-ops-random-data:latest
+docker push 172.30.1.1:5000/myproject/cef-ops-random-data:latest

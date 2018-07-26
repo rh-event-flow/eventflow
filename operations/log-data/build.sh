@@ -6,5 +6,5 @@
 
 echo 'Building CONTAINER'
 docker build -t cef-ops-log-data .
-docker tag cef-ops-log-data:latest 172.30.1.1:5000/hardcoded-test/cef-ops-log-data:latest
-docker push 172.30.1.1:5000/hardcoded-test/cef-ops-log-data:latest
+docker tag cef-ops-log-data:latest 172.30.1.1:5000/myproject/cef-ops-log-data:latest
+docker push 172.30.1.1:5000/myproject/cef-ops-log-data:latest

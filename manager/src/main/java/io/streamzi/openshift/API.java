@@ -60,18 +60,18 @@ public class API {
             
             config.setReplicas(1);
             config.addLabel("app", name);
-            config.addLabel("streamzi.flow.uuid", UUID.randomUUID().toString());
+                config.addLabel("streamzi.flow.uuid", UUID.randomUUID().toString());
             config.addLabel("streamzi.deployment.uuid", UUID.randomUUID().toString());
             config.addLabel("streamzi.type", "processor-flow");
             config.addTemplateLabel("app", name);
             
             IContainer c1 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
             c1.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c1.setImage(new DockerImageURI("172.30.1.1:5000/hardcoded-test/oc-stream-container:latest"));
+            c1.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
            
             IContainer c2 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
             c2.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c2.setImage(new DockerImageURI("172.30.1.1:5000/hardcoded-test/oc-stream-container:latest"));
+            c2.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
             
             config = container.getClient().create(config);
             return config.toJson();
@@ -163,20 +163,17 @@ public class API {
                     logger.info(map.toString());
 
                     container.getOSClient().configMaps().inNamespace(map.getMetadata().getNamespace()).withName(map.getMetadata().getName()).createOrReplace(map);
-
                 }
 
                 for (IContainer c : dc.getContainers()) {
                     final Map<String, String> evs = c.getEnvVars();
                     if (evs != null && evs.size() > 0) {
-                        final String containerName = c.getName();
-                        final String cmName = containerName + "-ev.cm";
+                        final String cmName = dc.getName() + "-ev.cm";
                         final String namespace = dc.getNamespace().getName();
-
 
                         final Map<String, String> labels = new HashMap<>();
                         labels.put("streamzi.io/kind", "ev");
-                        labels.put("streamzi.io/target", c.getName());
+                        labels.put("streamzi.io/target", dc.getName());
 
                         final ObjectMeta om = new ObjectMeta();
                         om.setName(cmName);
