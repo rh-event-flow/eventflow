@@ -6,5 +6,5 @@
 
 echo 'Building CONTAINER'
 docker build -t cef-ops-node-filter-event-data .
-docker tag cef-ops-node-filter-event-data:latest 172.30.1.1:5000/hardcoded-test/cef-ops-node-filter-event-data:latest
-docker push 172.30.1.1:5000/hardcoded-test/cef-ops-node-filter-event-data:latest
+docker tag cef-ops-node-filter-event-data:latest 172.30.1.1:5000/myproject/cef-ops-node-filter-event-data:latest
+docker push 172.30.1.1:5000/myproject/cef-ops-node-filter-event-data:latest

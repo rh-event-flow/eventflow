@@ -67,11 +67,11 @@ public class API {
             
             IContainer c1 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
             c1.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c1.setImage(new DockerImageURI("172.30.1.1:5000/hardcoded-test/oc-stream-container:latest"));
+            c1.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
            
             IContainer c2 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
             c2.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c2.setImage(new DockerImageURI("172.30.1.1:5000/hardcoded-test/oc-stream-container:latest"));
+            c2.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
             
             config = container.getClient().create(config);
             return config.toJson();
