@@ -133,8 +133,17 @@ function exportJson(flowName) {
             }
 
             //todo: this will only copy default values
-            if(block._template.settings){
-                settings = block._template.settings;
+            if(block._template.settings && block.fields.fields){
+                var field;
+                var attrs;
+                for(var j=0;j<block.fields.fields.length;j++){
+                    field = block.fields.fields[j];
+                    attrs = field.attrs;
+                    if(attrs && attrs.editable){
+                        // This can go in the settings
+                        settings[field.name] = field.value;
+                    }
+                }
             }
 
             processorJson = {
@@ -201,7 +210,7 @@ function exportJson(flowName) {
         links: linksArray,
         settings: {},
         globalSettings: {
-            STREAMZI_KAFKA_BOOTSTRAP_SERVER: "my-cluster-kafka:9092"
+            STREAMZI_KAFKA_BOOTSTRAP_SERVER: "my-cluster-kafka-bootstrap:9092"
         }
     };
     
@@ -262,6 +271,25 @@ function setupBlocksJs(nodeYamlList) {
                 });
             }
         }
+        
+        // ADD SETTINGS
+        var value;
+        var key;
+        if(template.settings){
+            var keys = Object.keys(template.settings);
+            
+            for(var j=0;j<keys.length;j++){
+                key = keys[j];
+                value = template.settings[key];
+                fields.push({
+                    name: key,
+                    defaultValue: value,
+                    type: "string",
+                    attrs: "editable"
+                });
+            }
+        }
+        
         blockData.fields = fields;
         console.log(JSON.stringify(blockData));
         blocks.register(blockData);
