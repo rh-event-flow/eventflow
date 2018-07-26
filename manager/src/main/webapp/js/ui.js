@@ -108,6 +108,7 @@ function exportJson(flowName) {
     var processorJson;
     var inputsArray;
     var outputsArray;
+    var settings;
     var block;
     var serializedBlock;
     
@@ -117,7 +118,7 @@ function exportJson(flowName) {
         if(block && block._template){
             inputsArray = new Array();
             outputsArray = new Array();
-            
+            settings = {};
 
             if(block._template.inputs){
                 for(var j=0;j<block._template.inputs.length;j++){
@@ -131,10 +132,15 @@ function exportJson(flowName) {
                 }
             }
 
+            //todo: this will only copy default values
+            if(block._template.settings){
+                settings = block._template.settings;
+            }
+
             processorJson = {
                 imageName: block._template.imageName,
                 uuid: block._uuid,
-                settings: {},
+                settings: settings,
                 inputs: inputsArray,
                 outputs: outputsArray
             };
