@@ -1,7 +1,5 @@
 package io.streamzi.openshift;
 
-import com.openshift.restclient.ClientBuilder;
-import com.openshift.restclient.IClient;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 
@@ -22,7 +20,6 @@ public class ClientContainerBean implements ClientContainer {
 
     private static final Logger logger = Logger.getLogger(ClientContainerBean.class.getName());
     private File storageDir = new File("/storage");
-    private IClient client;
     private OpenShiftClient osClient;
 
     @PostConstruct
@@ -30,12 +27,8 @@ public class ClientContainerBean implements ClientContainer {
         String host = System.getenv("KUBERNETES_SERVICE_HOST");
         int port = Integer.parseInt(System.getenv("KUBERNETES_SERVICE_PORT_HTTPS"));
         String masterUrl = "https://" + host + ":" + port;
-        
+
         logger.info("Starting ClientContainer");
-        client = new ClientBuilder(masterUrl)
-                    .withUserName("developer")
-                    .withPassword("admin")
-                    .build();
 
         osClient = new DefaultOpenShiftClient();
         logger.info("URL:" + osClient.getOpenshiftUrl().toString());
@@ -43,24 +36,18 @@ public class ClientContainerBean implements ClientContainer {
 
         // Storage folders
         File templateDir = new File(storageDir, "templates");
-        if(!templateDir.exists()){
+        if (!templateDir.exists()) {
             templateDir.mkdirs();
             logger.info("Created template dir");
         }
 
         File flowsDir = new File(storageDir, "flows");
-        if(!flowsDir.exists()){
+        if (!flowsDir.exists()) {
             flowsDir.mkdirs();
             logger.info("Created flows dir");
         }
     }
 
-    @Override
-    public IClient getClient() {
-        return client;
-    }
-
-    
     @PreDestroy
     public void cleanup() {
         logger.info("Stopping ClientContainer");

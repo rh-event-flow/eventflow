@@ -29,15 +29,11 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
         </dependency>
+
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.openshift</groupId>
-            <artifactId>openshift-restclient-java</artifactId>
         </dependency>
 
         <dependency>

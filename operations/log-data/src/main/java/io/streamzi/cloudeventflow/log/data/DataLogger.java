@@ -10,14 +10,13 @@ import io.streamzi.openshift.dataflow.annotations.CloudEventComponent;
 import io.streamzi.openshift.dataflow.annotations.CloudEventConsumer;
 
 /**
- *
  * @author hhiden
  */
 @CloudEventComponent
 public class DataLogger {
-    @CloudEventConsumer(name="input-data")
-    public void onCloudEvent(CloudEvent evt){
+    @CloudEventConsumer(name = "INPUT_DATA")
+    public void onCloudEvent(CloudEvent evt) {
         System.out.println(evt.getData().toString());
     }
-    
+
 }

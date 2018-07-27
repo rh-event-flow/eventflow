@@ -31,7 +31,14 @@
                 <groupId>io.cloudevents</groupId>
                 <artifactId>cloudevents-api</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
-            </dependency>               
+            </dependency>
+
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.17</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -60,13 +67,7 @@
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
                 <version>1.0.0</version>
-            </dependency>            
-                         
-            <dependency>
-                <groupId>com.openshift</groupId>
-                <artifactId>openshift-restclient-java</artifactId>
-                <version>6.1.0.Final</version>
-            </dependency>           
+            </dependency>
             
             <dependency>
                 <groupId>javax</groupId>

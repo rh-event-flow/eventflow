@@ -7,9 +7,9 @@ console.log("Starting KAFKA Processor in 10 seconds");
 setTimeout(function () {
     var kafkaHost = process.env.STREAMZI_KAFKA_BOOTSTRAP_SERVER;
     var nodeUuid = process.env.STREAMZI_NODE_UUID;
-    var sourceTopic = process.env.inputdata;
-    var targetTopic = process.env.outputdata;
-    var threshold = process.env.threshold;
+    var sourceTopic = process.env.INPUT_DATA;
+    var targetTopic = process.env.OUTPUT_DATA;
+    var threshold = process.env.THRESHOLD;
 
     if(threshold === undefined){
         threshold = 0.5
@@ -51,6 +51,7 @@ setTimeout(function () {
     });
 
     consumer.on("message", function (message) {
+        console.log("y");
         var value = message.value;
         var cloudEvent = JSON.parse(value);
         var numberValue = cloudEvent.data.value;

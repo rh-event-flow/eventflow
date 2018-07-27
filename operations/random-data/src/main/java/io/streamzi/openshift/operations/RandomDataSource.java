@@ -18,7 +18,7 @@ import io.streamzi.openshift.dataflow.annotations.CloudEventProducerTarget;
 @CloudEventComponent
 public class RandomDataSource {
     
-    @CloudEventProducer(name = "output-data")
+    @CloudEventProducer(name = "OUTPUT_DATA")
     private CloudEventProducerTarget output;
        
     @CloudEventComponentTimer(interval = 1000)
@@ -35,7 +35,8 @@ public class RandomDataSource {
                 .eventID(eventId)
                 .source(src)
                 .data(contents)
-                .build();      
+                .build();
+        System.out.println("x");
         output.send(simpleKeyValueEvent);
     }
 }
