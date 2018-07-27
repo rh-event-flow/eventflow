@@ -148,6 +148,8 @@ function exportJson(flowName) {
 
             processorJson = {
                 imageName: block._template.imageName,
+                templateId: block._template.id,
+                templateName: block._template.name,
                 uuid: block._uuid,
                 settings: settings,
                 inputs: inputsArray,

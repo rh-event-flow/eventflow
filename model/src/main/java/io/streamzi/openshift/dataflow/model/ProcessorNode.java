@@ -23,6 +23,12 @@ public class ProcessorNode extends ProcessorObject {
     /** Unique ID of the node */
     private String uuid;
 
+    /** Name of the node taken from the template */
+    private String templateName;
+    
+    /** ID of the node template */
+    private String templateId;
+    
     /** Runtime settings */
     private Map<String, String> settings = new HashMap<>();
     
@@ -96,5 +102,21 @@ public class ProcessorNode extends ProcessorObject {
 
     public void setSettings(Map<String, String> settings) {
         this.settings = settings;
+    }
+
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
     }
 }
