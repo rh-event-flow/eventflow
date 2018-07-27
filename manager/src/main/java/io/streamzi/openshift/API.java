@@ -1,12 +1,9 @@
 package io.streamzi.openshift;
 
 
-import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IContainer;
-import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IResource;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
@@ -40,10 +37,11 @@ public class API {
     @Path("/pods")
     @Produces("application/json")
     public List<String> listPods() {
-        List<IResource> pods = container.getClient().list(ResourceKind.POD, container.getNamespace());
+        List<Pod> pods = container.getOSClient().pods().inNamespace(container.getNamespace()).list().getItems();
+//        container.getClient().list(ResourceKind.POD, container.getNamespace());
         List<String> results = new ArrayList<>();
-        for (IResource r : pods) {
-            results.add(r.getName());
+        for (Pod p : pods) {
+            results.add(p.getMetadata().getName());
         }
         return results;
     }
@@ -97,15 +95,20 @@ public class API {
     public List<String> listProcessors() {
         List<String> results = new ArrayList<>();
 
+        //todo: look at applying labels to imagestreams and getting the necessary data from there.
+        //todo: could apply special labels to the deployment configs to hold the graph structure.
+
         File[] templates = container.getTemplateDir().listFiles();
-        for (File f : templates) {
-            try {
-                final ProcessorTemplateYAMLReader reader = new ProcessorTemplateYAMLReader(f);
-                final ProcessorNodeTemplate template = reader.readTemplate();
-                final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
-                results.add(writer.writeToYAMLString());
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Error loading template: " + e.getMessage());
+        if (templates != null) {
+            for (File f : templates) {
+                try {
+                    final ProcessorTemplateYAMLReader reader = new ProcessorTemplateYAMLReader(f);
+                    final ProcessorNodeTemplate template = reader.readTemplate();
+                    final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
+                    results.add(writer.writeToYAMLString());
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Error loading template: " + e.getMessage());
+                }
             }
         }
         return results;
@@ -153,10 +156,10 @@ public class API {
             logger.info("Flow written OK");
 
             // Now try and build a deployment
-            ProcessorFlowDeployer deployer = new ProcessorFlowDeployer(container.getClient(), container.getNamespace(), flow);
-            final List<IDeploymentConfig> deploymentConfigs = deployer.buildDeploymentConfigs();
+            final ProcessorFlowDeployer deployer = new ProcessorFlowDeployer(container.getNamespace(), flow);
+            final List<DeploymentConfig> deploymentConfigs = deployer.buildDeploymentConfigs();
 
-            for (IDeploymentConfig dc : deploymentConfigs) {
+            for (DeploymentConfig dc : deploymentConfigs) {
 
                 for (ConfigMap map : deployer.getTopicMaps()) {
                     logger.info("Creating ConfigMap: " + map.getMetadata().getName());
@@ -165,15 +168,15 @@ public class API {
                     container.getOSClient().configMaps().inNamespace(map.getMetadata().getNamespace()).withName(map.getMetadata().getName()).createOrReplace(map);
                 }
 
-                for (IContainer c : dc.getContainers()) {
-                    final Map<String, String> evs = c.getEnvVars();
+                for (Container c : dc.getSpec().getTemplate().getSpec().getContainers()) {
+                    final List<EnvVar> evs = c.getEnv();
                     if (evs != null && evs.size() > 0) {
-                        final String cmName = dc.getName() + "-ev.cm";
-                        final String namespace = dc.getNamespace().getName();
+                        final String cmName = dc.getMetadata().getName() + "-ev.cm";
+                        final String namespace = dc.getMetadata().getNamespace();
 
                         final Map<String, String> labels = new HashMap<>();
                         labels.put("streamzi.io/kind", "ev");
-                        labels.put("streamzi.io/target", dc.getName());
+                        labels.put("streamzi.io/target", dc.getMetadata().getName());
 
                         final ObjectMeta om = new ObjectMeta();
                         om.setName(cmName);
@@ -182,16 +185,36 @@ public class API {
 
                         final ConfigMap cm = new ConfigMap();
                         cm.setMetadata(om);
-                        cm.setData(evs);
+                        Map<String, String> cmData = new HashMap<>();
+                        for (EnvVar ev : evs) {
+                            cmData.put(ev.getName(), ev.getValue());
+                        }
+                        cm.setData(cmData);
 
                         container.getOSClient().configMaps().inNamespace(namespace).withName(cmName).createOrReplace(cm);
                     }
+
+                    logger.info("Creating deployment: " + dc.getMetadata().getName());
+                    logger.info(dc.toString()); //.toJson());
+                    container.getOSClient().deploymentConfigs().inNamespace(dc.getMetadata().getNamespace()).createOrReplace(dc);
+                }
+            }
+
+            //remove DCs that are no longer required.
+            List<DeploymentConfig> existingDCs = container.getOSClient().deploymentConfigs().inNamespace(container.getNamespace()).withLabel("app", flow.getName()).list().getItems();
+            for(DeploymentConfig existingDC : existingDCs){
+
+                boolean found = false;
+                for(DeploymentConfig  newDC : deploymentConfigs){
+                    if(existingDC.getMetadata().getName().equals(newDC.getMetadata().getName())){
+                        found = true;
+                    }
                 }
 
-                //todo: remove the Environment Variables which are embedded in the DC. This cannot be done via the IDeploymentConfig interface. Relies on switch to fabric8 API..
-                logger.info("Creating deployment: " + dc.getName());
-                logger.info(dc.toJson());
-                container.getClient().create(dc);
+                if(!found){
+                    logger.info("Removing DeploymentConfig: " + container.getNamespace() + "/" + existingDC.getMetadata().getName());
+                    container.getOSClient().deploymentConfigs().inNamespace(container.getNamespace()).withName(existingDC.getMetadata().getName()).delete();
+                }
             }
 
         } catch (Exception e) {
