@@ -18,6 +18,8 @@ public class SerializedNode {
     private ProcessorNode node;
 
     private String uuid;
+    private String templateName;
+    private String templateId;
     private List<String> inputs = new ArrayList<>();
     private List<String> outputs = new ArrayList<>();
     private String imageName;
@@ -29,6 +31,9 @@ public class SerializedNode {
     public SerializedNode(ProcessorNode node) {
         this.node = node;
         uuid = node.getUuid();
+        templateId = node.getTemplateId();
+        templateName = node.getTemplateName();
+                
         this.imageName = node.getImageName();
         for(String key : node.getSettings().keySet()){
             settings.put(key, node.getSettings().get(key));
@@ -49,6 +54,8 @@ public class SerializedNode {
         node.setUuid(uuid);
         node.setImageName(imageName);
         node.setSettings(settings);
+        node.setTemplateId(templateId);
+        node.setTemplateName(templateName);
         for(String input : inputs){
             node.addInput(new ProcessorInputPort(input));
         }
@@ -98,4 +105,21 @@ public class SerializedNode {
     public void setSettings(Map<String, String> settings) {
         this.settings = settings;
     }
+
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
 }
