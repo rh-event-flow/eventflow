@@ -128,6 +128,7 @@ public class ProcessorFlowDeployer {
         final ConfigMap cm = new ConfigMap();
         String topicName;
 
+        //todo: deal with unconnected outputs - should still have a topic created
         for (ProcessorLink link : flow.getLinks()) {
             logger.info("Processing link");
             topicName = link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
