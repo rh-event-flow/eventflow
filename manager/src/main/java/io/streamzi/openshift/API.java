@@ -31,7 +31,7 @@ public class API {
     @EJB(beanInterface = ClientContainer.class)
     private ClientContainer container;
 
-    private final String bootstrapServersDefault = "my-cluster-kafka";
+    private final String bootstrapServersDefault = "my-cluster-kafka:9092";
 
     @GET
     @Path("/pods")
