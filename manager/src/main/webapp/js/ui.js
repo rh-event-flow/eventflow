@@ -1,6 +1,7 @@
 blocks = new Blocks();
 blocks.scale = 1.4;
 var templateMap = {};
+var defaults = {};
 
 
 // Override the addBlock method to add some more stuff
@@ -38,6 +39,11 @@ blocks.addBlock = function (name, x, y){
     fetchNodeYaml(function (data) {
         setupBlocksJs(data);
         blocks.run('#blocks');
+    });
+
+    fetchDefaults(function(data){
+      defaults = data;
+      console.log(defaults);
     });
 
     //setupBlocksJs(data);
@@ -210,7 +216,7 @@ function exportJson(flowName) {
         links: linksArray,
         settings: {},
         globalSettings: {
-            STREAMZI_KAFKA_BOOTSTRAP_SERVER: "my-cluster-kafka-bootstrap:9092"
+            STREAMZI_KAFKA_BOOTSTRAP_SERVER: defaults.bootstrap_servers
         }
     };
     
@@ -304,6 +310,18 @@ function fetchNodeYaml(callback) {
 
     var promise = $.ajax({
         url: "rest/api/processors",
+        type: 'GET',
+        dataType: "json",
+        contentType: "application/json; charset=utf-8"
+    }).then(function (data) {
+        callback(data);
+    });
+}
+
+function fetchDefaults(callback) {
+
+    var promise = $.ajax({
+        url: "rest/api/globalproperties",
         type: 'GET',
         dataType: "json",
         contentType: "application/json; charset=utf-8"

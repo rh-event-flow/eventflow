@@ -1,9 +1,10 @@
 package io.streamzi.openshift;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
@@ -15,10 +16,7 @@ import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +30,8 @@ public class API {
 
     @EJB(beanInterface = ClientContainer.class)
     private ClientContainer container;
+
+    private final String bootstrapServersDefault = "my-cluster-kafka";
 
     @GET
     @Path("/pods")
@@ -97,6 +97,25 @@ public class API {
 
         //todo: look at applying labels to imagestreams and getting the necessary data from there.
         //todo: could apply special labels to the deployment configs to hold the graph structure.
+
+//        List<ImageStream> images = container.getOSClient().imageStreams().inAnyNamespace().withLabel("streamzi.io/kind", "processor").list().getItems();
+//        for (ImageStream image : images) {
+//            Map<String, String> labels = image.getMetadata().getLabels();
+//            final ProcessorNodeTemplate template = new ProcessorNodeTemplate();
+//            template.setId(labels.get("streamzi.io/processor/id"));
+//            template.setDescription(labels.get("streamzi.io/processor/description"));
+//            template.setName(labels.get("streamzi.io/processor/label"));
+//            template.setImageName(labels.get("streamzi.io/processor/imagename"));
+//
+//            String[] inputsLabel = labels.get("inputs").split(",");
+//            List<String> inputs = new ArrayList<>(Arrays.asList(inputsLabel));
+//
+//            String[] outputsLabel = labels.get("outputs").split(",");
+//            List<String> outputs = new ArrayList<>(Arrays.asList(outputsLabel));
+//
+//            template.setInputs(inputs);
+//            template.setOutputs(outputs);
+//        }
 
         File[] templates = container.getTemplateDir().listFiles();
         if (templates != null) {
@@ -202,16 +221,16 @@ public class API {
 
             //remove DCs that are no longer required.
             List<DeploymentConfig> existingDCs = container.getOSClient().deploymentConfigs().inNamespace(container.getNamespace()).withLabel("app", flow.getName()).list().getItems();
-            for(DeploymentConfig existingDC : existingDCs){
+            for (DeploymentConfig existingDC : existingDCs) {
 
                 boolean found = false;
-                for(DeploymentConfig  newDC : deploymentConfigs){
-                    if(existingDC.getMetadata().getName().equals(newDC.getMetadata().getName())){
+                for (DeploymentConfig newDC : deploymentConfigs) {
+                    if (existingDC.getMetadata().getName().equals(newDC.getMetadata().getName())) {
                         found = true;
                     }
                 }
 
-                if(!found){
+                if (!found) {
                     logger.info("Removing DeploymentConfig: " + container.getNamespace() + "/" + existingDC.getMetadata().getName());
                     container.getOSClient().deploymentConfigs().inNamespace(container.getNamespace()).withName(existingDC.getMetadata().getName()).delete();
                 }
@@ -219,6 +238,28 @@ public class API {
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error parsing JSON flow data: " + e.getMessage(), e);
+        }
+    }
+
+    @GET
+    @Path("/globalproperties")
+    @Produces("application/json")
+    public String getGlobalProperties() {
+        final Properties props = new Properties();
+
+        String bootstrapServers = EnvironmentResolver.get("bootstrap.servers");
+        if (bootstrapServers != null && !bootstrapServers.equals("")) {
+            props.put("bootstrap_servers", bootstrapServers);
+        } else {
+            props.put("bootstrap_servers", bootstrapServersDefault);
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(props);
+        } catch (JsonProcessingException e) {
+            logger.severe(e.getMessage());
+            return "{}";
         }
     }
 }
