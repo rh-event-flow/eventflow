@@ -103,7 +103,7 @@ public class ProcessorFlowDeployer {
 
         for (ProcessorLink link : flow.getLinks()) {
 
-            final String topicName = link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
+            final String topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
 
             // Set the topic name in the source node container
             if (node.getUuid().equals(link.getSource().getParent().getUuid())) {
@@ -131,7 +131,7 @@ public class ProcessorFlowDeployer {
         //todo: deal with unconnected outputs - should still have a topic created
         for (ProcessorLink link : flow.getLinks()) {
             logger.info("Processing link");
-            topicName = link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
+            topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
 
             final Map<String, String> data = new HashMap<>();
             data.put("name", topicName);
@@ -141,6 +141,7 @@ public class ProcessorFlowDeployer {
             final Map<String, String> labels = new HashMap<>();
             labels.put("strimzi.io/cluster", kafkaClusterName);
             labels.put("strimzi.io/kind", "topic");
+            labels.put("app", flow.getName());
 
             final ObjectMeta om = new ObjectMeta();
             om.setName(topicName);
