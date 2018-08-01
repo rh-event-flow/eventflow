@@ -3,7 +3,6 @@ package io.streamzi.openshift;
 
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorLink;
@@ -21,8 +20,8 @@ import java.util.logging.Logger;
  *
  * @author hhiden
  */
-public class ProcessorFlowDeployer {
-    private static final Logger logger = Logger.getLogger(ProcessorFlowDeployer.class.getName());
+public class DeploymentConfigBuilder {
+    private static final Logger logger = Logger.getLogger(DeploymentConfigBuilder.class.getName());
     private ProcessorFlow flow;
     private String namespace;
     private final String kafkaClusterName = "my-cluster";
@@ -30,7 +29,7 @@ public class ProcessorFlowDeployer {
     private final String registryAddress = "172.30.1.1:5000";
 
 
-    public ProcessorFlowDeployer(String namespace, ProcessorFlow flow) {
+    public DeploymentConfigBuilder(String namespace, ProcessorFlow flow) {
         this.flow = flow;
         this.namespace = namespace;
     }
@@ -51,7 +50,7 @@ public class ProcessorFlowDeployer {
             final String dcName = flow.getName() + "-" + node.getImageName(); //TODO: Add back in to get unique deployments + "-" + x;
             final Container container = populateNodeDeployments(node);
 
-            final DeploymentConfig dc = new DeploymentConfigBuilder()
+            final DeploymentConfig dc = new io.fabric8.openshift.api.model.DeploymentConfigBuilder()
                     .withNewMetadata()
                     .withName(dcName)
                     .withNamespace(namespace)
@@ -79,7 +78,7 @@ public class ProcessorFlowDeployer {
 
         }
 
-        populateTopicMaps(deploymentConfigs);
+        populateTopicMaps();
 
         return new ArrayList<>(deploymentConfigs.values());
     }
@@ -124,7 +123,7 @@ public class ProcessorFlowDeployer {
     }
 
 
-    private void populateTopicMaps(Map<String, DeploymentConfig> deploymentConfigs) {
+    private void populateTopicMaps() {
         final ConfigMap cm = new ConfigMap();
         String topicName;
 

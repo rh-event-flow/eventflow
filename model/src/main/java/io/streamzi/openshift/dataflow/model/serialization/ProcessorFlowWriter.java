@@ -1,6 +1,7 @@
 package io.streamzi.openshift.dataflow.model.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
 import java.io.File;
@@ -21,6 +22,13 @@ public class ProcessorFlowWriter {
     
     public String writeToJsonString() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
+        SerializedFlow sf = new SerializedFlow(flow);
+        return mapper.writeValueAsString(sf);
+    }
+
+    public String writeToIndentedJsonString() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.INDENT_OUTPUT,  true);
         SerializedFlow sf = new SerializedFlow(flow);
         return mapper.writeValueAsString(sf);
     }
