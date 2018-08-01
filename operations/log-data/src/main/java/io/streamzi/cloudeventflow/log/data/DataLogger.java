@@ -14,6 +14,7 @@ import io.streamzi.openshift.dataflow.annotations.CloudEventConsumer;
  */
 @CloudEventComponent
 public class DataLogger {
+
     @CloudEventConsumer(name = "INPUT_DATA")
     public void onCloudEvent(CloudEvent evt) {
         System.out.println(evt.getData().toString());

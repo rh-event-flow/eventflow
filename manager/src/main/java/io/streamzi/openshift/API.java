@@ -196,6 +196,7 @@ public class API {
                         final Map<String, String> labels = new HashMap<>();
                         labels.put("streamzi.io/kind", "ev");
                         labels.put("streamzi.io/target", dc.getMetadata().getName());
+                        labels.put("app", flow.getName());
 
                         final ObjectMeta om = new ObjectMeta();
                         om.setName(cmName);
@@ -210,11 +211,14 @@ public class API {
                         }
                         cm.setData(cmData);
 
+                        //add these CMs to the flow so that we can check if they're still needed
+                        deployer.getTopicMaps().add(cm);
+
                         container.getOSClient().configMaps().inNamespace(namespace).withName(cmName).createOrReplace(cm);
                     }
 
                     logger.info("Creating deployment: " + dc.getMetadata().getName());
-                    logger.info(dc.toString()); //.toJson());
+                    logger.info(dc.toString());
                     container.getOSClient().deploymentConfigs().inNamespace(dc.getMetadata().getNamespace()).createOrReplace(dc);
                 }
             }
@@ -233,6 +237,22 @@ public class API {
                 if (!found) {
                     logger.info("Removing DeploymentConfig: " + container.getNamespace() + "/" + existingDC.getMetadata().getName());
                     container.getOSClient().deploymentConfigs().inNamespace(container.getNamespace()).withName(existingDC.getMetadata().getName()).delete();
+                }
+            }
+
+            List<ConfigMap> existingCMs = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("app", flow.getName()).list().getItems();
+            for (ConfigMap existing : existingCMs) {
+
+                boolean found = false;
+                for (ConfigMap newCM : deployer.getTopicMaps()) {
+                    if (existing.getMetadata().getName().equals(newCM.getMetadata().getName())) {
+                        found = true;
+                    }
+                }
+
+                if (!found) {
+                    logger.info("Deleting ConfigMap: " + existing.getMetadata().getName());
+                    container.getOSClient().configMaps().inNamespace(container.getNamespace()).withName(existing.getMetadata().getName()).delete();
                 }
             }
 
