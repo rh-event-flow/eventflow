@@ -3,8 +3,9 @@ package io.streamzi.openshift;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
@@ -16,7 +17,9 @@ import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,49 +41,12 @@ public class API {
     @Produces("application/json")
     public List<String> listPods() {
         List<Pod> pods = container.getOSClient().pods().inNamespace(container.getNamespace()).list().getItems();
-//        container.getClient().list(ResourceKind.POD, container.getNamespace());
         List<String> results = new ArrayList<>();
         for (Pod p : pods) {
             results.add(p.getMetadata().getName());
         }
         return results;
     }
-
-    /*
-    @GET
-    @Path("/deployments/{namespace}/create/{name}")
-    @Produces("application/json")
-    public String create(@PathParam("namespace")String namespace, @PathParam("name")String name){
-        // Find the template
-        IResource template = container.getClient().get(ResourceKind.IMAGE_STREAM, name, namespace);
-        if(template!=null){
-            IDeploymentConfig config = container.getClient().getResourceFactory().stub(ResourceKind.DEPLOYMENT_CONFIG, name, namespace);
-            
-            config.setReplicas(1);
-            config.addLabel("app", name);
-                config.addLabel("streamzi.flow.uuid", UUID.randomUUID().toString());
-            config.addLabel("streamzi.deployment.uuid", UUID.randomUUID().toString());
-            config.addLabel("streamzi.type", "processor-flow");
-            config.addTemplateLabel("app", name);
-            
-            IContainer c1 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
-            c1.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c1.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
-           
-            IContainer c2 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
-            c2.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c2.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
-            
-            config = container.getClient().create(config);
-            return config.toJson();
-            
-        } else {
-            return "NOTHING";
-        }
-        
-    }
-    */
-
 
     @GET
     @Path("/dataflows/{uuid}")
@@ -156,7 +122,7 @@ public class API {
     }
 
     /**
-     * Upload a new flow
+     * Upload a new flow to a ConfigMap
      */
     @POST
     @Path("/flows")
@@ -168,98 +134,29 @@ public class API {
             ProcessorFlow flow = reader.readFromJsonString(flowJson);
             logger.info("Flow Parsed OK");
 
-            // Write this to the deployments folder
+            // Write this to a ConfigMap
             ProcessorFlowWriter writer = new ProcessorFlowWriter(flow);
-            File flowFile = new File(container.getFlowsDir(), flow.getName() + ".json");
-            writer.writeToFile(flowFile);
+
+            ConfigMap cm = new ConfigMapBuilder()
+                    .withNewMetadata()
+                    .withName(flow.getName() + ".cm")
+                    .withNamespace(container.getNamespace())
+                    .addToLabels("streamzi.io/kind", "flow")
+                    .addToLabels("app", flow.getName())
+                    .endMetadata()
+                    .addToData("flow", writer.writeToIndentedJsonString())
+                    .build();
+
+            container.getOSClient().configMaps().createOrReplace(cm);
+
             logger.info("Flow written OK");
-
-            // Now try and build a deployment
-            final ProcessorFlowDeployer deployer = new ProcessorFlowDeployer(container.getNamespace(), flow);
-            final List<DeploymentConfig> deploymentConfigs = deployer.buildDeploymentConfigs();
-
-            for (DeploymentConfig dc : deploymentConfigs) {
-
-                for (ConfigMap map : deployer.getTopicMaps()) {
-                    logger.info("Creating ConfigMap: " + map.getMetadata().getName());
-                    logger.info(map.toString());
-
-                    container.getOSClient().configMaps().inNamespace(map.getMetadata().getNamespace()).withName(map.getMetadata().getName()).createOrReplace(map);
-                }
-
-                for (Container c : dc.getSpec().getTemplate().getSpec().getContainers()) {
-                    final List<EnvVar> evs = c.getEnv();
-                    if (evs != null && evs.size() > 0) {
-                        final String cmName = dc.getMetadata().getName() + "-ev.cm";
-                        final String namespace = dc.getMetadata().getNamespace();
-
-                        final Map<String, String> labels = new HashMap<>();
-                        labels.put("streamzi.io/kind", "ev");
-                        labels.put("streamzi.io/target", dc.getMetadata().getName());
-                        labels.put("app", flow.getName());
-
-                        final ObjectMeta om = new ObjectMeta();
-                        om.setName(cmName);
-                        om.setNamespace(namespace);
-                        om.setLabels(labels);
-
-                        final ConfigMap cm = new ConfigMap();
-                        cm.setMetadata(om);
-                        Map<String, String> cmData = new HashMap<>();
-                        for (EnvVar ev : evs) {
-                            cmData.put(ev.getName(), ev.getValue());
-                        }
-                        cm.setData(cmData);
-
-                        //add these CMs to the flow so that we can check if they're still needed
-                        deployer.getTopicMaps().add(cm);
-
-                        container.getOSClient().configMaps().inNamespace(namespace).withName(cmName).createOrReplace(cm);
-                    }
-
-                    logger.info("Creating deployment: " + dc.getMetadata().getName());
-                    logger.info(dc.toString());
-                    container.getOSClient().deploymentConfigs().inNamespace(dc.getMetadata().getNamespace()).createOrReplace(dc);
-                }
-            }
-
-            //remove DCs that are no longer required.
-            List<DeploymentConfig> existingDCs = container.getOSClient().deploymentConfigs().inNamespace(container.getNamespace()).withLabel("app", flow.getName()).list().getItems();
-            for (DeploymentConfig existingDC : existingDCs) {
-
-                boolean found = false;
-                for (DeploymentConfig newDC : deploymentConfigs) {
-                    if (existingDC.getMetadata().getName().equals(newDC.getMetadata().getName())) {
-                        found = true;
-                    }
-                }
-
-                if (!found) {
-                    logger.info("Removing DeploymentConfig: " + container.getNamespace() + "/" + existingDC.getMetadata().getName());
-                    container.getOSClient().deploymentConfigs().inNamespace(container.getNamespace()).withName(existingDC.getMetadata().getName()).delete();
-                }
-            }
-
-            List<ConfigMap> existingCMs = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("app", flow.getName()).list().getItems();
-            for (ConfigMap existing : existingCMs) {
-
-                boolean found = false;
-                for (ConfigMap newCM : deployer.getTopicMaps()) {
-                    if (existing.getMetadata().getName().equals(newCM.getMetadata().getName())) {
-                        found = true;
-                    }
-                }
-
-                if (!found) {
-                    logger.info("Deleting ConfigMap: " + existing.getMetadata().getName());
-                    container.getOSClient().configMaps().inNamespace(container.getNamespace()).withName(existing.getMetadata().getName()).delete();
-                }
-            }
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error parsing JSON flow data: " + e.getMessage(), e);
         }
+
     }
+
 
     @GET
     @Path("/globalproperties")

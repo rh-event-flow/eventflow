@@ -6,13 +6,102 @@
         <artifactId>cloudevent-flow</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
+
     <groupId>io.streamzi.cloudevent-flow</groupId>
     <name>cloudevent-flow-${project.artifactId}</name>
     <artifactId>manager</artifactId>
     <packaging>war</packaging>
-    
-    
+
+
+    <properties>
+        <version.wildfly.swarm>2017.9.4</version.wildfly.swarm>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <fabric8.generator.name>wessendorf/${project.artifactId}:latest</fabric8.generator.name>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.wildfly.swarm</groupId>
+                <artifactId>bom-all</artifactId>
+                <version>${version.wildfly.swarm}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <finalName>flow-manager</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.wildfly.swarm</groupId>
+                <artifactId>wildfly-swarm-plugin</artifactId>
+                <version>${version.wildfly.swarm}</version>
+
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <properties>
+                        <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
+                    </properties>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>fabric8-maven-plugin</artifactId>
+                <version>3.5.33</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>resource</goal>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <resources>
+                        <labels>
+                            <service>
+                                <expose>true</expose>
+                            </service>
+                        </labels>
+                    </resources>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
     <dependencies>
+        <!-- Java EE 7 dependency -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>7.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- WildFly Swarm Fractions -->
+        <dependency>
+            <groupId>org.wildfly.swarm</groupId>
+            <artifactId>microprofile</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wildfly.swarm</groupId>
+            <artifactId>ejb</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.streamzi.cloudevent-flow</groupId>
             <artifactId>model</artifactId>
@@ -31,19 +120,8 @@
         </dependency>
 
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>openshift-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
         </dependency>
 
     </dependencies>

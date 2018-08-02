@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.streamzi</groupId>
+        <artifactId>cloudevent-flow</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <groupId>io.streamzi.cloudevent-flow</groupId>
+    <name>cloudevent-flow-${project.artifactId}</name>
+    <artifactId>watcher</artifactId>
+    <packaging>jar</packaging>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>io.streamzi.cloudevent-flow</groupId>
+            <artifactId>model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.18</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>openshift-client</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>FlowController</finalName>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>io.streamzi.openshift.Executor</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>fabric8-maven-plugin</artifactId>
+                <version>3.5.30</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>resource</goal>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <resources>
+                        <labels>
+                            <service>
+                                <expose>true</expose>
+                            </service>
+                        </labels>
+                    </resources>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
