@@ -24,9 +24,6 @@ public class ClientContainerBean implements ClientContainer {
 
     @PostConstruct
     public void init() {
-        String host = System.getenv("KUBERNETES_SERVICE_HOST");
-        int port = Integer.parseInt(System.getenv("KUBERNETES_SERVICE_PORT_HTTPS"));
-        String masterUrl = "https://" + host + ":" + port;
 
         logger.info("Starting ClientContainer");
 
