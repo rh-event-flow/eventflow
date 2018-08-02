@@ -1,0 +1,7 @@
+#Rename to .yml for PVC to be created. Recreating erases volume.
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi

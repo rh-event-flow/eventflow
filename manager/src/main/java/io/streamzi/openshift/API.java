@@ -41,49 +41,12 @@ public class API {
     @Produces("application/json")
     public List<String> listPods() {
         List<Pod> pods = container.getOSClient().pods().inNamespace(container.getNamespace()).list().getItems();
-//        container.getClient().list(ResourceKind.POD, container.getNamespace());
         List<String> results = new ArrayList<>();
         for (Pod p : pods) {
             results.add(p.getMetadata().getName());
         }
         return results;
     }
-
-    /*
-    @GET
-    @Path("/deployments/{namespace}/create/{name}")
-    @Produces("application/json")
-    public String create(@PathParam("namespace")String namespace, @PathParam("name")String name){
-        // Find the template
-        IResource template = container.getClient().get(ResourceKind.IMAGE_STREAM, name, namespace);
-        if(template!=null){
-            IDeploymentConfig config = container.getClient().getResourceFactory().stub(ResourceKind.DEPLOYMENT_CONFIG, name, namespace);
-            
-            config.setReplicas(1);
-            config.addLabel("app", name);
-                config.addLabel("streamzi.flow.uuid", UUID.randomUUID().toString());
-            config.addLabel("streamzi.deployment.uuid", UUID.randomUUID().toString());
-            config.addLabel("streamzi.type", "processor-flow");
-            config.addTemplateLabel("app", name);
-            
-            IContainer c1 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
-            c1.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c1.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
-           
-            IContainer c2 = config.addContainer("streamzi-processor-" + UUID.randomUUID().toString());
-            c2.addEnvVar("processor-uuid", UUID.randomUUID().toString());
-            c2.setImage(new DockerImageURI("172.30.1.1:5000/myproject/oc-stream-container:latest"));
-            
-            config = container.getClient().create(config);
-            return config.toJson();
-            
-        } else {
-            return "NOTHING";
-        }
-        
-    }
-    */
-
 
     @GET
     @Path("/dataflows/{uuid}")
