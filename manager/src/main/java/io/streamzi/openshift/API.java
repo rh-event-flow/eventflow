@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
@@ -16,7 +17,6 @@ import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLW
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -61,41 +61,20 @@ public class API {
     public List<String> listProcessors() {
         List<String> results = new ArrayList<>();
 
-        //todo: look at applying labels to imagestreams and getting the necessary data from there.
-        //todo: could apply special labels to the deployment configs to hold the graph structure.
 
-//        List<ImageStream> images = container.getOSClient().imageStreams().inAnyNamespace().withLabel("streamzi.io/kind", "processor").list().getItems();
-//        for (ImageStream image : images) {
-//            Map<String, String> labels = image.getMetadata().getLabels();
-//            final ProcessorNodeTemplate template = new ProcessorNodeTemplate();
-//            template.setId(labels.get("streamzi.io/processor/id"));
-//            template.setDescription(labels.get("streamzi.io/processor/description"));
-//            template.setName(labels.get("streamzi.io/processor/label"));
-//            template.setImageName(labels.get("streamzi.io/processor/imagename"));
-//
-//            String[] inputsLabel = labels.get("inputs").split(",");
-//            List<String> inputs = new ArrayList<>(Arrays.asList(inputsLabel));
-//
-//            String[] outputsLabel = labels.get("outputs").split(",");
-//            List<String> outputs = new ArrayList<>(Arrays.asList(outputsLabel));
-//
-//            template.setInputs(inputs);
-//            template.setOutputs(outputs);
-//        }
-
-        File[] templates = container.getTemplateDir().listFiles();
-        if (templates != null) {
-            for (File f : templates) {
-                try {
-                    final ProcessorTemplateYAMLReader reader = new ProcessorTemplateYAMLReader(f);
-                    final ProcessorNodeTemplate template = reader.readTemplate();
-                    final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
-                    results.add(writer.writeToYAMLString());
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "Error loading template: " + e.getMessage());
-                }
+        ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "processor").list();
+        List<ConfigMap> processorConfigMaps = configMapList.getItems();
+        for(ConfigMap cm : processorConfigMaps){
+            try {
+                String templateYaml = cm.getData().get("template");
+                final ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplateFromString(templateYaml);
+                final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
+                results.add(writer.writeToYAMLString());
+            } catch (Exception e){
+                logger.log(Level.WARNING, "Error reading template from config map: " + e.getMessage());
             }
         }
+
         return results;
     }
 
@@ -110,11 +89,19 @@ public class API {
         try {
             ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplateFromString(yamlData);
             logger.info("Valid template for image: " + template.getImageName());
-
-            // Save this in the storage folder
             ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
-            writer.writeToFile(container.getTemplateDir());
 
+            // Write this to a config map
+            ConfigMap cm = new ConfigMapBuilder()
+                    .withNewMetadata()
+                    .withName(template.getId() + ".cm")
+                    .withNamespace(container.getNamespace())
+                    .addToLabels("streamzi.io/kind", "processor")
+                    .endMetadata()
+                    .addToData("template", writer.writeToYAMLString())
+                    .build();
+            container.getOSClient().configMaps().createOrReplace(cm);
+            
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error parsing YAML data: " + e.getMessage(), e);
         }
