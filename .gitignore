@@ -109,6 +109,7 @@ buildNumber.properties
 ### NetBeans ###
 nbproject/private/
 build/
+nbproject/
 nbbuild/
 dist/
 nbdist/
@@ -143,5 +144,5 @@ Temporary Items
 .apdisk
 
 dependency-reduced-pom.xml
-
+node_modules/
 # End of https://www.gitignore.io/api/java,maven,netbeans,intellij+all,osx
