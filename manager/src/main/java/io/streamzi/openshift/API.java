@@ -49,18 +49,38 @@ public class API {
     }
 
     @GET
-    @Path("/dataflows/{uuid}")
+    @Path("/dataflows/{name}")
     @Produces("application/json")
-    public String getProcessorFlowDeployment(String uuid) {
-        return "";
+    public String getProcessorFlowDeployment(@PathParam("name")String name) {
+        ConfigMap map = container.getOSClient().configMaps().withName(name).get();
+        if(map!=null){
+            return map.getData().get("flow");
+        } else {
+            return "";
+        }
     }
 
+    @GET
+    @Path("/dataflows")
+    @Produces("application/json")
+    public List<String>listFlows(){
+        List<String> results = new ArrayList<>();
+        
+        // Find all of the config maps with the streamzi/kind flow labels
+        ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "flow").list();        
+        
+        for(ConfigMap cm : configMapList.getItems()){
+            results.add(cm.getMetadata().getName());
+        }
+        
+        return results;
+    }
+    
     @GET
     @Path("/processors")
     @Produces("application/json")
     public List<String> listProcessors() {
         List<String> results = new ArrayList<>();
-
 
         ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "processor").list();
         List<ConfigMap> processorConfigMaps = configMapList.getItems();
@@ -141,9 +161,7 @@ public class API {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error parsing JSON flow data: " + e.getMessage(), e);
         }
-
     }
-
 
     @GET
     @Path("/globalproperties")

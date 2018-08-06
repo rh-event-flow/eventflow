@@ -15,7 +15,9 @@
         <module>log-data</module>
     </modules>
 
-
+    <properties>
+        <docker.registry>172.30.1.1:5000</docker.registry>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>io.streamzi.cloudevent-flow</groupId>
@@ -32,8 +34,9 @@
 
     
     <build>
-
+        <pluginManagement>
         <plugins>
+            <!-- Build a fatjar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -56,7 +59,62 @@
                     </execution>
                 </executions>
             </plugin>            
-        </plugins>          
+            
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.26.1</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <alias>processor</alias>
+                            <name>myproject/cef-ops-${project.artifactId}</name>
+                            <build>
+                                <tags>
+                                    <tag>latest</tag>
+                                </tags>
+                                <from>java:8</from>
+                                <assembly>
+                                    <inline>
+                                        <includeBaseDirectory>false</includeBaseDirectory>   
+                                        <baseDirectory>target</baseDirectory>
+                                        <fileSets>
+                                            <fileSet>
+                                                <directory>target</directory>
+                                                <outputDirectory>/</outputDirectory>
+                                                <includes>
+                                                    <include>processor.jar</include>
+                                                </includes>
+                                            </fileSet>
+                                        </fileSets>                                        
+                                    </inline>
+                                </assembly>
+                                <cmd>
+                                    <shell>java -jar /maven/processor.jar</shell>
+                                </cmd>
+                            </build>
+                        </image>
+                    </images>
+                    <skip>true</skip>
+                </configuration>
+                
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <id>build</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>     
+               
+
+                </executions>       
+            </plugin>            
+            
+        </plugins>   
+        </pluginManagement>     
+
     </build>
     
 </project>

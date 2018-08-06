@@ -10,4 +10,26 @@
     <artifactId>log-data</artifactId>
     <packaging>jar</packaging>
     <name>${parent.artifactId}-${project.artifactId}</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
+            
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>       
+                <executions>
+                 
+                </executions>
+            </plugin>
+
+                    
+        </plugins>
+    </build>
 </project>
