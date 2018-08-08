@@ -1,0 +1,13 @@
+---
+id: jms-receiver
+name: "JMS Receiver"
+description: "Receives random JMS messages"
+inputs:
+- "input-data"
+outputs:
+imageName: "cef-ops-receiver"
+settings: {
+  JAVA_NAMING_FACTORY_INITIAL: "org.apache.qpid.jms.jndi.JmsInitialContextFactory",
+  CONNECTIONFACTORY_FACTORY: "amqp://dispatch-b.myproject.svc:5672",
+  QUEUE_QUEUE: "queue.test"
+}
