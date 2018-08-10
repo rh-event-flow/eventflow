@@ -13,6 +13,7 @@ public class ProcessorNodeTemplate {
     private String id = "processor";
     private String name = "Unnamed Processor";
     private String description = "A processor node";
+    private String transport = "kafka";
     private List<String> inputs = new ArrayList<>();
     private List<String> outputs = new ArrayList<>();
     private String mainClassName = "io.streamzi.openshift.container.ProcessorRunner";
@@ -83,6 +84,13 @@ public class ProcessorNodeTemplate {
         this.settings = settings;
     }
 
+    public String getTransport() {
+        return transport;
+    }
+
+    public void setTransport(String transport) {
+        this.transport = transport;
+    }
 
     public void addInput(String name) {
         this.inputs.add(name);

@@ -35,6 +35,7 @@ public class API {
     private ClientContainer container;
 
     private final String bootstrapServersDefault = "my-cluster-kafka:9092";
+    private final String brokerUrlDefault = "amqp://dispatch.myproject.svc:5672";
 
     @GET
     @Path("/pods")
@@ -51,9 +52,9 @@ public class API {
     @GET
     @Path("/dataflows/{name}")
     @Produces("application/json")
-    public String getProcessorFlowDeployment(@PathParam("name")String name) {
+    public String getProcessorFlowDeployment(@PathParam("name") String name) {
         ConfigMap map = container.getOSClient().configMaps().withName(name).get();
-        if(map!=null){
+        if (map != null) {
             return map.getData().get("flow");
         } else {
             return "";
@@ -63,19 +64,19 @@ public class API {
     @GET
     @Path("/dataflows")
     @Produces("application/json")
-    public List<String>listFlows(){
+    public List<String> listFlows() {
         List<String> results = new ArrayList<>();
-        
+
         // Find all of the config maps with the streamzi/kind flow labels
-        ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "flow").list();        
-        
-        for(ConfigMap cm : configMapList.getItems()){
+        ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "flow").list();
+
+        for (ConfigMap cm : configMapList.getItems()) {
             results.add(cm.getMetadata().getName());
         }
-        
+
         return results;
     }
-    
+
     @GET
     @Path("/processors")
     @Produces("application/json")
@@ -84,13 +85,13 @@ public class API {
 
         ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "processor").list();
         List<ConfigMap> processorConfigMaps = configMapList.getItems();
-        for(ConfigMap cm : processorConfigMaps){
+        for (ConfigMap cm : processorConfigMaps) {
             try {
                 String templateYaml = cm.getData().get("template");
                 final ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplateFromString(templateYaml);
                 final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
                 results.add(writer.writeToYAMLString());
-            } catch (Exception e){
+            } catch (Exception e) {
                 logger.log(Level.WARNING, "Error reading template from config map: " + e.getMessage());
             }
         }
@@ -121,7 +122,7 @@ public class API {
                     .addToData("template", writer.writeToYAMLString())
                     .build();
             container.getOSClient().configMaps().createOrReplace(cm);
-            
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error parsing YAML data: " + e.getMessage(), e);
         }
@@ -174,6 +175,13 @@ public class API {
             props.put("bootstrap_servers", bootstrapServers);
         } else {
             props.put("bootstrap_servers", bootstrapServersDefault);
+        }
+
+        String brokerUrl = EnvironmentResolver.get("broker.url");
+        if (brokerUrl != null && !brokerUrl.equals("")) {
+            props.put("broker.url", brokerUrl);
+        } else {
+            props.put("broker.url", brokerUrlDefault);
         }
 
         ObjectMapper mapper = new ObjectMapper();

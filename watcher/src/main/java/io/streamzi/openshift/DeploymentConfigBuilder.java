@@ -128,6 +128,7 @@ public class DeploymentConfigBuilder {
         String topicName;
 
         //todo: deal with unconnected outputs - should still have a topic created
+        //todo: deal with different transports
         for (ProcessorLink link : flow.getLinks()) {
             logger.info("Processing link");
             topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
