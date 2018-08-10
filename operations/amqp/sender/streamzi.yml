@@ -1,0 +1,11 @@
+---
+id: amqp-sender
+name: "AMQP Sender"
+description: "Sends random numbers as AMQP messages"
+transport: "amqp"
+inputs:
+outputs:
+- "output-data"
+imageName: "cef-ops-sender"
+settings: {
+}

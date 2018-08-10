@@ -29,7 +29,7 @@
     <artifactId>sender</artifactId>
     <packaging>jar</packaging>
 
-      <dependencies>
+    <dependencies>
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>qpid-jms-client</artifactId>

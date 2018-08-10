@@ -156,6 +156,7 @@ function exportJson(flowName) {
                 imageName: block._template.imageName,
                 templateId: block._template.id,
                 templateName: block._template.name,
+                transport: block._template.transport,
                 uuid: block._uuid,
                 settings: settings,
                 inputs: inputsArray,
@@ -217,9 +218,7 @@ function exportJson(flowName) {
         nodes: processorArray,
         links: linksArray,
         settings: {},
-        globalSettings: {
-            STREAMZI_KAFKA_BOOTSTRAP_SERVER: defaults.bootstrap_servers
-        }
+        globalSettings: defaults
     };
     
     if(flowName){

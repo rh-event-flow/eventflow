@@ -1,6 +1,5 @@
 package io.streamzi.openshift.dataflow.model;
 
-import io.streamzi.openshift.dataflow.model.serialization.SerializedNode;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,33 +7,52 @@ import java.util.Map;
  * This class represents a node that processes CloudEvents. It contains
  * details of input and output connections and the code to instantiate
  * when being deployed
+ *
  * @author hhiden
  */
 public class ProcessorNode extends ProcessorObject {
-    /** Input Ports */
+    /**
+     * Input Ports
+     */
     private Map<String, ProcessorInputPort> inputs = new HashMap<>();
-    
-    /** Output Ports */
+
+    /**
+     * Output Ports
+     */
     private Map<String, ProcessorOutputPort> outputs = new HashMap<>();
-    
-    /** Image name */
+
+    /**
+     * Image name
+     */
     private String imageName = "oc-stream-container";
-    
-    /** Unique ID of the node */
+
+    /**
+     * Unique ID of the node
+     */
     private String uuid;
 
-    /** Name of the node taken from the template */
+    /**
+     * Name of the node taken from the template
+     */
     private String templateName;
-    
-    /** ID of the node template */
+
+    /**
+     * ID of the node template
+     */
     private String templateId;
-    
-    /** Runtime settings */
+
+    /**
+     * Runtime settings
+     */
     private Map<String, String> settings = new HashMap<>();
-    
-    /** Parent flow */
+
+    /**
+     * Parent flow
+     */
     private ProcessorFlow parent;
-    
+
+    private String transport;
+
     public ProcessorNode() {
     }
 
@@ -45,7 +63,7 @@ public class ProcessorNode extends ProcessorObject {
     public void setParent(ProcessorFlow parent) {
         this.parent = parent;
     }
-       
+
     public Map<String, ProcessorInputPort> getInputs() {
         return inputs;
     }
@@ -69,24 +87,24 @@ public class ProcessorNode extends ProcessorObject {
     public void setImageName(String imageName) {
         this.imageName = imageName;
     }
-    
-    public void addInput(ProcessorInputPort input){
+
+    public void addInput(ProcessorInputPort input) {
         input.setParent(this);
         inputs.put(input.getName(), input);
     }
-    
-    public void addOutput(ProcessorOutputPort output){
+
+    public void addOutput(ProcessorOutputPort output) {
         output.setParent(this);
         outputs.put(output.getName(), output);
     }
-    
-    public ProcessorOutputPort getOutput(String name){
+
+    public ProcessorOutputPort getOutput(String name) {
         return outputs.get(name);
     }
-    
-    public ProcessorInputPort getInput(String name){
+
+    public ProcessorInputPort getInput(String name) {
         return inputs.get(name);
-    } 
+    }
 
     public String getUuid() {
         return uuid;
@@ -118,5 +136,13 @@ public class ProcessorNode extends ProcessorObject {
 
     public void setTemplateName(String templateName) {
         this.templateName = templateName;
+    }
+
+    public String getTransport() {
+        return transport;
+    }
+
+    public void setTransport(String transport) {
+        this.transport = transport;
     }
 }
