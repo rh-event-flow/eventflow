@@ -122,6 +122,7 @@ function exportJson(flowName) {
                 templateId: block._template.id,
                 templateName: block._template.name,
                 transport: block._template.transport,
+                processorType: block._template.processorType,
                 uuid: block._uuid,
                 settings: settings,
                 inputs: inputsArray,
@@ -229,7 +230,10 @@ function setupTopicBlocksJs(topicList) {
                 templateName: topicList[i],
                 transport: "kafka",
                 uuid: "none",
-                deployable: false
+                processorType: "TOPIC_ENDPOINT",
+                outputs: [
+                    topicList[i]
+                ]
         };
         blocks.register(blockData);        
     }
@@ -254,6 +258,7 @@ function setupBlocksJs(nodeYamlList) {
 
         // Keep this for saving
         templateMap[template.name] = template;
+        templateMap[template.name].processorType = "DEPLOYABLE_IMAGE";
 
         /* ADD SETTINGS
          var fields = new Array();

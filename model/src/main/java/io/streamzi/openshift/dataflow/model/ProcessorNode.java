@@ -2,6 +2,7 @@ package io.streamzi.openshift.dataflow.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.processing.Processor;
 
 /**
  * This class represents a node that processes CloudEvents. It contains
@@ -10,7 +11,7 @@ import java.util.Map;
  *
  * @author hhiden
  */
-public class ProcessorNode extends ProcessorObject {
+public class ProcessorNode extends ProcessorObject implements ProcessorConstants {
     /**
      * Input Ports
      */
@@ -51,6 +52,11 @@ public class ProcessorNode extends ProcessorObject {
      */
     private ProcessorFlow parent;
 
+    /**
+     * What type of processor is this
+     */
+    private ProcessorType processorType = ProcessorType.DEPLOYABLE_IMAGE;
+    
     private String transport;
 
     public ProcessorNode() {
@@ -145,4 +151,13 @@ public class ProcessorNode extends ProcessorObject {
     public void setTransport(String transport) {
         this.transport = transport;
     }
+
+    public ProcessorType getProcessorType() {
+        return processorType;
+    }
+
+    public void setProcessorType(ProcessorType processorType) {
+        this.processorType = processorType;
+    }
+
 }

@@ -1,6 +1,7 @@
 package io.streamzi.openshift.dataflow.model.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.model.ProcessorInputPort;
 import io.streamzi.openshift.dataflow.model.ProcessorNode;
 import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
@@ -21,6 +22,7 @@ public class SerializedNode {
     private String templateName;
     private String templateId;
     private String transport;
+    private String processorType;
     private List<String> inputs = new ArrayList<>();
     private List<String> outputs = new ArrayList<>();
     private String imageName;
@@ -35,6 +37,7 @@ public class SerializedNode {
         templateId = node.getTemplateId();
         templateName = node.getTemplateName();
         transport = node.getTransport();
+        processorType = node.getProcessorType().toString();
                 
         this.imageName = node.getImageName();
         for(String key : node.getSettings().keySet()){
@@ -59,6 +62,7 @@ public class SerializedNode {
         node.setTemplateId(templateId);
         node.setTemplateName(templateName);
         node.setTransport(transport);
+        node.setProcessorType(ProcessorConstants.ProcessorType.valueOf(processorType));
         for(String input : inputs){
             node.addInput(new ProcessorInputPort(input));
         }
@@ -131,5 +135,13 @@ public class SerializedNode {
 
     public void setTransport(String transport) {
         this.transport = transport;
+    }
+
+    public String getProcessorType() {
+        return processorType;
+    }
+
+    public void setProcessorType(String processorType) {
+        this.processorType = processorType;
     }
 }
