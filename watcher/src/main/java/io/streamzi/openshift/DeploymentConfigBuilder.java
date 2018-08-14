@@ -178,6 +178,7 @@ public class DeploymentConfigBuilder {
                 final Map<String, String> labels = new HashMap<>();
                 labels.put("strimzi.io/cluster", kafkaClusterName);
                 labels.put("strimzi.io/kind", "topic");
+                labels.put("streamzi.io/source", "autocreated");
                 labels.put("app", flow.getName());
 
                 final ObjectMeta om = new ObjectMeta();
