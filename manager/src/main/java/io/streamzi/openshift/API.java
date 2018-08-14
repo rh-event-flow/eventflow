@@ -7,6 +7,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
@@ -172,9 +173,9 @@ public class API {
 
         String bootstrapServers = EnvironmentResolver.get("bootstrap.servers");
         if (bootstrapServers != null && !bootstrapServers.equals("")) {
-            props.put("bootstrap_servers", bootstrapServers);
+            props.put(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS, bootstrapServers);
         } else {
-            props.put("bootstrap_servers", bootstrapServersDefault);
+            props.put(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS, bootstrapServersDefault);
         }
 
         String brokerUrl = EnvironmentResolver.get("broker.url");
