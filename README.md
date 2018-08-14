@@ -32,6 +32,8 @@ The Watch can be run outside OpenShift using `mvn clean package; java -jar targe
 Run `mvn package` from the `./operations` directory. 
 This will deploy the Java based operations.
 
+For each project, do an upload of the `streamzi.yml` in the `manager` UI component!
+
 TODO: how to deploy the Node.js operations?
  
 ## Apache Qpid Dispatch Router Installation
