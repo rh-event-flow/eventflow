@@ -202,7 +202,15 @@ public class API {
         
         ArrayList<String> results = new ArrayList<>();
         for(ConfigMap cm : list.getItems()){
-            results.add(cm.getMetadata().getName());
+            if(cm.getMetadata().getLabels().containsKey("streamzi.io/source")){
+                // This is one of ours - add it if it wasn't autocreated
+                String source = cm.getMetadata().getLabels().get("streamzi.io/source");
+                if(source==null || source.isEmpty() || !source.equalsIgnoreCase("autocreated")){
+                    results.add(cm.getMetadata().getName());
+                }
+            } else {
+                results.add(cm.getMetadata().getName());
+            }
         }
         return results;
     }
