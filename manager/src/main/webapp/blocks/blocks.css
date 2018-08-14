@@ -79,6 +79,8 @@
     margin-right:-1px;
     background-repeat:repeat-x;
     padding:3px;
+    overflow: hidden;
+    height: 30px;
 }
 
 .blocks_js_editor .contextmenu .menu_icon
