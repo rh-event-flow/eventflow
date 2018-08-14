@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-var kafkaHost = process.env.STREAMZI_KAFKA_BOOTSTRAP_SERVER;
+var kafkaHost = process.env.BOOTSTRAP_SERVERS;
 var nodeUuid = process.env.STREAMZI_NODE_UUID;
 var sourceTopic = process.env.INPUT_DATA;
 var targetTopic = process.env.OUTPUT_DATA;
