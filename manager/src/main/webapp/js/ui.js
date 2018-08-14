@@ -230,10 +230,12 @@ function setupTopicBlocksJs(topicList) {
                 templateName: topicList[i],
                 transport: "kafka",
                 uuid: "none",
+
                 processorType: "TOPIC_ENDPOINT",
                 outputs: [
                     topicList[i]
                 ]
+
         };
         blocks.register(blockData);        
     }
@@ -358,4 +360,5 @@ function guid() {
                 .substring(1);
     }
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+
 }
