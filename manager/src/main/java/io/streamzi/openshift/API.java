@@ -171,7 +171,7 @@ public class API {
     public String getGlobalProperties() {
         final Properties props = new Properties();
 
-        String bootstrapServers = EnvironmentResolver.get("bootstrap.servers");
+        String bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
         if (bootstrapServers != null && !bootstrapServers.equals("")) {
             props.put(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS, bootstrapServers);
         } else {
@@ -192,5 +192,26 @@ public class API {
             logger.severe(e.getMessage());
             return "{}";
         }
+    }
+    
+    @GET
+    @Path("/topics")
+    @Produces("application/json")
+    public List<String> listTopics(){
+        ConfigMapList list = container.getOSClient().configMaps().withLabel("strimzi.io/kind", "topic").list();
+        
+        ArrayList<String> results = new ArrayList<>();
+        for(ConfigMap cm : list.getItems()){
+            if(cm.getMetadata().getLabels().containsKey("streamzi.io/source")){
+                // This is one of ours - add it if it wasn't autocreated
+                String source = cm.getMetadata().getLabels().get("streamzi.io/source");
+                if(source==null || source.isEmpty() || !source.equalsIgnoreCase("autocreated")){
+                    results.add(cm.getMetadata().getName());
+                }
+            } else {
+                results.add(cm.getMetadata().getName());
+            }
+        }
+        return results;
     }
 }

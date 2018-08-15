@@ -7,6 +7,8 @@ import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorLink;
 import io.streamzi.openshift.dataflow.model.ProcessorNode;
+import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
+import io.streamzi.openshift.dataflow.model.ProcessorPort;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,52 +43,48 @@ public class DeploymentConfigBuilder {
     public List<DeploymentConfig> buildDeploymentConfigs() {
 
         final Map<String, DeploymentConfig> deploymentConfigs = new HashMap<>();
-
+        populateTopicMaps();
+        
         for (ProcessorNode node : flow.getNodes()) {
 
-//            Random r = new Random();
-//            int x = r.nextInt(1000);
+            if(node.getProcessorType()==ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE){
+                // Only create deployments for deployable image nodes
+                final String dcName = flow.getName() + "-" + node.getImageName(); //TODO: Add back in to get unique deployments + "-" + x;
+                final Container container = populateNodeDeployments(node);
 
-            final String dcName = flow.getName() + "-" + node.getImageName(); //TODO: Add back in to get unique deployments + "-" + x;
-            final Container container = populateNodeDeployments(node);
+                final DeploymentConfig dc = new io.fabric8.openshift.api.model.DeploymentConfigBuilder()
+                        .withNewMetadata()
+                        .withName(dcName)
+                        .withNamespace(namespace)
+                        .addToLabels("app", flow.getName())
+                        .addToLabels("streamzi/type", "processor-flow")
+                        .endMetadata()
+                        .withNewSpec()
+                        .withReplicas(1)
+                        .addNewTrigger()
+                        .withType("ConfigChange")
+                        .endTrigger()
+                        .withNewTemplate()
+                        .withNewMetadata()
+                        .addToLabels("app", flow.getName())
+                        .endMetadata()
+                        .withNewSpec()
+                        .addNewContainerLike(container)
+                        .endContainer()
+                        .endSpec()
+                        .endTemplate()
+                        .endSpec()
+                        .build();
 
-            final DeploymentConfig dc = new io.fabric8.openshift.api.model.DeploymentConfigBuilder()
-                    .withNewMetadata()
-                    .withName(dcName)
-                    .withNamespace(namespace)
-                    .addToLabels("app", flow.getName())
-                    .addToLabels("streamzi/type", "processor-flow")
-                    .endMetadata()
-                    .withNewSpec()
-                    .withReplicas(1)
-                    .addNewTrigger()
-                    .withType("ConfigChange")
-                    .endTrigger()
-                    .withNewTemplate()
-                    .withNewMetadata()
-                    .addToLabels("app", flow.getName())
-                    .endMetadata()
-                    .withNewSpec()
-                    .addNewContainerLike(container)
-                    .endContainer()
-                    .endSpec()
-                    .endTemplate()
-                    .endSpec()
-                    .build();
-
-            deploymentConfigs.put(dcName, dc);
-
+                deploymentConfigs.put(dcName, dc);
+            }
         }
-
-        populateTopicMaps();
-
         return new ArrayList<>(deploymentConfigs.values());
     }
 
 
     private Container populateNodeDeployments(ProcessorNode node) {
-
-
+        
         final List<EnvVar> envVars = new ArrayList<>();
         envVars.add(new EnvVar(sanitiseEnvVar(ProcessorConstants.NODE_UUID), node.getUuid(), null));
 
@@ -100,9 +98,40 @@ public class DeploymentConfigBuilder {
             envVars.add(new EnvVar(sanitiseEnvVar(key), node.getParent().getGlobalSettings().get(key), null));
         }
 
+        String topicName;
+        ProcessorNode sourceNode;
+        ProcessorNode targetNode;
+        
+        for(ProcessorPort input : node.getInputs().values()){
+            for(ProcessorLink link : input.getLinks()){
+                sourceNode = link.getSource().getParent();
+                if(sourceNode.getProcessorType()==ProcessorConstants.ProcessorType.TOPIC_ENDPOINT){
+                    // This is a pre-existing topic
+                    envVars.add(new EnvVar(sanitiseEnvVar(input.getName()), link.getSource().getName(), null));
+                } else {
+                    // This topic will be created
+                    topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
+                    envVars.add(new EnvVar(sanitiseEnvVar(input.getName()), topicName, null));
+                }
+            }
+        }
+        
+        for(ProcessorOutputPort output : node.getOutputs().values()){
+            topicName = flow.getName() + "-" + node.getUuid() + "-" + output.getName();
+            envVars.add(new EnvVar(sanitiseEnvVar(output.getName()), topicName, null));
+        }
+        /*
         for (ProcessorLink link : flow.getLinks()) {
-
-            final String topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
+            sourceNode = link.getSource().getParent();
+            targetNode = link.getTarget().getParent();
+            
+            if(node.getProcessorType()==ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE){
+                // This will be a topic that has been created for the processor
+                topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
+            } else {
+                // This is a pre-existing topic
+                topicName = link.getSource().getName();
+            }
 
             // Set the topic name in the source node container
             if (node.getUuid().equals(link.getSource().getParent().getUuid())) {
@@ -115,6 +144,9 @@ public class DeploymentConfigBuilder {
             }
 
         }
+        */
+
+
         return new ContainerBuilder()
                 .withName(node.getParent().getName())
                 .withImage(registryAddress + "/" + namespace + "/" + node.getImageName() + ":latest")
@@ -126,32 +158,40 @@ public class DeploymentConfigBuilder {
     private void populateTopicMaps() {
         final ConfigMap cm = new ConfigMap();
         String topicName;
-
+        ProcessorNode sourceNode;
+        
         //todo: deal with unconnected outputs - should still have a topic created
         //todo: deal with different transports
         for (ProcessorLink link : flow.getLinks()) {
             logger.info("Processing link");
-            topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
+            sourceNode = link.getSource().getParent();
+            
+            if(sourceNode.getProcessorType()==ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE){
+                // Deployable images need to have a topic created for them
+                topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
 
-            final Map<String, String> data = new HashMap<>();
-            data.put("name", topicName);
-            data.put("partitions", "2");
-            data.put("replicas", "1");
+                final Map<String, String> data = new HashMap<>();
+                data.put("name", topicName);
+                data.put("partitions", "2");
+                data.put("replicas", "1");
 
-            final Map<String, String> labels = new HashMap<>();
-            labels.put("strimzi.io/cluster", kafkaClusterName);
-            labels.put("strimzi.io/kind", "topic");
-            labels.put("app", flow.getName());
+                final Map<String, String> labels = new HashMap<>();
+                labels.put("strimzi.io/cluster", kafkaClusterName);
+                labels.put("strimzi.io/kind", "topic");
+                labels.put("streamzi.io/source", "autocreated");
+                labels.put("app", flow.getName());
 
-            final ObjectMeta om = new ObjectMeta();
-            om.setName(topicName);
-            om.setNamespace(namespace);
-            om.setLabels(labels);
+                final ObjectMeta om = new ObjectMeta();
+                om.setName(topicName);
+                om.setNamespace(namespace);
+                om.setLabels(labels);
 
-            cm.setMetadata(om);
-            cm.setData(data);
+                cm.setMetadata(om);
+                cm.setData(data);
 
-            topicMaps.add(cm);
+                topicMaps.add(cm);                
+            }
+
         }
     }
 

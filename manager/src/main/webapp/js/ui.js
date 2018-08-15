@@ -5,9 +5,9 @@ var defaults = {};
 
 
 // Override the addBlock method to add some more stuff
-blocks.addBlock = function (name, x, y){
+blocks.addBlock = function (name, x, y) {
     console.log("Add blocks:" + name);
-    
+
     for (var k in this.metas) {
         var type = this.metas[k];
 
@@ -17,13 +17,13 @@ blocks.addBlock = function (name, x, y){
             block.y = y;
             block._uuid = guid();
             block.create(this.div.find('.blocks'));
-            
+
             // Keep the template with the block so that we can get data
             // needed for the deployment
-            if(templateMap[name]){
+            if (templateMap[name]) {
                 block._template = templateMap[name];
             }
-            
+
             this.history.save();
             this.blocks.push(block);
             this.id++;
@@ -41,9 +41,13 @@ blocks.addBlock = function (name, x, y){
         blocks.run('#blocks');
     });
 
-    fetchDefaults(function(data){
-      defaults = data;
-      console.log(defaults);
+    fetchTopicList(function (data) {
+        setupTopicBlocksJs(data);
+    });
+
+    fetchDefaults(function (data) {
+        defaults = data;
+        console.log(defaults);
     });
 
     //setupBlocksJs(data);
@@ -55,46 +59,7 @@ blocks.addBlock = function (name, x, y){
             //alert($.toJSON(blocks.export()));
             exportJson();
         }, 'export');
-        /*
-         $('.setLabel').click(function () {
-         for (k in blocks.edges) {
-         var edge = blocks.edges[k];
-         edge.setLabel('Edge #' + edge.id);
-         }
-         });
-         
-         $('.setInfos').click(function () {
-         for (k in blocks.blocks) {
-         var block = blocks.blocks[k];
-         block.setInfos('Hello, I am the block #' + block.id);
-         }
-         });
-         
-         $('.setDescriptions').click(function () {
-         for (k in blocks.blocks) {
-         var block = blocks.blocks[k];
-         block.setDescription('This is the block #' + block.id);
-         }
-         });
-         
-         $('.resize').click(function () {
-         $('#blocks').width('300px');
-         blocks.perfectScale();
-         });
-         
-         $('.hideIcons').click(function () {
-         blocks.showIcons = false;
-         blocks.redraw();
-         });
-         
-         $('.stressTest').click(function () {
-         for (var x = 0; x < 1000; x += 100) {
-         for (var y = 0; y < 1000; y += 100) {
-         blocks.addBlock('Sinus', x, y);
-         }
-         }
-         });
-         */
+
     });
 
 
@@ -117,35 +82,35 @@ function exportJson(flowName) {
     var settings;
     var block;
     var serializedBlock;
-    
+
     for (var i = 0; i < data.blocks.length; i++) {
         serializedBlock = data.blocks[i];
         block = blocks.getBlockById(serializedBlock.id);
-        if(block && block._template){
+        if (block && block._template) {
             inputsArray = new Array();
             outputsArray = new Array();
             settings = {};
 
-            if(block._template.inputs){
-                for(var j=0;j<block._template.inputs.length;j++){
+            if (block._template.inputs) {
+                for (var j = 0; j < block._template.inputs.length; j++) {
                     inputsArray.push(block._template.inputs[j]);
                 }
             }
-            
-            if(block._template.outputs){
-                for(var j=0;j<block._template.outputs.length;j++){
+
+            if (block._template.outputs) {
+                for (var j = 0; j < block._template.outputs.length; j++) {
                     outputsArray.push(block._template.outputs[j]);
                 }
             }
 
             //todo: this will only copy default values
-            if(block._template.settings && block.fields.fields){
+            if (block._template.settings && block.fields.fields) {
                 var field;
                 var attrs;
-                for(var j=0;j<block.fields.fields.length;j++){
+                for (var j = 0; j < block.fields.fields.length; j++) {
                     field = block.fields.fields[j];
                     attrs = field.attrs;
-                    if(attrs && attrs.editable){
+                    if (attrs && attrs.editable) {
                         // This can go in the settings
                         settings[field.name] = field.value;
                     }
@@ -157,17 +122,18 @@ function exportJson(flowName) {
                 templateId: block._template.id,
                 templateName: block._template.name,
                 transport: block._template.transport,
+                processorType: block._template.processorType,
                 uuid: block._uuid,
                 settings: settings,
                 inputs: inputsArray,
                 outputs: outputsArray
             };
-            
+
             processorArray.push(processorJson);
-            
+
         }
     }
-    
+
     // Add the edges / links
     var block1;
     var block2;
@@ -179,49 +145,49 @@ function exportJson(flowName) {
     var targetPort;
     var targetUuid;
     var linksArray = new Array();
-    
-    
-    for(var i=0;i<data.edges.length;i++){
+
+
+    for (var i = 0; i < data.edges.length; i++) {
         serializedEdge = data.edges[i];
         serializedConnector1 = data.edges[i].connector1;
         serializedConnector2 = data.edges[i].connector2;
-        
+
         block1 = blocks.getBlockById(serializedEdge.block1);
         block2 = blocks.getBlockById(serializedEdge.block2);
-        
-        if(serializedConnector1[1]==="output" && serializedConnector2[1]==="input"){
+
+        if (serializedConnector1[1] === "output" && serializedConnector2[1] === "input") {
             // 1 is the output, 2 is the input
             sourceUuid = block1._uuid;
             sourcePort = serializedConnector1[0];
             targetUuid = block2._uuid;
             targetPort = serializedConnector2[0];
-            
-        } else if(serializedConnector1[1]==="input" && serializedConnector2[1]==="output") {
+
+        } else if (serializedConnector1[1] === "input" && serializedConnector2[1] === "output") {
             sourceUuid = block2._uuid;
             sourcePort = serializedConnector2[0];
             targetUuid = block1._uuid;
             targetPort = serializedConnector1[0];
-        
+
         } else {
             console.log("Bad connection");
         }
         linksArray.push({
             sourceUuid: sourceUuid,
-            targetUuid: targetUuid, 
+            targetUuid: targetUuid,
             sourcePortName: sourcePort,
             targetPortName: targetPort
         });
-        
+
     }
-    
+
     var result = {
         nodes: processorArray,
         links: linksArray,
         settings: {},
         globalSettings: defaults
     };
-    
-    if(flowName){
+
+    if (flowName) {
         result.name = flowName;
     } else {
         result.name = "unnamed-flow";
@@ -231,6 +197,51 @@ function exportJson(flowName) {
     return json;
 }
 
+function setupTopicBlocksJs(topicList) {
+    var template;
+    var blockData;
+    var fields;
+    for (var i = 0; i < topicList.length; i++) {
+        fields = new Array();
+        blockData = {
+            name: topicList[i],
+            description: "Kafka Topic",
+            family: "TOPICS"
+        };
+        fields.push({
+
+            name: topicList[i],
+            type: "string",
+            attrs: "output"
+
+        });
+        
+        fields.push({
+            name: "deployable",
+            type: "boolean",
+            value: false
+        })
+        blockData.fields = fields;
+        
+        // Dummy template
+        templateMap[topicList[i]] = {
+                imageName: "none",
+                templateId: "none",
+                templateName: topicList[i],
+                transport: "kafka",
+                uuid: "none",
+
+                processorType: "TOPIC_ENDPOINT",
+                outputs: [
+                    topicList[i]
+                ]
+
+        };
+        blocks.register(blockData);        
+    }
+}
+
+
 function setupBlocksJs(nodeYamlList) {
     var template;
     var blockData;
@@ -238,6 +249,7 @@ function setupBlocksJs(nodeYamlList) {
 
     for (var i = 0; i < nodeYamlList.length; i++) {
         template = YAML.parse(nodeYamlList[i]);
+        template.deployable = true;
 
         fields = new Array();
         blockData = {
@@ -248,6 +260,7 @@ function setupBlocksJs(nodeYamlList) {
 
         // Keep this for saving
         templateMap[template.name] = template;
+        templateMap[template.name].processorType = "DEPLOYABLE_IMAGE";
 
         /* ADD SETTINGS
          var fields = new Array();
@@ -278,14 +291,14 @@ function setupBlocksJs(nodeYamlList) {
                 });
             }
         }
-        
+
         // ADD SETTINGS
         var value;
         var key;
-        if(template.settings){
+        if (template.settings) {
             var keys = Object.keys(template.settings);
-            
-            for(var j=0;j<keys.length;j++){
+
+            for (var j = 0; j < keys.length; j++) {
                 key = keys[j];
                 value = template.settings[key];
                 fields.push({
@@ -296,16 +309,24 @@ function setupBlocksJs(nodeYamlList) {
                 });
             }
         }
-        
+
         blockData.fields = fields;
         console.log(JSON.stringify(blockData));
         blocks.register(blockData);
         console.log("Template: " + i);
     }
-
-
 }
 
+function fetchTopicList(callback) {
+    var promise = $.ajax({
+        url: "rest/api/topics",
+        type: 'GET',
+        dataType: "json",
+        contentType: "application/json; charset=utf-8"
+    }).then(function (data) {
+        callback(data);
+    });
+}
 
 function fetchNodeYaml(callback) {
 
@@ -333,10 +354,11 @@ function fetchDefaults(callback) {
 
 // THIS ISN'T A GUID
 function guid() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+
 }
