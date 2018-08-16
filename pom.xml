@@ -23,7 +23,6 @@
         <module>container</module>
         <module>manager</module>
         <module>watcher</module>
-        <module>operations</module>
     </modules>
 
     <dependencyManagement>
