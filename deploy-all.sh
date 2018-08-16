@@ -3,8 +3,6 @@
 mvn -f ./pom.xml clean install
 cd manager
 ./build.sh;
-cd ../operations/random-data/
-./build.sh
 cd ../log-data/
 ./build.sh
 cd ../nodejs/filter-events/

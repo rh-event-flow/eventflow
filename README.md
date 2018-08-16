@@ -27,15 +27,6 @@ The Watcher will be notified of the presence of the flow `ConfigMap` and will de
 The Manager can be run outside OpenShift using `mvn clean package wildfly-swarm:run`.
 The Watch can be run outside OpenShift using `mvn clean package; java -jar target/FlowController.jar`.
 
-## Operations Installation
-
-Run `mvn package` from the `./operations` directory. 
-This will deploy the Java based operations.
-
-For each project, do an upload of the `streamzi.yml` in the `manager` UI component!
-
-TODO: how to deploy the Node.js operations?
- 
 ## Apache Qpid Dispatch Router Installation
 
 To install a single Dispatch Router run the `build.sh` from the `dispatch/router` directory.
