@@ -1,6 +1,7 @@
 blocks = new Blocks();
 blocks.scale = 1.4;
 var templateMap = {};
+var renameMap = {};
 var defaults = {};
 
 
@@ -158,15 +159,37 @@ function exportJson(flowName) {
         if (serializedConnector1[1] === "output" && serializedConnector2[1] === "input") {
             // 1 is the output, 2 is the input
             sourceUuid = block1._uuid;
-            sourcePort = serializedConnector1[0];
+            
+            if(renameMap[serializedConnector1[0]]){
+                sourcePort = renameMap[serializedConnector1[0]];
+            } else {
+                sourcePort = serializedConnector1[0];
+            }
+            
             targetUuid = block2._uuid;
-            targetPort = serializedConnector2[0];
+            
+            if(renameMap[serializedConnector2[0]]){
+                targetPort = renameMap[serializedConnector2[0]];
+            } else {
+                targetPort = serializedConnector2[0];
+            }
 
         } else if (serializedConnector1[1] === "input" && serializedConnector2[1] === "output") {
             sourceUuid = block2._uuid;
-            sourcePort = serializedConnector2[0];
+            
+            if(renameMap[serializedConnector2[0]]){
+                sourcePort = renameMap[serializedConnector2[0]];
+            } else {
+                sourcePort = serializedConnector2[0];
+            }
+            
             targetUuid = block1._uuid;
-            targetPort = serializedConnector1[0];
+            
+            if(renameMap[serializedConnector1[0]]){
+                targetPort = renameMap[serializedConnector1[0]];
+            } else {
+                targetPort = serializedConnector1[0];
+            }
 
         } else {
             console.log("Bad connection");
@@ -201,6 +224,8 @@ function setupTopicBlocksJs(topicList) {
     var template;
     var blockData;
     var fields;
+    var outputName;
+    
     for (var i = 0; i < topicList.length; i++) {
         fields = new Array();
         blockData = {
@@ -208,36 +233,41 @@ function setupTopicBlocksJs(topicList) {
             description: "Kafka Topic",
             family: "TOPICS"
         };
+        
+        // Fix names and add to the rename map so that we can fix later
+        //outputName = replaceall(topicList[i], ".", "-");
+        outputName = sanitize(topicList[i]);
+        renameMap[outputName] = topicList[i];
+        
         fields.push({
-
-            name: topicList[i],
+            name: outputName,
             type: "string",
-            attrs: "output"
+            attrs: "output",
+            topicName: +topicList[i]
 
         });
-        
+
         fields.push({
             name: "deployable",
             type: "boolean",
             value: false
-        })
+        });
         blockData.fields = fields;
-        
+
         // Dummy template
         templateMap[topicList[i]] = {
-                imageName: "none",
-                templateId: "none",
-                templateName: topicList[i],
-                transport: "kafka",
-                uuid: "none",
-
-                processorType: "TOPIC_ENDPOINT",
-                outputs: [
-                    topicList[i]
-                ]
+            imageName: "none",
+            templateId: "none",
+            templateName: topicList[i],
+            transport: "kafka",
+            uuid: "none",
+            processorType: "TOPIC_ENDPOINT",
+            outputs: [
+                topicList[i]
+            ]
 
         };
-        blocks.register(blockData);        
+        blocks.register(blockData);
     }
 }
 
@@ -246,6 +276,8 @@ function setupBlocksJs(nodeYamlList) {
     var template;
     var blockData;
     var fields;
+    var inputName;
+    var outputName;
 
     for (var i = 0; i < nodeYamlList.length; i++) {
         template = YAML.parse(nodeYamlList[i]);
@@ -273,8 +305,10 @@ function setupBlocksJs(nodeYamlList) {
         // ADD INPUTS
         if (template.inputs) {
             for (var j = 0; j < template.inputs.length; j++) {
+                inputName = sanitize(template.inputs[j]);
+                renameMap[inputName] = template.inputs[j];
                 fields.push({
-                    name: template.inputs[j],
+                    name: inputName,
                     type: "string",
                     attrs: "input"
                 });
@@ -284,8 +318,10 @@ function setupBlocksJs(nodeYamlList) {
         // ADD OUTPUTS
         if (template.outputs) {
             for (var j = 0; j < template.outputs.length; j++) {
+                outputName = sanitize(template.outputs[j]);
+                renameMap[outputName] = template.outputs[j];
                 fields.push({
-                    name: template.outputs[j],
+                    name: outputName,
                     type: "string",
                     attrs: "output"
                 });
@@ -361,4 +397,30 @@ function guid() {
     }
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 
+}
+
+function sanitize(str){
+    str = replaceall(str, "_", "-");
+    str = replaceall(str, ".", "-");
+    return str;
+}
+
+function replaceall(str, replace, with_this) {
+    var str_hasil = "";
+    var temp;
+
+    for (var i = 0; i < str.length; i++) // not need to be equal. it causes the last change: undefined..
+    {
+        if (str[i] == replace)
+        {
+            temp = with_this;
+        } else
+        {
+            temp = str[i];
+        }
+
+        str_hasil += temp;
+    }
+
+    return str_hasil;
 }
