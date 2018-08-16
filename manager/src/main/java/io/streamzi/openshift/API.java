@@ -209,7 +209,7 @@ public class API {
                     results.add(cm.getMetadata().getName());
                 }
             } else {
-                results.add(cm.getMetadata().getName());
+                results.add(cm.getData().get("name"));
             }
         }
         return results;
