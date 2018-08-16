@@ -27,6 +27,10 @@ The Watcher will be notified of the presence of the flow `ConfigMap` and will de
 The Manager can be run outside OpenShift using `mvn clean package wildfly-swarm:run`.
 The Watch can be run outside OpenShift using `mvn clean package; java -jar target/FlowController.jar`.
 
+## Stream Processors
+
+A number of stream processors are available [here](https://github.com/project-streamzi/event-flow-operation-samples)!
+
 ## Apache Qpid Dispatch Router Installation
 
 To install a single Dispatch Router run the `build.sh` from the `dispatch/router` directory.
