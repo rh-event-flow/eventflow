@@ -28,7 +28,7 @@ public class DeploymentConfigBuilder {
     private String namespace;
     private final String kafkaClusterName = "my-cluster";
     private final List<ConfigMap> topicMaps = new ArrayList<>();
-    private final String registryAddress = "172.30.1.1:5000";
+    private final String registryAddress = "docker.io";
 
 
     public DeploymentConfigBuilder(String namespace, ProcessorFlow flow) {
@@ -149,7 +149,7 @@ public class DeploymentConfigBuilder {
 
         return new ContainerBuilder()
                 .withName(node.getParent().getName())
-                .withImage(registryAddress + "/" + namespace + "/" + node.getImageName() + ":latest")
+                .withImage(registryAddress + "/" + node.getImageName())
                 .withEnv(envVars)
                 .build();
     }

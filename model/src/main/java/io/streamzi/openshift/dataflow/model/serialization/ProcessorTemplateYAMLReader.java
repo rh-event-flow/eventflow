@@ -12,22 +12,24 @@ import java.io.InputStream;
  * Parses the definition YAML file to create a processor
  * @author hhiden
  */
-public class ProcessorTemplateYAMLReader {
-    private File yamlFile;
+public final class ProcessorTemplateYAMLReader {
 
-    public ProcessorTemplateYAMLReader(File yamlFile) {
-        this.yamlFile = yamlFile;
+    private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+
+    private ProcessorTemplateYAMLReader() {
     }
     
-    public ProcessorNodeTemplate readTemplate() throws Exception {
+    public static ProcessorNodeTemplate readTemplate(final File yamlFile) throws Exception {
         try(InputStream inStream = new FileInputStream(yamlFile)){
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            return mapper.readValue(inStream, ProcessorNodeTemplate.class);
+            return MAPPER.readValue(inStream, ProcessorNodeTemplate.class);
         }        
     }
-    
-    public static ProcessorNodeTemplate readTemplateFromString(String yaml) throws Exception {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        return mapper.readValue(yaml, ProcessorNodeTemplate.class);
+
+    public static ProcessorNodeTemplate readTemplate(final String yaml) throws Exception {
+        return MAPPER.readValue(yaml, ProcessorNodeTemplate.class);
+    }
+
+    public static ProcessorNodeTemplate readTemplate(final InputStream src) throws Exception {
+        return MAPPER.readValue(src, ProcessorNodeTemplate.class);
     }
 }
