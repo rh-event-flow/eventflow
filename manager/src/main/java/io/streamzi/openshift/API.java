@@ -88,8 +88,8 @@ public class API {
         List<ConfigMap> processorConfigMaps = configMapList.getItems();
         for (ConfigMap cm : processorConfigMaps) {
             try {
-                String templateYaml = cm.getData().get("template");
-                final ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplateFromString(templateYaml);
+                final String templateYaml = cm.getData().get("template");
+                final ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplate(templateYaml);
                 final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
                 results.add(writer.writeToYAMLString());
             } catch (Exception e) {
@@ -106,10 +106,10 @@ public class API {
     @POST
     @Path("/processors")
     @Consumes("application/json")
-    public void postYaml(String yamlData) {
+    public void postYaml(final String yamlData) {
         logger.info(yamlData);
         try {
-            ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplateFromString(yamlData);
+            ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplate(yamlData);
             logger.info("Valid template for image: " + template.getImageName());
             ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
 
