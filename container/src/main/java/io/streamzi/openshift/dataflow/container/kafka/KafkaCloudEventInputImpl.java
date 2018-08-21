@@ -102,8 +102,7 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
 
             Properties properties = new Properties();
             properties.put(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-            properties.put(ConsumerConfig.GROUP_ID_CONFIG, "processor-group");
-            properties.put(ConsumerConfig.CLIENT_ID_CONFIG, processorUuid);
+            properties.put(ConsumerConfig.GROUP_ID_CONFIG, processorUuid);
             properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 1000);
