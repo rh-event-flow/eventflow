@@ -49,7 +49,7 @@ public class DeploymentConfigBuilder {
 
             if(node.getProcessorType()==ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE){
                 // Only create deployments for deployable image nodes
-                final String dcName = flow.getName() + "-" + node.getImageName() + "-" + node.getUuid().substring(0,6);
+                final String dcName = flow.getName() + "-" + node.getImageName().replace("/", "-") + "-" + node.getUuid().substring(0,6);
                 final Container container = populateNodeDeployments(node);
 
                 final DeploymentConfig dc = new io.fabric8.openshift.api.model.DeploymentConfigBuilder()
