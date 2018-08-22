@@ -2,8 +2,6 @@ package io.streamzi.openshift.dataflow.model.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedNode;
 
 /**
  * Loads a flow from a JSON file

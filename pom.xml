@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.9.6</jackson.version>
         <openshift.fabric8.version>4.0.3</openshift.fabric8.version>
+        <jcloudevents.version>0.0.2</jcloudevents.version>
         <version.okhttp3>3.9.1</version.okhttp3>
     </properties>
 
@@ -27,12 +28,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>io.cloudevents</groupId>
-                <artifactId>cloudevents-api</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
-            </dependency>
-
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -94,6 +89,15 @@
                 <artifactId>okhttp</artifactId>
                 <version>${version.okhttp3}</version>
             </dependency>
+
+
+            <dependency>
+                <groupId>io.streamzi</groupId>
+                <artifactId>jcloudevents-api</artifactId>
+                <version>${jcloudevents.version}</version>
+            </dependency>
+
+
         </dependencies>
 
     </dependencyManagement>
@@ -112,4 +116,13 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <repositories>
+        <repository>
+            <id>jboss-thirdparty-releases</id>
+            <name>JBoss Thirdparty Releases</name>
+            <url>https://repository.jboss.org/nexus/service/local/repositories/thirdparty-releases/content/</url>
+        </repository>
+    </repositories>
+
 </project>

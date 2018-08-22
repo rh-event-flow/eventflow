@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorLink;
 import io.streamzi.openshift.dataflow.model.ProcessorNode;
-import io.streamzi.openshift.dataflow.model.ProcessorObject;
 import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
 import java.util.ArrayList;
 import java.util.HashMap;

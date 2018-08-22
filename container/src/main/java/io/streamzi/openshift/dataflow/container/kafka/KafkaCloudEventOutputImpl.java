@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.cloudevents.CloudEvent;
 import java.util.logging.Logger;
+
+import io.streamzi.cloudevents.CloudEvent;
 import io.streamzi.openshift.dataflow.container.CloudEventOutput;
 import io.streamzi.openshift.dataflow.container.config.EnvironmentResolver;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;

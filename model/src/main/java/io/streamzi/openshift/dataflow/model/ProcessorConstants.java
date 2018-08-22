@@ -5,11 +5,11 @@ package io.streamzi.openshift.dataflow.model;
  * @author hhiden
  */
 public interface ProcessorConstants {
-    public enum ProcessorType {
+    enum ProcessorType {
         DEPLOYABLE_IMAGE,
         TOPIC_ENDPOINT
     }
     
-    public static final String KAFKA_BOOTSTRAP_SERVERS = "STREAMZI_KAFKA_BOOTSTRAP_SERVER";
-    public static final String NODE_UUID = "STREAMZI_NODE_UUID";
+    String KAFKA_BOOTSTRAP_SERVERS = "STREAMZI_KAFKA_BOOTSTRAP_SERVER";
+    String NODE_UUID = "STREAMZI_NODE_UUID";
 }

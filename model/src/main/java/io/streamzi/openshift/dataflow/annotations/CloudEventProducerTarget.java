@@ -1,6 +1,7 @@
 package io.streamzi.openshift.dataflow.annotations;
 
-import io.cloudevents.CloudEvent;
+
+import io.streamzi.cloudevents.CloudEvent;
 
 /**
  * This interface defines an object that can receive cloud events
