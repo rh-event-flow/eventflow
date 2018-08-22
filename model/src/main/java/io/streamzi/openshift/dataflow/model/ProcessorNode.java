@@ -2,7 +2,6 @@ package io.streamzi.openshift.dataflow.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.processing.Processor;
 
 /**
  * This class represents a node that processes CloudEvents. It contains

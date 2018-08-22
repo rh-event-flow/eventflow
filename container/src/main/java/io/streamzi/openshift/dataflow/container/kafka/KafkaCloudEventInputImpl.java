@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.cloudevents.CloudEvent;
-import io.cloudevents.impl.DefaultCloudEventImpl;
+import io.streamzi.cloudevents.CloudEvent;
+import io.streamzi.cloudevents.impl.CloudEventImpl;
 import io.streamzi.openshift.dataflow.container.CloudEventInput;
 import io.streamzi.openshift.dataflow.container.config.EnvironmentResolver;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
@@ -78,7 +78,7 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
                 for (ConsumerRecord<String, String> r : records) {
                     try {
                         logger.info("Read: " + r.value());
-                        CloudEvent evt = mapper.readValue(r.value(), DefaultCloudEventImpl.class);
+                        CloudEvent evt = mapper.readValue(r.value(), CloudEventImpl.class);
                         consumerMethod.invoke(consumerObject, evt);
                     } catch (Exception e){
                         logger.warning("Error running consumer method: " + e.getMessage());
