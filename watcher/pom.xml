@@ -35,6 +35,13 @@
             <artifactId>openshift-client</artifactId>
         </dependency>
 
+        <!-- Explicit dependency on Jackson as fabric8 k8s client brings in old version -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

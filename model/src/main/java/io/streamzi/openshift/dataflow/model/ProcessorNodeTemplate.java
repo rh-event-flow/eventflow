@@ -1,5 +1,7 @@
 package io.streamzi.openshift.dataflow.model;
 
+import io.streamzi.openshift.dataflow.model.crds.Processor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +22,21 @@ public class ProcessorNodeTemplate {
     private String imageName = "oc-stream-container";
     private Map<String, String> settings = new HashMap<>();
 
+    public ProcessorNodeTemplate() {
+    }
+
+    public ProcessorNodeTemplate(Processor crd){
+        this.setId(crd.getMetadata().getName());
+        this.setName(crd.getSpec().getDisplayName());
+        this.setDescription(crd.getSpec().getDescription());
+        this.setTransport("kafka");
+        this.setInputs(crd.getSpec().getInputs());
+        this.setOutputs(crd.getSpec().getOutputs());
+        this.setMainClassName("io.streamzi.openshift.container.crdessorRunner");
+        this.setImageName(crd.getSpec().getImageName());
+        this.setSettings(crd.getSpec().getSettings());
+    }
+    
     public String getDescription() {
         return description;
     }
