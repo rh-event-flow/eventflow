@@ -3,9 +3,11 @@ package io.streamzi.openshift;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.ConfigMapList;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
-import io.fabric8.kubernetes.client.CustomResourceList;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
@@ -16,13 +18,13 @@ import io.streamzi.openshift.dataflow.model.crds.Processor;
 import io.streamzi.openshift.dataflow.model.crds.ProcessorList;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowWriter;
-import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -88,13 +90,13 @@ public class API {
     public List<String> listProcessors() {
 
 
-        CustomResourceDefinition procCRD =  container.getOSClient().customResourceDefinitions().withName("processors.streamzi.io").get();
-        if(procCRD == null){
+        final CustomResourceDefinition procCRD = container.getOSClient().customResourceDefinitions().withName("processors.streamzi.io").get();
+        if (procCRD == null) {
             logger.severe("Can't find CRD");
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
-        NonNamespaceOperation<Processor, ProcessorList, DoneableProcessor, Resource<Processor, DoneableProcessor>> processorClient =
+        final NonNamespaceOperation<Processor, ProcessorList, DoneableProcessor, Resource<Processor, DoneableProcessor>> processorClient =
                 container.getOSClient().customResources(
                         procCRD,
                         Processor.class,
@@ -102,12 +104,12 @@ public class API {
                         DoneableProcessor.class)
                         .inNamespace(container.getOSClient().getNamespace());
 
-        ArrayList<String> results = new ArrayList<>();
+        final List<String> results = new ArrayList<>();
 
-        List<Processor> processors =  processorClient.list().getItems();
-        for(Processor proc: processors){
+        final List<Processor> processors = processorClient.list().getItems();
+        for (Processor proc : processors) {
             try {
-                ProcessorNodeTemplate template = new ProcessorNodeTemplate(proc);
+                final ProcessorNodeTemplate template = new ProcessorNodeTemplate(proc);
                 final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
                 results.add(writer.writeToYAMLString());
 
@@ -183,19 +185,19 @@ public class API {
             return "{}";
         }
     }
-    
+
     @GET
     @Path("/topics")
     @Produces("application/json")
-    public List<String> listTopics(){
+    public List<String> listTopics() {
         ConfigMapList list = container.getOSClient().configMaps().withLabel("strimzi.io/kind", "topic").list();
-        
+
         ArrayList<String> results = new ArrayList<>();
-        for(ConfigMap cm : list.getItems()){
-            if(cm.getMetadata().getLabels().containsKey("streamzi.io/source")){
+        for (ConfigMap cm : list.getItems()) {
+            if (cm.getMetadata().getLabels().containsKey("streamzi.io/source")) {
                 // This is one of ours - add it if it wasn't autocreated
                 String source = cm.getMetadata().getLabels().get("streamzi.io/source");
-                if(source==null || source.isEmpty() || !source.equalsIgnoreCase("autocreated")){
+                if (source == null || source.isEmpty() || !source.equalsIgnoreCase("autocreated")) {
                     results.add(cm.getMetadata().getName());
                 }
             } else {
