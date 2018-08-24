@@ -89,7 +89,7 @@
                     <images>
                         <image>
                             <alias>watcher</alias>
-                            <name>streamzi/cef-watcher</name>
+                            <name>docker.io/streamzi/cef-watcher</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>
