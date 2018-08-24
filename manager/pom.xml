@@ -33,31 +33,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <build>
-        <finalName>flow-manager</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.wildfly.swarm</groupId>
-                <artifactId>wildfly-swarm-plugin</artifactId>
-                <version>${version.wildfly.swarm}</version>
-
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <properties>
-                        <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
-                    </properties>
-                </configuration>
-            </plugin>
-
-        </plugins>
-    </build>
-
     <dependencies>
         <!-- Java EE 7 dependency -->
         <dependency>
@@ -99,6 +74,58 @@
             <groupId>io.fabric8</groupId>
             <artifactId>openshift-client</artifactId>
         </dependency>
-
     </dependencies>
+
+    <build>
+        <finalName>flow-manager</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.wildfly.swarm</groupId>
+                <artifactId>wildfly-swarm-plugin</artifactId>
+                <version>${version.wildfly.swarm}</version>
+
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <properties>
+                        <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
+                    </properties>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.26.1</version>
+
+                <configuration>
+                    <images>
+                        <image>
+                            <alias>manager</alias>
+                            <name>docker.io/streamzi/cef-manager</name>
+                            <build>
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <id>build</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

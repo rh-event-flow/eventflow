@@ -7,18 +7,24 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
+import io.streamzi.openshift.dataflow.model.crds.DoneableProcessor;
+import io.streamzi.openshift.dataflow.model.crds.Processor;
+import io.streamzi.openshift.dataflow.model.crds.ProcessorList;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowWriter;
-import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -82,16 +88,31 @@ public class API {
     @Path("/processors")
     @Produces("application/json")
     public List<String> listProcessors() {
-        List<String> results = new ArrayList<>();
 
-        ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "processor").list();
-        List<ConfigMap> processorConfigMaps = configMapList.getItems();
-        for (ConfigMap cm : processorConfigMaps) {
+
+        final CustomResourceDefinition procCRD = container.getOSClient().customResourceDefinitions().withName("processors.streamzi.io").get();
+        if (procCRD == null) {
+            logger.severe("Can't find CRD");
+            return Collections.emptyList();
+        }
+
+        final NonNamespaceOperation<Processor, ProcessorList, DoneableProcessor, Resource<Processor, DoneableProcessor>> processorClient =
+                container.getOSClient().customResources(
+                        procCRD,
+                        Processor.class,
+                        ProcessorList.class,
+                        DoneableProcessor.class)
+                        .inNamespace(container.getOSClient().getNamespace());
+
+        final List<String> results = new ArrayList<>();
+
+        final List<Processor> processors = processorClient.list().getItems();
+        for (Processor proc : processors) {
             try {
-                final String templateYaml = cm.getData().get("template");
-                final ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplate(templateYaml);
+                final ProcessorNodeTemplate template = new ProcessorNodeTemplate(proc);
                 final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
                 results.add(writer.writeToYAMLString());
+
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error reading template from config map: " + e.getMessage());
             }
@@ -100,35 +121,6 @@ public class API {
         return results;
     }
 
-    /**
-     * Upload a definition for a processor node
-     */
-    @POST
-    @Path("/processors")
-    @Consumes("application/json")
-    public void postYaml(final String yamlData) {
-        logger.info(yamlData);
-        try {
-            ProcessorNodeTemplate template = ProcessorTemplateYAMLReader.readTemplate(yamlData);
-            logger.info("Valid template for image: " + template.getImageName());
-            ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
-
-            // Write this to a config map
-            ConfigMap cm = new ConfigMapBuilder()
-                    .withNewMetadata()
-                    .withName(template.getId() + ".cm")
-                    .withNamespace(container.getNamespace())
-                    .addToLabels("streamzi.io/kind", "processor")
-                    .endMetadata()
-                    .addToData("template", writer.writeToYAMLString())
-                    .build();
-            container.getOSClient().configMaps().createOrReplace(cm);
-
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error parsing YAML data: " + e.getMessage(), e);
-        }
-
-    }
 
     /**
      * Upload a new flow to a ConfigMap
@@ -193,19 +185,19 @@ public class API {
             return "{}";
         }
     }
-    
+
     @GET
     @Path("/topics")
     @Produces("application/json")
-    public List<String> listTopics(){
+    public List<String> listTopics() {
         ConfigMapList list = container.getOSClient().configMaps().withLabel("strimzi.io/kind", "topic").list();
-        
+
         ArrayList<String> results = new ArrayList<>();
-        for(ConfigMap cm : list.getItems()){
-            if(cm.getMetadata().getLabels().containsKey("streamzi.io/source")){
+        for (ConfigMap cm : list.getItems()) {
+            if (cm.getMetadata().getLabels().containsKey("streamzi.io/source")) {
                 // This is one of ours - add it if it wasn't autocreated
                 String source = cm.getMetadata().getLabels().get("streamzi.io/source");
-                if(source==null || source.isEmpty() || !source.equalsIgnoreCase("autocreated")){
+                if (source == null || source.isEmpty() || !source.equalsIgnoreCase("autocreated")) {
                     results.add(cm.getMetadata().getName());
                 }
             } else {

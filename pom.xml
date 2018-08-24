@@ -83,18 +83,16 @@
                 <version>${openshift.fabric8.version}</version>
             </dependency>
 
-            <!-- explicit dependency needed as fabric8 client needs newer version than com.openshift restclient. -->
-            <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>${version.okhttp3}</version>
-            </dependency>
-
-
             <dependency>
                 <groupId>io.streamzi</groupId>
                 <artifactId>jcloudevents-api</artifactId>
                 <version>${jcloudevents.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${openshift.fabric8.version}</version>
             </dependency>
 
 
