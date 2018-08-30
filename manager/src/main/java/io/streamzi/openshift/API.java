@@ -11,10 +11,8 @@ import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.crds.*;
-import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
 import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
 
@@ -132,13 +130,7 @@ public class API {
             ObjectMapper mapper = new ObjectMapper();
 
             SerializedFlow serializedFlow = mapper.readValue(flowJson, SerializedFlow.class);
-            ProcessorFlow flow = new ProcessorFlow(serializedFlow);
-
-            if(flow != null){
-                logger.info("Flow Parsed OK");
-            }else{
-                logger.warning("Flow not parsed OK");
-            }
+            logger.info("Flow Parsed OK");
 
             Flow customResource = new Flow();
 
