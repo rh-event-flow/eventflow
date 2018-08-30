@@ -14,7 +14,8 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.9.6</jackson.version>
-        <openshift.fabric8.version>4.0.3</openshift.fabric8.version>
+        <openshift.fabric8.version>4.0.4</openshift.fabric8.version>
+        <k8s.model.version>2.0.4</k8s.model.version>
         <jcloudevents.version>0.0.2</jcloudevents.version>
         <version.okhttp3>3.9.1</version.okhttp3>
     </properties>
@@ -93,6 +94,13 @@
                 <groupId>io.fabric8</groupId>
                 <artifactId>kubernetes-client</artifactId>
                 <version>${openshift.fabric8.version}</version>
+            </dependency>
+
+            <!-- Needed as the transitive dependency brings in a broken version -->
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-model</artifactId>
+                <version>${k8s.model.version}</version>
             </dependency>
 
 

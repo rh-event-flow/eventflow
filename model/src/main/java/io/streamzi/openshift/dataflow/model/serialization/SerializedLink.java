@@ -62,4 +62,15 @@ public class SerializedLink {
     public void setTargetUuid(String targetUuid) {
         this.targetUuid = targetUuid;
     }
+
+    @Override
+    public String toString() {
+        return "SerializedLink{" +
+                "link=" + link +
+                ", sourceUuid='" + sourceUuid + '\'' +
+                ", targetUuid='" + targetUuid + '\'' +
+                ", sourcePortName='" + sourcePortName + '\'' +
+                ", targetPortName='" + targetPortName + '\'' +
+                '}';
+    }
 }

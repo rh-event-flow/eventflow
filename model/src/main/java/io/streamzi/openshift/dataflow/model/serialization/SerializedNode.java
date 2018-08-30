@@ -144,4 +144,20 @@ public class SerializedNode {
     public void setProcessorType(String processorType) {
         this.processorType = processorType;
     }
+
+    @Override
+    public String toString() {
+        return "SerializedNode{" +
+                "node=" + node +
+                ", uuid='" + uuid + '\'' +
+                ", templateName='" + templateName + '\'' +
+                ", templateId='" + templateId + '\'' +
+                ", transport='" + transport + '\'' +
+                ", processorType='" + processorType + '\'' +
+                ", inputs=" + inputs +
+                ", outputs=" + outputs +
+                ", imageName='" + imageName + '\'' +
+                ", settings=" + settings +
+                '}';
+    }
 }
