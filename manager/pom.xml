@@ -107,7 +107,7 @@
                     <images>
                         <image>
                             <alias>manager</alias>
-                            <name>streamzi/cef-manager</name>
+                            <name>docker.io/streamzi/cef-manager</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>
