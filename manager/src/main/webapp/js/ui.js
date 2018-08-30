@@ -231,7 +231,7 @@ function setupTopicBlocksJs(topicList) {
         blockData = {
             name: topicList[i],
             description: "Kafka Topic",
-            family: "TOPICS"
+            family: "Input Topics"
         };
         
         // Fix names and add to the rename map so that we can fix later
@@ -287,7 +287,7 @@ function setupBlocksJs(nodeYamlList) {
         blockData = {
             name: template.name,
             description: template.description,
-            family: "BLOCKS"
+            family: "Processors"
         };
 
         // Keep this for saving
