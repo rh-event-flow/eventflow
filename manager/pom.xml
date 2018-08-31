@@ -14,7 +14,7 @@
 
 
     <properties>
-        <version.wildfly.swarm>2017.9.4</version.wildfly.swarm>
+        <version.thorntail>2.0.0.Final</version.thorntail>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <failOnMissingWebXml>false</failOnMissingWebXml>
@@ -24,9 +24,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.wildfly.swarm</groupId>
+                <groupId>io.thorntail</groupId>
                 <artifactId>bom-all</artifactId>
-                <version>${version.wildfly.swarm}</version>
+                <version>${version.thorntail}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -42,14 +42,14 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- WildFly Swarm Fractions -->
+        <!-- Thorntail Fractions -->
         <dependency>
-            <groupId>org.wildfly.swarm</groupId>
+            <groupId>io.thorntail</groupId>
             <artifactId>microprofile</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.wildfly.swarm</groupId>
+            <groupId>io.thorntail</groupId>
             <artifactId>ejb</artifactId>
         </dependency>
 
@@ -80,9 +80,9 @@
         <finalName>flow-manager</finalName>
         <plugins>
             <plugin>
-                <groupId>org.wildfly.swarm</groupId>
-                <artifactId>wildfly-swarm-plugin</artifactId>
-                <version>${version.wildfly.swarm}</version>
+                <groupId>io.thorntail</groupId>
+                <artifactId>thorntail-maven-plugin</artifactId>
+                <version>${version.thorntail}</version>
 
                 <executions>
                     <execution>
