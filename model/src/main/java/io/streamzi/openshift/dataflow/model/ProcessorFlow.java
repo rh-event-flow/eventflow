@@ -1,16 +1,10 @@
 package io.streamzi.openshift.dataflow.model;
 
-import io.streamzi.openshift.dataflow.model.crds.Flow;
 import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedLink;
 import io.streamzi.openshift.dataflow.model.serialization.SerializedNode;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Contains a connected graph of processor nodes
@@ -29,22 +23,16 @@ public class ProcessorFlow implements Serializable {
 
         this.setName(flow.getName());
         // Add the nodes
-        for(SerializedNode node : flow.getNodes()){
-            this.addProcessorNode(node.createNode());
-        }
+        flow.getNodes().stream()
+                .map(SerializedNode::createNode)
+                .forEach(this::addProcessorNode);
 
         // Connect them together
-        for(SerializedLink link : flow.getLinks()){
-            this.linkNodes(link.getSourceUuid(), link.getSourcePortName(), link.getTargetUuid(), link.getTargetPortName());
-        }
+        flow.getLinks().forEach(link -> this.linkNodes(link.getSourceUuid(), link.getSourcePortName(), link.getTargetUuid(), link.getTargetPortName()));
 
-        for(String key : flow.getSettings().keySet()){
-            this.getSettings().put(key, flow.getSettings().get(key));
-        }
+        flow.getSettings().keySet().forEach(key -> this.getSettings().put(key, flow.getSettings().get(key)));
 
-        for(String key : flow.getGlobalSettings().keySet()){
-            this.getGlobalSettings().put(key, flow.getGlobalSettings().get(key));
-        }
+        flow.getGlobalSettings().keySet().forEach(key -> this.getGlobalSettings().put(key, flow.getGlobalSettings().get(key)));
     }
 
     public String getName() {

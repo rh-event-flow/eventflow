@@ -3,18 +3,11 @@ package io.streamzi.openshift;
 
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import io.streamzi.openshift.dataflow.model.ProcessorFlow;
-import io.streamzi.openshift.dataflow.model.ProcessorLink;
-import io.streamzi.openshift.dataflow.model.ProcessorNode;
-import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
-import io.streamzi.openshift.dataflow.model.ProcessorPort;
+import io.streamzi.openshift.dataflow.model.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * This class deploys a ProcessorFlow as a series of containers and wires them
@@ -38,6 +31,12 @@ public class DeploymentConfigBuilder {
 
     public List<ConfigMap> getTopicMaps() {
         return topicMaps;
+    }
+
+    public Set<String> getTopicMapNames() {
+        return topicMaps.stream()
+                .map(topicMap -> topicMap.getMetadata().getName())
+                .collect(Collectors.toSet());
     }
 
     public List<DeploymentConfig> buildDeploymentConfigs() {

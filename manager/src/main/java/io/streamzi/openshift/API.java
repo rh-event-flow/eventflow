@@ -34,6 +34,9 @@ import java.util.logging.Logger;
 public class API {
     private static final Logger logger = Logger.getLogger(API.class.getName());
 
+    private final ObjectMapper MAPPER = new ObjectMapper();
+
+
     @EJB(beanInterface = ClientContainer.class)
     private ClientContainer container;
 
@@ -127,9 +130,8 @@ public class API {
     public void postFlow(String flowJson) {
         logger.info(flowJson);
         try {
-            ObjectMapper mapper = new ObjectMapper();
 
-            SerializedFlow serializedFlow = mapper.readValue(flowJson, SerializedFlow.class);
+            SerializedFlow serializedFlow = MAPPER.readValue(flowJson, SerializedFlow.class);
             logger.info("Flow Parsed OK");
 
             Flow customResource = new Flow();
@@ -170,9 +172,8 @@ public class API {
             props.put("broker.url", brokerUrlDefault);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.writeValueAsString(props);
+            return MAPPER.writeValueAsString(props);
         } catch (JsonProcessingException e) {
             logger.severe(e.getMessage());
             return "{}";
