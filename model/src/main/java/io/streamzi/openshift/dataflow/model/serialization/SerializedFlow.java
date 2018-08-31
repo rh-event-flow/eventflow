@@ -1,6 +1,9 @@
 package io.streamzi.openshift.dataflow.model.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorLink;
 import io.streamzi.openshift.dataflow.model.ProcessorNode;
@@ -14,14 +17,22 @@ import java.util.Map;
  * Serialized form of flow
  * @author hhiden
  */
-public class SerializedFlow {
+@JsonDeserialize(
+        using = JsonDeserializer.None.class
+)
+public class SerializedFlow implements KubernetesResource {
+
     @JsonIgnore
     private ProcessorFlow flow;
     
     private String name;
+
     private List<SerializedNode> nodes = new ArrayList<>();
+
     private List<SerializedLink> links = new ArrayList<>();
+
     private Map<String, String> settings = new HashMap<>();
+
     private Map<String, String> globalSettings = new HashMap<>();
 
     public SerializedFlow() {
@@ -84,6 +95,20 @@ public class SerializedFlow {
     public void setLinks(List<SerializedLink> links) {
         this.links = links;
     }
-    
-    
+
+    public void setNodes(List<SerializedNode> nodes) {
+        this.nodes = nodes;
+    }
+
+    @Override
+    public String toString() {
+        return "SerializedFlow{" +
+                "flow=" + flow +
+                ", name='" + name + '\'' +
+                ", nodes=" + nodes +
+                ", links=" + links +
+                ", settings=" + settings +
+                ", globalSettings=" + globalSettings +
+                '}';
+    }
 }

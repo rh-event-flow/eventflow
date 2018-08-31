@@ -1,11 +1,10 @@
 package io.streamzi.openshift.dataflow.model;
 
+import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
+import io.streamzi.openshift.dataflow.model.serialization.SerializedNode;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Contains a connected graph of processor nodes
@@ -16,6 +15,25 @@ public class ProcessorFlow implements Serializable {
     private String name;
     private Map<String, String> settings = new HashMap<>();
     private Map<String, String> globalSettings = new HashMap<>();
+
+    public ProcessorFlow() {
+    }
+
+    public ProcessorFlow(SerializedFlow flow){
+
+        this.setName(flow.getName());
+        // Add the nodes
+        flow.getNodes().stream()
+                .map(SerializedNode::createNode)
+                .forEach(this::addProcessorNode);
+
+        // Connect them together
+        flow.getLinks().forEach(link -> this.linkNodes(link.getSourceUuid(), link.getSourcePortName(), link.getTargetUuid(), link.getTargetPortName()));
+
+        flow.getSettings().keySet().forEach(key -> this.getSettings().put(key, flow.getSettings().get(key)));
+
+        flow.getGlobalSettings().keySet().forEach(key -> this.getGlobalSettings().put(key, flow.getGlobalSettings().get(key)));
+    }
 
     public String getName() {
         return name;
@@ -95,4 +113,5 @@ public class ProcessorFlow implements Serializable {
         }
         return null;
     }
+
 }

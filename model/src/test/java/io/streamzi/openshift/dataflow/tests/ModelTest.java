@@ -1,12 +1,16 @@
 package io.streamzi.openshift.dataflow.tests;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
+import io.streamzi.openshift.dataflow.model.crds.Processor;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowWriter;
 import io.streamzi.openshift.dataflow.model.ProcessorInputPort;
 import io.streamzi.openshift.dataflow.model.ProcessorNode;
 import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
 import java.util.logging.Logger;
+
+import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

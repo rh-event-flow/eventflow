@@ -15,8 +15,6 @@ public class Executor {
 
     private static Logger logger;
 
-    private static final String FLOW_PREDICATE = "streamzi.io/kind=flow";
-
     public Executor() {
     }
 
@@ -37,7 +35,7 @@ public class Executor {
 
         logger.info("\uD83C\uDF0A Starting Flow Controller \uD83C\uDF0A");
 
-        final FlowWatcher fw = new FlowWatcher(new FlowController(), FLOW_PREDICATE);
+        final FlowWatcher fw = new FlowWatcher(new FlowController());
 
         final ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.submit(fw);

@@ -4,21 +4,17 @@ package io.streamzi.openshift;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
-import io.streamzi.openshift.dataflow.model.crds.DoneableProcessor;
-import io.streamzi.openshift.dataflow.model.crds.Processor;
-import io.streamzi.openshift.dataflow.model.crds.ProcessorList;
-import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowReader;
-import io.streamzi.openshift.dataflow.model.serialization.ProcessorFlowWriter;
+import io.streamzi.openshift.dataflow.model.crds.*;
 import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
+import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
@@ -37,6 +33,9 @@ import java.util.logging.Logger;
 @Path("/api")
 public class API {
     private static final Logger logger = Logger.getLogger(API.class.getName());
+
+    private final ObjectMapper MAPPER = new ObjectMapper();
+
 
     @EJB(beanInterface = ClientContainer.class)
     private ClientContainer container;
@@ -131,24 +130,20 @@ public class API {
     public void postFlow(String flowJson) {
         logger.info(flowJson);
         try {
-            ProcessorFlowReader reader = new ProcessorFlowReader();
-            ProcessorFlow flow = reader.readFromJsonString(flowJson);
+
+            SerializedFlow serializedFlow = MAPPER.readValue(flowJson, SerializedFlow.class);
             logger.info("Flow Parsed OK");
 
-            // Write this to a ConfigMap
-            ProcessorFlowWriter writer = new ProcessorFlowWriter(flow);
+            Flow customResource = new Flow();
 
-            ConfigMap cm = new ConfigMapBuilder()
-                    .withNewMetadata()
-                    .withName(flow.getName() + ".cm")
-                    .withNamespace(container.getNamespace())
-                    .addToLabels("streamzi.io/kind", "flow")
-                    .addToLabels("app", flow.getName())
-                    .endMetadata()
-                    .addToData("flow", writer.writeToIndentedJsonString())
-                    .build();
+            ObjectMeta metadata = new ObjectMeta();
+            metadata.setName(serializedFlow.getName());
+            customResource.setMetadata(metadata);
+            customResource.setSpec(serializedFlow);
 
-            container.getOSClient().configMaps().createOrReplace(cm);
+            final CustomResourceDefinition flowCRD = container.getOSClient().customResourceDefinitions().withName("flows.streamzi.io").get();
+
+            container.getOSClient().customResources(flowCRD, Flow.class, FlowList.class, DoneableFlow.class).inNamespace(container.getNamespace()).createOrReplace(customResource);
 
             logger.info("Flow written OK");
 
@@ -177,9 +172,8 @@ public class API {
             props.put("broker.url", brokerUrlDefault);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.writeValueAsString(props);
+            return MAPPER.writeValueAsString(props);
         } catch (JsonProcessingException e) {
             logger.severe(e.getMessage());
             return "{}";
