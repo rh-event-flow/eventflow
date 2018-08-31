@@ -46,11 +46,13 @@
         <dependency>
             <groupId>io.thorntail</groupId>
             <artifactId>microprofile</artifactId>
+            <version>${version.thorntail}</version>
         </dependency>
 
         <dependency>
             <groupId>io.thorntail</groupId>
             <artifactId>ejb</artifactId>
+            <version>${version.thorntail}</version>
         </dependency>
 
         <dependency>
