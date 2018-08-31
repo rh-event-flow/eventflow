@@ -29,7 +29,7 @@ Install the Manager and Watcher components by running `mvn clean package fabric8
 The Manager contains the UI and API to support it - the API will create a ConfigMap containing the abstract flow in OpenShift. 
 The Watcher will be notified of the presence of the flow `ConfigMap` and will deploy the necessary components (DeploymentConfigs and ConfigMaps).
 
-The Manager can be run outside OpenShift using `mvn clean package wildfly-swarm:run`.
+The Manager can be run outside OpenShift using `mvn clean package thorntail:start`.
 The Watcher can be run outside OpenShift using `mvn clean package; java -jar target/FlowController.jar`.
 
 4. Register the CustomResourceDefinition for the Stream Processors
