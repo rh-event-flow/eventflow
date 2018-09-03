@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.streamzi.cloudevent-flow</groupId>
         <artifactId>parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1</version>
     </parent>
     <name>cloudevent-flow-watcher</name>
     <artifactId>watcher</artifactId>
