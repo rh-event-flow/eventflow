@@ -3,10 +3,31 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>27</version>
+    </parent>
+
     <groupId>io.streamzi</groupId>
     <artifactId>cloudevent-flow</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <scm>
+        <connection>scm:git:git://github.com/project-streamzi/cloudevent-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:project-streamzi/cloudevent-flow.git</developerConnection>
+        <url>https://github.com/project-streamzi/cloudevent-flow</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
