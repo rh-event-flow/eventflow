@@ -55,8 +55,10 @@ public class ProcessorNode extends ProcessorObject implements ProcessorConstants
      * What type of processor is this
      */
     private ProcessorType processorType = ProcessorType.DEPLOYABLE_IMAGE;
-    
+
     private String transport;
+
+    private String displayName;
 
     public ProcessorNode() {
     }
@@ -159,4 +161,11 @@ public class ProcessorNode extends ProcessorObject implements ProcessorConstants
         this.processorType = processorType;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 }

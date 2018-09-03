@@ -48,7 +48,7 @@ public class DeploymentConfigBuilder {
 
             if(node.getProcessorType()==ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE){
                 // Only create deployments for deployable image nodes
-                final String dcName = flow.getName() + "-" + node.getImageName().replace("/", "-") + "-" + node.getUuid().substring(0,6);
+                final String dcName = flow.getName() + "-" + sanitisePodName(node.getDisplayName()) + "-" + node.getUuid().substring(0, 6);
                 final Container container = populateNodeDeployments(node);
 
                 final DeploymentConfig dc = new io.fabric8.openshift.api.model.DeploymentConfigBuilder()
@@ -119,36 +119,11 @@ public class DeploymentConfigBuilder {
             topicName = flow.getName() + "-" + node.getUuid() + "-" + output.getName();
             envVars.add(new EnvVar(sanitiseEnvVar(output.getName()), topicName, null));
         }
-        /*
-        for (ProcessorLink link : flow.getLinks()) {
-            sourceNode = link.getSource().getParent();
-            targetNode = link.getTarget().getParent();
-            
-            if(node.getProcessorType()==ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE){
-                // This will be a topic that has been created for the processor
-                topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
-            } else {
-                // This is a pre-existing topic
-                topicName = link.getSource().getName();
-            }
-
-            // Set the topic name in the source node container
-            if (node.getUuid().equals(link.getSource().getParent().getUuid())) {
-                envVars.add(new EnvVar(sanitiseEnvVar(link.getSource().getName()), topicName, null));
-            }
-
-            // Set the topic name in the target node container
-            if (node.getUuid().equals(link.getTarget().getParent().getUuid())) {
-                envVars.add(new EnvVar(sanitiseEnvVar(link.getTarget().getName()), topicName, null));
-            }
-
-        }
-        */
-
 
         return new ContainerBuilder()
                 .withName(node.getParent().getName())
                 .withImage(registryAddress + "/" + node.getImageName())
+                .withImagePullPolicy("IfNotPresent")
                 .withEnv(envVars)
                 .build();
     }
@@ -200,5 +175,12 @@ public class DeploymentConfigBuilder {
                 .replace("-", "_")
                 .replace(".", "_")
                 .toUpperCase();
+    }
+
+    private String sanitisePodName(String source) {
+        return source
+                .replace(" ", "-")
+                .replace("/", "-")
+                .toLowerCase();
     }
 }

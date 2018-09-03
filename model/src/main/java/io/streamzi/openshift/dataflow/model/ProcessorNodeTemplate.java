@@ -14,6 +14,7 @@ import java.util.Map;
 public class ProcessorNodeTemplate {
     private String id = "processor";
     private String name = "Unnamed Processor";
+    private String displayName = "Display Name";
     private String description = "A processor node";
     private String transport = "kafka";
     private List<String> inputs = new ArrayList<>();
@@ -28,6 +29,7 @@ public class ProcessorNodeTemplate {
     public ProcessorNodeTemplate(Processor crd){
         this.setId(crd.getMetadata().getName());
         this.setName(crd.getSpec().getDisplayName());
+        this.setDisplayName(crd.getSpec().getDisplayName());
         this.setDescription(crd.getSpec().getDescription());
         this.setTransport("kafka");
         this.setInputs(crd.getSpec().getInputs());
@@ -51,6 +53,14 @@ public class ProcessorNodeTemplate {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getImageName() {
@@ -122,6 +132,8 @@ public class ProcessorNodeTemplate {
         
         node.setImageName(imageName);
         node.setSettings(settings);
+        node.setDisplayName(displayName);
+
         if(inputs!=null){
             for(String input : inputs){
                 node.addInput(new ProcessorInputPort(input));

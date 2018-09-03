@@ -246,6 +246,7 @@ function exportJson(flowName) {
             }
 
             processorJson = {
+                displayName: block._template.displayName,
                 imageName: block._template.imageName,
                 templateId: block._template.id,
                 templateName: block._template.name,
@@ -383,6 +384,7 @@ function setupTopicBlocksJs(topicList) {
 
         // Dummy template
         templateMap[topicList[i]] = {
+            displayName: "",
             imageName: "none",
             templateId: "none",
             templateName: topicList[i],
