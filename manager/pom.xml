@@ -46,13 +46,23 @@
         <dependency>
             <groupId>io.thorntail</groupId>
             <artifactId>microprofile</artifactId>
-            <version>${version.thorntail}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.wildfly.swarm</groupId>
+                    <artifactId>config-api-runtime</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>io.thorntail</groupId>
             <artifactId>ejb</artifactId>
-            <version>${version.thorntail}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.wildfly.swarm</groupId>
+                    <artifactId>config-api-runtime</artifactId>
+                </exclusion>
+            </exclusions>            
         </dependency>
 
         <dependency>
