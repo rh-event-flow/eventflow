@@ -77,7 +77,6 @@ public class API {
     @Path("/dataflows")
     @Produces("application/json")
     public List<String> listFlows() {
-        
         final CustomResourceDefinition flowCRD = container.getOSClient().customResourceDefinitions().withName("flows.streamzi.io").get();
         if (flowCRD == null) {
             logger.severe("Can't find Flow CRD");
@@ -92,15 +91,6 @@ public class API {
                 .inNamespace(container.getOSClient().getNamespace()).list().getItems().stream()
                 .map(flow -> flow.getMetadata().getName())
                 .collect(Collectors.toList());
-    }
-    
-    @GET
-    @Path("/dataflows/{name}")
-    @Produces("application/json")
-    public String getFlow(@PathParam("name")String flowName){
-        ConfigMap map = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withName(flowName).get();
-        String flowJson = map.getData().get("flow");
-        return flowJson;
     }
 
     @GET
