@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.crds.*;
@@ -25,6 +22,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author hhiden
@@ -47,40 +45,53 @@ public class API {
     @Path("/pods")
     @Produces("application/json")
     public List<String> listPods() {
-        List<Pod> pods = container.getOSClient().pods().inNamespace(container.getNamespace()).list().getItems();
-        List<String> results = new ArrayList<>();
-        for (Pod p : pods) {
-            results.add(p.getMetadata().getName());
-        }
-        return results;
+        return container.getOSClient().pods().inNamespace(container.getNamespace()).list()
+                .getItems()
+                .stream()
+                .map(pod -> pod.getMetadata().getName())
+                .collect(Collectors.toList());
     }
 
     @GET
     @Path("/dataflows/{name}")
     @Produces("application/json")
-    public String getProcessorFlowDeployment(@PathParam("name") String name) {
-        ConfigMap map = container.getOSClient().configMaps().withName(name).get();
-        if (map != null) {
-            return map.getData().get("flow");
-        } else {
+    public String getProcessorFlowDeployment(@PathParam("name") String name) throws Exception {
+
+        final CustomResourceDefinition flowCRD = container.getOSClient().customResourceDefinitions().withName("flows.streamzi.io").get();
+        if (flowCRD == null) {
+            logger.severe("Can't find Flow CRD");
             return "";
         }
+
+        return MAPPER.writeValueAsString(container.getOSClient().customResources(
+                flowCRD,
+                Flow.class,
+                FlowList.class,
+                DoneableFlow.class)
+                .inNamespace(container.getOSClient().getNamespace())
+                .withName(name).get());
+
     }
 
     @GET
     @Path("/dataflows")
     @Produces("application/json")
     public List<String> listFlows() {
-        List<String> results = new ArrayList<>();
-
-        // Find all of the config maps with the streamzi/kind flow labels
-        ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "flow").list();
-
-        for (ConfigMap cm : configMapList.getItems()) {
-            results.add(cm.getMetadata().getLabels().get("app"));
+        
+        final CustomResourceDefinition flowCRD = container.getOSClient().customResourceDefinitions().withName("flows.streamzi.io").get();
+        if (flowCRD == null) {
+            logger.severe("Can't find Flow CRD");
+            return Collections.emptyList();
         }
 
-        return results;
+        return container.getOSClient().customResources(
+                flowCRD,
+                Flow.class,
+                FlowList.class,
+                DoneableFlow.class)
+                .inNamespace(container.getOSClient().getNamespace()).list().getItems().stream()
+                .map(flow -> flow.getMetadata().getName())
+                .collect(Collectors.toList());
     }
     
     @GET
@@ -97,41 +108,37 @@ public class API {
     @Produces("application/json")
     public List<String> listProcessors() {
 
-
         final CustomResourceDefinition procCRD = container.getOSClient().customResourceDefinitions().withName("processors.streamzi.io").get();
         if (procCRD == null) {
             logger.severe("Can't find CRD");
             return Collections.emptyList();
         }
 
-        final NonNamespaceOperation<Processor, ProcessorList, DoneableProcessor, Resource<Processor, DoneableProcessor>> processorClient =
-                container.getOSClient().customResources(
-                        procCRD,
-                        Processor.class,
-                        ProcessorList.class,
-                        DoneableProcessor.class)
-                        .inNamespace(container.getOSClient().getNamespace());
+        return container.getOSClient().customResources(
+                procCRD,
+                Processor.class,
+                ProcessorList.class,
+                DoneableProcessor.class)
+                .inNamespace(container.getOSClient().getNamespace())
+                .list().getItems()
+                .stream()
+                .map(proc -> {
+                    final ProcessorNodeTemplate template = new ProcessorNodeTemplate(proc);
+                    final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
+                    try {
+                        return writer.writeToYAMLString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return "";
+                    }
 
-        final List<String> results = new ArrayList<>();
-
-        final List<Processor> processors = processorClient.list().getItems();
-        for (Processor proc : processors) {
-            try {
-                final ProcessorNodeTemplate template = new ProcessorNodeTemplate(proc);
-                final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
-                results.add(writer.writeToYAMLString());
-
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Error reading template from config map: " + e.getMessage());
-            }
-        }
-
-        return results;
+                })
+                .collect(Collectors.toList());
     }
 
 
     /**
-     * Upload a new flow to a ConfigMap
+     * Upload a new Custom Resource
      */
     @POST
     @Path("/flows")
@@ -189,6 +196,7 @@ public class API {
         }
     }
 
+    //todo: Have these been replaced by CRs in Strimzi?
     @GET
     @Path("/topics")
     @Produces("application/json")
