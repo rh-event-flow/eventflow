@@ -77,10 +77,19 @@ public class API {
         ConfigMapList configMapList = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withLabel("streamzi.io/kind", "flow").list();
 
         for (ConfigMap cm : configMapList.getItems()) {
-            results.add(cm.getMetadata().getName());
+            results.add(cm.getMetadata().getLabels().get("app"));
         }
 
         return results;
+    }
+    
+    @GET
+    @Path("/dataflows/{name}")
+    @Produces("application/json")
+    public String getFlow(@PathParam("name")String flowName){
+        ConfigMap map = container.getOSClient().configMaps().inNamespace(container.getNamespace()).withName(flowName).get();
+        String flowJson = map.getData().get("flow");
+        return flowJson;
     }
 
     @GET

@@ -4,9 +4,70 @@ var templateMap = {};
 var renameMap = {};
 var defaults = {};
 
+// Add a method to get a block by uuid
+blocks.connectorCounter = 0;
+blocks.getBlockByUUID = function(uuid){
+    var block;
+    for(var i=0;i<this.blocks.length;i++){
+        block = this.blocks[i];
+        if(block._uuid && block._uuid===uuid){
+            return block;   
+        }
+    }
+    return null;
+};
+
+blocks.linkBlocks = function(sourceBlock, sourceOutput, targetBlock, targetInput){
+    if(sourceBlock.outputExists(sourceOutput) && targetBlock.inputExists(targetInput)){
+        console.log("Can link");
+        var id = this.edgeId++;
+        var connectorA = new Connector(sourceOutput, "output");
+        var connectorB = new Connector(targetInput, "input");
+        var edge = new Edge(id, sourceBlock, connectorA, targetBlock, connectorB, this);
+        edge.create();
+        var edgeIndex = this.edges.push(edge)-1;
+        this.redraw();
+    }
+    /*
+    var data = scene.edges[k];
+    var edge = EdgeImport(self, data);
+
+    self.edgeId = Math.max(self.edgeId, edge.id+1);
+
+    edge.create();
+    self.edges.push(edge);   
+    */
+   
+   
+    /*
+    return new Edge(data.id, block1, ConnectorImport(data.connector1), 
+                             block2, ConnectorImport(data.connector2), blocks);
+             
+     */
+};
+
+Block.prototype.inputExists = function(name){
+    var id = name + "_input";
+    for(var i=0 ;i<this.connectors.length;i++){
+        if(this.connectors[i]===id){
+            return true;
+        }
+    }
+    return false;    
+}
+// Find a connector in a block
+Block.prototype.outputExists = function(name){
+    var id = name + "_output";
+    for(var i=0 ;i<this.connectors.length;i++){
+        if(this.connectors[i]===id){
+            return true;
+        }
+    }
+    return false;
+};
 
 // Override the addBlock method to add some more stuff
-blocks.addBlock = function (name, x, y) {
+blocks.addBlock = function (name, x, y, nodeData) {
     console.log("Add blocks:" + name);
 
     for (var k in this.metas) {
@@ -17,6 +78,21 @@ blocks.addBlock = function (name, x, y) {
             block.x = x;
             block.y = y;
             block._uuid = guid();
+            
+            // Add settings if there are any
+
+            if(nodeData){
+                var settings = nodeData.settings;
+                block._uuid = nodeData.uuid;
+                var fields = block.fields.fields;
+                for(var j=0;j<fields.length;j++){
+                    if(settings[fields[j].name]){
+                        fields[j].value = settings[fields[j].name];
+                        console.log(fields[j].name);
+                    }
+                }                
+            }
+            
             block.create(this.div.find('.blocks'));
 
             // Keep the template with the block so that we can get data
@@ -28,18 +104,22 @@ blocks.addBlock = function (name, x, y) {
             this.history.save();
             this.blocks.push(block);
             this.id++;
+            return block;
         }
     }
 };
+
 
 (function () {
     function include(file) {
         $('head').append('<script type="text/javascript" src="demo/' + file + '"></script>');
     }
-
+    
     fetchNodeYaml(function (data) {
         setupBlocksJs(data);
         blocks.run('#blocks');
+        
+
     });
 
     fetchTopicList(function (data) {
@@ -61,6 +141,11 @@ blocks.addBlock = function (name, x, y) {
             exportJson();
         }, 'export');
 
+        if(_flowName){
+            fetchFlowJson(_flowName, function(result){
+                importJson(result);
+            })
+        };
     });
 
 
@@ -71,6 +156,48 @@ blocks.addBlock = function (name, x, y) {
     blocks.types.addCompatibility('bool', 'string');
 
 })();
+
+function fetchFlowJson(flowName, callback) {
+    var promise = $.ajax({
+        url: "rest/api/dataflows/" + flowName,
+        type: 'GET',
+        dataType: "json",
+        contentType: "application/json; charset=utf-8"
+    }).then(function (data) {
+        callback(data);
+    });
+}
+
+function importJson(drawingData){
+    // Global settings
+    
+    // Create the blocks
+    var nodeData;
+    var block;
+    var settings;
+    var fields;
+    
+    for(var i=0;i<drawingData.nodes.length;i++){
+        nodeData = drawingData.nodes[i];
+        block = blocks.addBlock(nodeData.templateName, 100, 100, nodeData);
+        console.log("Template: " + nodeData.templateName);
+    }
+    
+    // Connect everything together
+    var link;
+    var source;
+    var target;
+    for(var i=0;i<drawingData.links.length;i++){
+        link = drawingData.links[i];
+        source = blocks.getBlockByUUID(link.sourceUuid);
+        target = blocks.getBlockByUUID(link.targetUuid);
+        if(source && target){
+            console.log("Linking:" + source._uuid + " to " + target._uuid);
+            blocks.linkBlocks(source, link.sourcePortName, target, link.targetPortName);
+        }
+    }
+    console.log("Imported data");
+}
 
 function exportJson(flowName) {
     var data = blocks.export();
@@ -159,16 +286,16 @@ function exportJson(flowName) {
         if (serializedConnector1[1] === "output" && serializedConnector2[1] === "input") {
             // 1 is the output, 2 is the input
             sourceUuid = block1._uuid;
-            
-            if(renameMap[serializedConnector1[0]]){
+
+            if (renameMap[serializedConnector1[0]]) {
                 sourcePort = renameMap[serializedConnector1[0]];
             } else {
                 sourcePort = serializedConnector1[0];
             }
-            
+
             targetUuid = block2._uuid;
-            
-            if(renameMap[serializedConnector2[0]]){
+
+            if (renameMap[serializedConnector2[0]]) {
                 targetPort = renameMap[serializedConnector2[0]];
             } else {
                 targetPort = serializedConnector2[0];
@@ -176,16 +303,16 @@ function exportJson(flowName) {
 
         } else if (serializedConnector1[1] === "input" && serializedConnector2[1] === "output") {
             sourceUuid = block2._uuid;
-            
-            if(renameMap[serializedConnector2[0]]){
+
+            if (renameMap[serializedConnector2[0]]) {
                 sourcePort = renameMap[serializedConnector2[0]];
             } else {
                 sourcePort = serializedConnector2[0];
             }
-            
+
             targetUuid = block1._uuid;
-            
-            if(renameMap[serializedConnector1[0]]){
+
+            if (renameMap[serializedConnector1[0]]) {
                 targetPort = renameMap[serializedConnector1[0]];
             } else {
                 targetPort = serializedConnector1[0];
@@ -225,7 +352,7 @@ function setupTopicBlocksJs(topicList) {
     var blockData;
     var fields;
     var outputName;
-    
+
     for (var i = 0; i < topicList.length; i++) {
         fields = new Array();
         blockData = {
@@ -233,12 +360,12 @@ function setupTopicBlocksJs(topicList) {
             description: "Kafka Topic",
             family: "Input Topics"
         };
-        
+
         // Fix names and add to the rename map so that we can fix later
         //outputName = replaceall(topicList[i], ".", "-");
         outputName = sanitize(topicList[i]);
         renameMap[outputName] = topicList[i];
-        
+
         fields.push({
             name: outputName,
             type: "string",
@@ -399,7 +526,7 @@ function guid() {
 
 }
 
-function sanitize(str){
+function sanitize(str) {
     str = replaceall(str, "_", "-");
     str = replaceall(str, ".", "-");
     return str;
