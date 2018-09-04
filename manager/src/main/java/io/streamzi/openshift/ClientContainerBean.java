@@ -90,7 +90,7 @@ public class ClientContainerBean implements ClientContainer {
     }
 
     @Override
-    public OpenShiftClient getOsClient(String name) {
+    public OpenShiftClient getOSClient(String name) {
         return apiClients.get(name);
     }
 }

@@ -19,5 +19,5 @@ public interface ClientContainer {
 
     Set<String> getOSClientNames();
 
-    OpenShiftClient getOsClient(String name);
+    OpenShiftClient getOSClient(String name);
 }

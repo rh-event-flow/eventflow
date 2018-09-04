@@ -2,8 +2,6 @@ package io.streamzi.openshift;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
 import io.streamzi.openshift.dataflow.model.crds.DoneableFlow;
@@ -57,11 +55,9 @@ public class FlowWatcher implements Watcher<Flow>, Runnable {
     public void run() {
         logger.info("Starting FlowWatcher");
 
-        final KubernetesClient client = new DefaultKubernetesClient();
+        final CustomResourceDefinition flowCRD = ClientCache.getClient().customResourceDefinitions().withName("flows.streamzi.io").get();
 
-        final CustomResourceDefinition flowCRD = client.customResourceDefinitions().withName("flows.streamzi.io").get();
-
-        client.customResources(flowCRD, Flow.class, FlowList.class, DoneableFlow.class).inNamespace(client.getNamespace()).watch(this);
+        ClientCache.getClient().customResources(flowCRD, Flow.class, FlowList.class, DoneableFlow.class).inNamespace(ClientCache.getClient().getNamespace()).watch(this);
     }
 
     @Override

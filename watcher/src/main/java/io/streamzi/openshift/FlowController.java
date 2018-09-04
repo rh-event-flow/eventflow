@@ -5,8 +5,6 @@ import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.openshift.api.model.DeploymentConfig;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftClient;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
 import io.streamzi.openshift.dataflow.model.crds.DoneableFlow;
 import io.streamzi.openshift.dataflow.model.crds.Flow;
@@ -24,10 +22,8 @@ public class FlowController {
 
     private static Logger logger = Logger.getLogger(FlowController.class.getName());
 
-    private OpenShiftClient osClient;
-
     public FlowController() {
-        osClient = new DefaultOpenShiftClient();
+
     }
 
     public void onAdded(Flow flow) {
@@ -50,7 +46,7 @@ public class FlowController {
             logger.info("Flow Parsed OK");
 
             // Now try and build a deployment
-            final DeploymentConfigBuilder deployer = new DeploymentConfigBuilder(osClient.getNamespace(), flow);
+            final DeploymentConfigBuilder deployer = new DeploymentConfigBuilder(ClientCache.getClient().getNamespace(), flow);
             final List<DeploymentConfig> deploymentConfigs = deployer.buildDeploymentConfigs();
 
             for (DeploymentConfig dc : deploymentConfigs) {
@@ -59,7 +55,7 @@ public class FlowController {
                     logger.info("Creating ConfigMap: " + map.getMetadata().getName());
                     logger.info(map.toString());
 
-                    osClient.configMaps().inNamespace(map.getMetadata().getNamespace()).withName(map.getMetadata().getName()).createOrReplace(map);
+                    ClientCache.getClient().configMaps().inNamespace(map.getMetadata().getNamespace()).withName(map.getMetadata().getName()).createOrReplace(map);
                 }
 
                 dc.getSpec().getTemplate().getSpec().getContainers()
@@ -90,11 +86,11 @@ public class FlowController {
                             //add these CMs to the flow so that we can check if they're still needed
                             deployer.getTopicMaps().add(cm);
 
-                            osClient.configMaps().inNamespace(namespace).withName(cmName).createOrReplace(cm);
+                            ClientCache.getClient().configMaps().inNamespace(namespace).withName(cmName).createOrReplace(cm);
 
                             logger.info("Creating deployment: " + dc.getMetadata().getName());
                             logger.info(dc.toString());
-                            osClient.deploymentConfigs().inNamespace(dc.getMetadata().getNamespace()).createOrReplace(dc);
+                            ClientCache.getClient().deploymentConfigs().inNamespace(dc.getMetadata().getNamespace()).createOrReplace(dc);
                         });
             }
 
@@ -103,28 +99,28 @@ public class FlowController {
                     .map(dc -> dc.getMetadata().getName())
                     .collect(Collectors.toSet());
 
-            osClient.deploymentConfigs().inNamespace(osClient.getNamespace()).withLabel("app", flow.getName())
+            ClientCache.getClient().deploymentConfigs().inNamespace(ClientCache.getClient().getNamespace()).withLabel("app", flow.getName())
                     .list()
                     .getItems()
                     .stream()
                     .filter(existingDC -> !newDeploymentConfigNames.contains(existingDC.getMetadata().getName()))
-                    .forEach(existingDC -> osClient.deploymentConfigs().inNamespace(osClient.getNamespace()).withName(existingDC.getMetadata().getName()).delete());
+                    .forEach(existingDC -> ClientCache.getClient().deploymentConfigs().inNamespace(ClientCache.getClient().getNamespace()).withName(existingDC.getMetadata().getName()).delete());
 
 
             //remove the CMs that are no longer required.
-            osClient.configMaps().inNamespace(osClient.getNamespace()).withLabel("app", flow.getName())
+            ClientCache.getClient().configMaps().inNamespace(ClientCache.getClient().getNamespace()).withLabel("app", flow.getName())
                     .list()
                     .getItems()
                     .stream()
                     .filter(existing -> !(existing.getMetadata().getLabels().containsKey("streamzi.io/kind") && existing.getMetadata().getLabels().get("streamzi.io/kind").equals("flow")))
                     .filter(existing -> !deployer.getTopicMapNames().contains(existing.getMetadata().getName()))
-                    .forEach(deleted -> osClient.configMaps().inNamespace(osClient.getNamespace()).withName(deleted.getMetadata().getName()).delete());
+                    .forEach(deleted -> ClientCache.getClient().configMaps().inNamespace(ClientCache.getClient().getNamespace()).withName(deleted.getMetadata().getName()).delete());
 
             //remove the flow CM if the flow is empty
             if (flow.getNodes().isEmpty() && flow.getLinks().isEmpty()) {
                 //remove the flow
-                final CustomResourceDefinition flowCRD = osClient.customResourceDefinitions().withName("flows.streamzi.io").get();
-                osClient.customResources(flowCRD, Flow.class, FlowList.class, DoneableFlow.class).inNamespace(osClient.getNamespace()).delete(customResource);
+                final CustomResourceDefinition flowCRD = ClientCache.getClient().customResourceDefinitions().withName("flows.streamzi.io").get();
+                ClientCache.getClient().customResources(flowCRD, Flow.class, FlowList.class, DoneableFlow.class).inNamespace(ClientCache.getClient().getNamespace()).delete(customResource);
             }
 
         } catch (Exception e) {
@@ -140,17 +136,17 @@ public class FlowController {
 
             //todo: is this safe and/or the best way to do it. Other apps *could* be deleted.
             //remove DCs that are no longer required.
-            List<DeploymentConfig> existingDCs = osClient.deploymentConfigs().inNamespace(osClient.getNamespace()).withLabel("app", flow.getName()).list().getItems();
+            List<DeploymentConfig> existingDCs = ClientCache.getClient().deploymentConfigs().inNamespace(ClientCache.getClient().getNamespace()).withLabel("app", flow.getName()).list().getItems();
 
-            existingDCs.forEach(existingDC -> osClient.deploymentConfigs().inNamespace(osClient.getNamespace()).withName(existingDC.getMetadata().getName()).delete());
+            existingDCs.forEach(existingDC -> ClientCache.getClient().deploymentConfigs().inNamespace(ClientCache.getClient().getNamespace()).withName(existingDC.getMetadata().getName()).delete());
 
             //todo: work out why the Strimzi topic CMs aren't being deleted - they get recreated even after the containers have gone away
-            List<ConfigMap> existingCMs = osClient.configMaps().inNamespace(osClient.getNamespace()).withLabel("app", flow.getName()).list().getItems();
-            existingCMs.forEach(existing -> osClient.configMaps().inNamespace(osClient.getNamespace()).withName(existing.getMetadata().getName()).delete());
+            List<ConfigMap> existingCMs = ClientCache.getClient().configMaps().inNamespace(ClientCache.getClient().getNamespace()).withLabel("app", flow.getName()).list().getItems();
+            existingCMs.forEach(existing -> ClientCache.getClient().configMaps().inNamespace(ClientCache.getClient().getNamespace()).withName(existing.getMetadata().getName()).delete());
 
             //remove the flow
-            final CustomResourceDefinition flowCRD = osClient.customResourceDefinitions().withName("flows.streamzi.io").get();
-            osClient.customResources(flowCRD, Flow.class, FlowList.class, DoneableFlow.class).inNamespace(osClient.getNamespace()).delete(customResource);
+            final CustomResourceDefinition flowCRD = ClientCache.getClient().customResourceDefinitions().withName("flows.streamzi.io").get();
+            ClientCache.getClient().customResources(flowCRD, Flow.class, FlowList.class, DoneableFlow.class).inNamespace(ClientCache.getClient().getNamespace()).delete(customResource);
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error parsing JSON flow data: " + e.getMessage(), e);

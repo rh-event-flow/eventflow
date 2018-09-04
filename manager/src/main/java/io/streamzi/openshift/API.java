@@ -16,10 +16,7 @@ import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -224,7 +221,35 @@ public class API {
                 CloudList.class,
                 DoneableCloud.class)
                 .inNamespace(container.getOSClient().getNamespace())
-                .list().getItems()));
+                .list().getItems())
+                .stream().peek(cloud -> cloud.getSpec().setToken(null))
+                .collect(Collectors.toList())
+        );
+    }
+
+    @GET
+    @Path("/clouds/names")
+    @Produces("application/json")
+    public String getCloudNames() throws Exception {
+
+        final CustomResourceDefinition cloudCRD = container.getOSClient().customResourceDefinitions().withName("clouds.streamzi.io").get();
+        if (cloudCRD == null) {
+            logger.severe("Can't find Cloud CRD");
+            return "[\"local\"]";
+        }
+
+        Set<String> cloudNames = container.getOSClient().customResources(
+                cloudCRD,
+                Cloud.class,
+                CloudList.class,
+                DoneableCloud.class)
+                .inNamespace(container.getOSClient().getNamespace())
+                .list().getItems()
+                .stream().map(cloud -> cloud.getMetadata().getName())
+                .collect(Collectors.toSet());
+
+        cloudNames.add("local");
+        return MAPPER.writeValueAsString(cloudNames);
     }
 
     @GET
@@ -238,14 +263,21 @@ public class API {
             return "";
         }
 
-        return MAPPER.writeValueAsString(container.getOSClient().customResources(
+        Cloud cloud = container.getOSClient().customResources(
                 cloudCRD,
                 Cloud.class,
                 CloudList.class,
                 DoneableCloud.class)
                 .inNamespace(container.getOSClient().getNamespace())
                 .withName(name)
-                .get());
+                .get();
+
+        if (cloud != null) {
+            cloud.getSpec().setToken(null);
+            return MAPPER.writeValueAsString(cloud);
+        } else {
+            return "{}";
+        }
     }
 
 }
