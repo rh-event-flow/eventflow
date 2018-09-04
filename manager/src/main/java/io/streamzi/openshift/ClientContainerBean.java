@@ -1,11 +1,19 @@
 package io.streamzi.openshift;
 
+import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
+import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.streamzi.openshift.dataflow.model.crds.Cloud;
+import io.streamzi.openshift.dataflow.model.crds.CloudList;
+import io.streamzi.openshift.dataflow.model.crds.DoneableCloud;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 
@@ -18,16 +26,47 @@ import java.util.logging.Logger;
 public class ClientContainerBean implements ClientContainer {
 
     private static final Logger logger = Logger.getLogger(ClientContainerBean.class.getName());
-    private OpenShiftClient osClient;
+    private final Map<String, OpenShiftClient> apiClients = new HashMap<>();
 
     @PostConstruct
     public void init() {
 
         logger.info("Starting ClientContainer");
 
-        osClient = new DefaultOpenShiftClient();
-        logger.info("URL:" + osClient.getOpenshiftUrl().toString());
-        logger.info("Namespace: " + osClient.getNamespace());
+        //Get the local OpenShift Client
+        OpenShiftClient osClient = new DefaultOpenShiftClient();
+        logger.info("Local OpenShift URL: " + osClient.getOpenshiftUrl().toString());
+        logger.info("Local OpenShift Namespace: " + osClient.getNamespace());
+        apiClients.put("local", osClient);
+
+        //Get any other OpenShift Clients
+        final CustomResourceDefinition cloudCRD = osClient.customResourceDefinitions().withName("clouds.streamzi.io").get();
+        if (cloudCRD == null) {
+            logger.info("Can't find Cloud CRDs - Local OpenShift only");
+            return;
+        }
+
+        osClient.customResources(
+                cloudCRD,
+                Cloud.class,
+                CloudList.class,
+                DoneableCloud.class)
+                .inNamespace(osClient.getNamespace())
+                .list()
+                .getItems()
+                .stream()
+                .filter(cloud -> !cloud.getMetadata().getName().equals("local"))
+                .forEach(cloud -> {
+                    ConfigBuilder configBuilder = new ConfigBuilder();
+                    configBuilder.withMasterUrl("https://" + cloud.getSpec().getHostname() + ":" + cloud.getSpec().getPort());
+                    configBuilder.withOauthToken(cloud.getSpec().getToken());
+
+                    OpenShiftClient client = new DefaultOpenShiftClient(configBuilder.build());
+                    apiClients.put(cloud.getMetadata().getName(), client);
+
+                    logger.info("Remote OpenShift URL (" + cloud.getMetadata().getName() + ": " + client.getOpenshiftUrl().toString());
+                    logger.info("Remote OpenShift Namespace(" + cloud.getMetadata().getName() + ": " + client.getNamespace());
+                });
     }
 
     @PreDestroy
@@ -42,6 +81,16 @@ public class ClientContainerBean implements ClientContainer {
 
     @Override
     public OpenShiftClient getOSClient() {
-        return osClient;
+        return apiClients.get("local");
+    }
+
+    @Override
+    public Set<String> getOSClientNames() {
+        return apiClients.keySet();
+    }
+
+    @Override
+    public OpenShiftClient getOsClient(String name) {
+        return apiClients.get(name);
     }
 }

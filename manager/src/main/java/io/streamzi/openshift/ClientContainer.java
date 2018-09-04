@@ -4,6 +4,7 @@ package io.streamzi.openshift;
 import io.fabric8.openshift.client.OpenShiftClient;
 
 import javax.ejb.Local;
+import java.util.Set;
 
 /**
  * Methods for accessing the openshift client, looking up storage dirs etc.
@@ -12,6 +13,11 @@ import javax.ejb.Local;
  */
 @Local
 public interface ClientContainer {
-    public String getNamespace();
-    public OpenShiftClient getOSClient();
+    String getNamespace();
+
+    OpenShiftClient getOSClient();
+
+    Set<String> getOSClientNames();
+
+    OpenShiftClient getOsClient(String name);
 }
