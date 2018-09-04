@@ -34,10 +34,10 @@ public class API {
 
     private final ObjectMapper MAPPER = new ObjectMapper();
 
-
     @EJB(beanInterface = ClientContainer.class)
     private ClientContainer container;
 
+    /* Global settings that each block gets */
     private final String bootstrapServersDefault = "my-cluster-kafka:9092";
     private final String brokerUrlDefault = "amqp://dispatch.myproject.svc:5672";
 
@@ -70,7 +70,6 @@ public class API {
                 DoneableFlow.class)
                 .inNamespace(container.getOSClient().getNamespace())
                 .withName(name).get());
-
     }
 
     @GET
@@ -207,4 +206,46 @@ public class API {
         }
         return results;
     }
+
+    @GET
+    @Path("/clouds")
+    @Produces("application/json")
+    public String getClouds() throws Exception {
+
+        final CustomResourceDefinition cloudCRD = container.getOSClient().customResourceDefinitions().withName("clouds.streamzi.io").get();
+        if (cloudCRD == null) {
+            logger.severe("Can't find Cloud CRD");
+            return "[]";
+        }
+
+        return MAPPER.writeValueAsString(new ArrayList<>(container.getOSClient().customResources(
+                cloudCRD,
+                Cloud.class,
+                CloudList.class,
+                DoneableCloud.class)
+                .inNamespace(container.getOSClient().getNamespace())
+                .list().getItems()));
+    }
+
+    @GET
+    @Path("/clouds/{name}")
+    @Produces("application/json")
+    public String getCloud(@PathParam("name") String name) throws Exception {
+
+        final CustomResourceDefinition cloudCRD = container.getOSClient().customResourceDefinitions().withName("clouds.streamzi.io").get();
+        if (cloudCRD == null) {
+            logger.severe("Can't find Cloud CRD");
+            return "";
+        }
+
+        return MAPPER.writeValueAsString(container.getOSClient().customResources(
+                cloudCRD,
+                Cloud.class,
+                CloudList.class,
+                DoneableCloud.class)
+                .inNamespace(container.getOSClient().getNamespace())
+                .withName(name)
+                .get());
+    }
+
 }
