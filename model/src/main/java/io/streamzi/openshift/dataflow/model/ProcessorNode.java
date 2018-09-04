@@ -51,6 +51,11 @@ public class ProcessorNode extends ProcessorObject implements ProcessorConstants
      */
     private ProcessorFlow parent;
 
+    /** 
+     * Deployment locations
+     */
+    private Map<String, Integer> targetClouds = new HashMap<>();
+    
     /**
      * What type of processor is this
      */
@@ -167,5 +172,13 @@ public class ProcessorNode extends ProcessorObject implements ProcessorConstants
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public Map<String, Integer> getTargetClouds() {
+        return targetClouds;
+    }
+
+    public void setTargetClouds(Map<String, Integer> targetClouds) {
+        this.targetClouds = targetClouds;
     }
 }

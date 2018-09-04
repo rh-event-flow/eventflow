@@ -3,6 +3,7 @@ blocks.scale = 1.4;
 var templateMap = {};
 var renameMap = {};
 var defaults = {};
+var clouds = new Array();
 
 // Add a method to get a block by uuid
 blocks.connectorCounter = 0;
@@ -28,22 +29,6 @@ blocks.linkBlocks = function(sourceBlock, sourceOutput, targetBlock, targetInput
         var edgeIndex = this.edges.push(edge)-1;
         this.redraw();
     }
-    /*
-    var data = scene.edges[k];
-    var edge = EdgeImport(self, data);
-
-    self.edgeId = Math.max(self.edgeId, edge.id+1);
-
-    edge.create();
-    self.edges.push(edge);   
-    */
-   
-   
-    /*
-    return new Edge(data.id, block1, ConnectorImport(data.connector1), 
-                             block2, ConnectorImport(data.connector2), blocks);
-             
-     */
 };
 
 Block.prototype.inputExists = function(name){
@@ -54,7 +39,8 @@ Block.prototype.inputExists = function(name){
         }
     }
     return false;    
-}
+};
+
 // Find a connector in a block
 Block.prototype.outputExists = function(name){
     var id = name + "_output";
@@ -115,11 +101,15 @@ blocks.addBlock = function (name, x, y, nodeData) {
         $('head').append('<script type="text/javascript" src="demo/' + file + '"></script>');
     }
     
+    fetchClouds(function(data){
+        for(var i=0;i<data.length;i++){
+            clouds.push(data[i]);
+        }        
+    });
+    
     fetchNodeYaml(function (data) {
         setupBlocksJs(data);
         blocks.run('#blocks');
-        
-
     });
 
     fetchTopicList(function (data) {
@@ -476,6 +466,29 @@ function setupBlocksJs(nodeYamlList) {
             }
         }
 
+        // ADD DEPLOYMENT DATA
+        var cloudName;
+        for(var j=0;j<clouds.length;j++){
+            cloudName = clouds[j];
+            if(cloudName==="local"){
+                // Default is 1-local
+                fields.push({
+                    name: "deployment_" + cloudName,
+                    defaultValue: 1,
+                    type: "integer",
+                    attrs: " editable"
+                });
+            } else {
+                // Nothing for anywhere else
+                fields.push({
+                    name: "deployment_" + cloudName,
+                    defaultValue: 0,
+                    type: "integer",
+                    attrs: " editable"
+                });                
+            }
+        }
+        
         blockData.fields = fields;
         console.log(JSON.stringify(blockData));
         blocks.register(blockData);
@@ -504,6 +517,17 @@ function fetchNodeYaml(callback) {
     }).then(function (data) {
         callback(data);
     });
+}
+
+function fetchClouds(callback){
+    var promise = $.ajax({
+        url: "rest/api/clouds/names",
+        type: 'GET',
+        dataType: "json",
+        contentType: "application/json; charset=utf-8"
+    }).then(function (data) {
+        callback(data);
+    });    
 }
 
 function fetchDefaults(callback) {
