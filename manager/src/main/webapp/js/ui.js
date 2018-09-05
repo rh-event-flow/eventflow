@@ -168,8 +168,9 @@ function fetchFlowJson(flowName, callback) {
     });
 }
 
-function importJson(drawingData){
-    // Global settings
+function importJson(customResource) {
+
+    var drawingData = customResource.spec;
     
     // Create the blocks
     var nodeData;

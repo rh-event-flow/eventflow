@@ -51,7 +51,7 @@
 
 <script type="text/javascript">
     <%if(request.getParameter("flow")!=null){%>
-        var _flowName = "<%=request.getParameter("flow")%>.cm";
+    var _flowName = "<%=request.getParameter("flow")%>";
         document.getElementById("deploymentName").value = "<%=request.getParameter("flow")%>";
     <%} else {%>
         var _flowName = null;
