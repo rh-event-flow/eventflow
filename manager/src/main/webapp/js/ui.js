@@ -473,7 +473,7 @@ function setupBlocksJs(nodeYamlList) {
             if(cloudName==="local"){
                 // Default is 1-local
                 fields.push({
-                    name: "deployment_" + cloudName,
+                    name: "replicas_" + cloudName,
                     defaultValue: 1,
                     type: "integer",
                     attrs: " editable"
@@ -481,7 +481,7 @@ function setupBlocksJs(nodeYamlList) {
             } else {
                 // Nothing for anywhere else
                 fields.push({
-                    name: "deployment_" + cloudName,
+                    name: "replicas_" + cloudName,
                     defaultValue: 0,
                     type: "integer",
                     attrs: " editable"
