@@ -77,6 +77,22 @@ blocks.addBlock = function (name, x, y, nodeData) {
                         console.log(fields[j].name);
                     }
                 }                
+                
+                // Add the replicas to the replicas field
+                if(nodeData.targetClouds){
+                    var fieldName;
+                    
+                    var keys = Object.keys(nodeData.targetClouds);
+                    for(var i=0;i<keys.length;i++){
+                        fieldName = "replicas_" + keys[i];
+                        var fields = block.fields.fields;
+                        for(var j=0;j<fields.length;j++){
+                            if(fieldName===fields[j].name){
+                                fields[j].value = nodeData.targetClouds[keys[i]];
+                            }
+                        }
+                    }
+                }
             }
             
             block.create(this.div.find('.blocks'));
@@ -198,8 +214,10 @@ function exportJson(flowName) {
     var processorJson;
     var inputsArray;
     var outputsArray;
+    var replicas;
     var settings;
     var block;
+    var cloudName;
     var serializedBlock;
 
     for (var i = 0; i < data.blocks.length; i++) {
@@ -208,6 +226,7 @@ function exportJson(flowName) {
         if (block && block._template) {
             inputsArray = new Array();
             outputsArray = new Array();
+            replicas = {};
             settings = {};
 
             if (block._template.inputs) {
@@ -223,15 +242,29 @@ function exportJson(flowName) {
             }
 
             //todo: this will only copy default values
+            var field;
+            var attrs;            
             if (block._template.settings && block.fields.fields) {
-                var field;
-                var attrs;
                 for (var j = 0; j < block.fields.fields.length; j++) {
+                    // Standard property
                     field = block.fields.fields[j];
-                    attrs = field.attrs;
-                    if (attrs && attrs.editable) {
-                        // This can go in the settings
-                        settings[field.name] = field.value;
+                    if(!field.name.startsWith("replicas_")){
+                        attrs = field.attrs;
+                        if (attrs && attrs.editable) {
+                            // This can go in the settings
+                            settings[field.name] = field.value;
+                        }
+                    }
+                }
+            }
+            
+            // Find the replicas data
+            if(block.fields.fields){
+                for(var j=0;j<block.fields.fields.length;j++){
+                    field = block.fields.fields[j];
+                    if(field.name.startsWith("replicas_")){
+                        cloudName = field.name.substring(9);
+                        replicas[cloudName] = field.value;                    
                     }
                 }
             }
@@ -246,7 +279,8 @@ function exportJson(flowName) {
                 uuid: block._uuid,
                 settings: settings,
                 inputs: inputsArray,
-                outputs: outputsArray
+                outputs: outputsArray,
+                targetClouds: replicas
             };
 
             processorArray.push(processorJson);
