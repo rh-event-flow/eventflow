@@ -434,7 +434,10 @@ function setupBlocksJs(nodeYamlList) {
     var outputName;
 
     for (var i = 0; i < nodeYamlList.length; i++) {
-        template = YAML.parse(nodeYamlList[i]);
+
+        template = nodeYamlList[i].spec;
+        template.name = template.displayName;
+        template.id = nodeYamlList[i].metadata.name;
         template.deployable = true;
 
         fields = new Array();

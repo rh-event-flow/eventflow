@@ -7,11 +7,9 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
+import io.streamzi.openshift.dataflow.crds.*;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
-import io.streamzi.openshift.dataflow.model.crds.*;
-import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
+import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
@@ -92,34 +90,21 @@ public class API {
     @GET
     @Path("/processors")
     @Produces("application/json")
-    public List<String> listProcessors() {
+    public String listProcessors() throws Exception {
 
         final CustomResourceDefinition procCRD = container.getOSClient().customResourceDefinitions().withName("processors.streamzi.io").get();
         if (procCRD == null) {
             logger.severe("Can't find CRD");
-            return Collections.emptyList();
+            return "[]";
         }
 
-        return container.getOSClient().customResources(
+        return MAPPER.writeValueAsString(container.getOSClient().customResources(
                 procCRD,
                 Processor.class,
                 ProcessorList.class,
                 DoneableProcessor.class)
                 .inNamespace(container.getOSClient().getNamespace())
-                .list().getItems()
-                .stream()
-                .map(proc -> {
-                    final ProcessorNodeTemplate template = new ProcessorNodeTemplate(proc);
-                    final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
-                    try {
-                        return writer.writeToYAMLString();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return "";
-                    }
-
-                })
-                .collect(Collectors.toList());
+                .list().getItems());
     }
 
 
@@ -136,8 +121,13 @@ public class API {
             SerializedFlow serializedFlow = MAPPER.readValue(flowJson, SerializedFlow.class);
             logger.info("Flow Parsed OK");
 
-            Flow customResource = new Flow();
+            serializedFlow.setName(serializedFlow.getName()
+                    .toLowerCase()
+                    .replace("_", "-")
+                    .replace(" ", "-")
+            );
 
+            Flow customResource = new Flow();
             ObjectMeta metadata = new ObjectMeta();
             metadata.setName(serializedFlow.getName());
             customResource.setMetadata(metadata);

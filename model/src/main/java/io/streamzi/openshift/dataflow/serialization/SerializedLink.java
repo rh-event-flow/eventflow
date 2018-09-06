@@ -1,4 +1,4 @@
-package io.streamzi.openshift.dataflow.model.serialization;
+package io.streamzi.openshift.dataflow.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.streamzi.openshift.dataflow.model.ProcessorLink;

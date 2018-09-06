@@ -1,0 +1,44 @@
+{
+  "nodes": [
+    {
+      "displayName": "Random Source",
+      "imageName": "streamziprocessors/cef-ops-random-data",
+      "templateId": "random-data-source",
+      "templateName": "Random Source",
+      "processorType": "DEPLOYABLE_IMAGE",
+      "uuid": "9e392e21-02a3-ddb7-cfc7-19da16b7b854",
+      "settings": {},
+      "inputs": [],
+      "outputs": [
+        "output-data"
+      ]
+    },
+    {
+      "displayName": "Log Data",
+      "imageName": "streamziprocessors/cef-ops-log-data",
+      "templateId": "log-data",
+      "templateName": "Log Data",
+      "processorType": "DEPLOYABLE_IMAGE",
+      "uuid": "42bff701-9b97-ca40-d33d-03a332133e84",
+      "settings": {},
+      "inputs": [
+        "input-data"
+      ],
+      "outputs": []
+    }
+  ],
+  "links": [
+    {
+      "sourceUuid": "9e392e21-02a3-ddb7-cfc7-19da16b7b854",
+      "targetUuid": "42bff701-9b97-ca40-d33d-03a332133e84",
+      "sourcePortName": "output-data",
+      "targetPortName": "input-data"
+    }
+  ],
+  "settings": {},
+  "globalSettings": {
+    "STREAMZI_KAFKA_BOOTSTRAP_SERVER": "my-cluster-kafka:9092",
+    "broker.url": "amqp://dispatch.myproject.svc:5672"
+  },
+  "name": "flow17"
+}

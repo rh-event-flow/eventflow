@@ -1,8 +1,11 @@
-package io.streamzi.openshift.dataflow.model.crds;
+package io.streamzi.openshift.dataflow.serialization;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
+import io.streamzi.openshift.dataflow.model.ProcessorInputPort;
+import io.streamzi.openshift.dataflow.model.ProcessorNode;
+import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +13,7 @@ import java.util.Map;
 @JsonDeserialize(
         using = JsonDeserializer.None.class
 )
-public class ProcessorSpec implements KubernetesResource {
+public class SerializedTemplate implements KubernetesResource {
 
     private String displayName;
 
@@ -23,11 +26,11 @@ public class ProcessorSpec implements KubernetesResource {
     private List<String> outputs;
 
     private Map<String, String> settings;
-    
+
     @Override
     public String toString() {
-        return "ProcessorSpec{" +
-                "displayName='" + displayName + '\'' +
+        return "SerializedTemplate{" +
+                ", displayName='" + displayName + '\'' +
                 ", description='" + description + '\'' +
                 ", imageName='" + imageName + '\'' +
                 ", inputs=" + inputs +
@@ -82,5 +85,26 @@ public class ProcessorSpec implements KubernetesResource {
 
     public void setSettings(Map<String, String> settings) {
         this.settings = settings;
+    }
+
+    public ProcessorNode createProcessorNode() {
+        ProcessorNode node = new ProcessorNode();
+
+        node.setImageName(imageName);
+        node.setSettings(settings);
+        node.setDisplayName(displayName);
+
+        if (inputs != null) {
+            for (String input : inputs) {
+                node.addInput(new ProcessorInputPort(input));
+            }
+        }
+
+        if (outputs != null) {
+            for (String output : outputs) {
+                node.addOutput(new ProcessorOutputPort(output));
+            }
+        }
+        return node;
     }
 }

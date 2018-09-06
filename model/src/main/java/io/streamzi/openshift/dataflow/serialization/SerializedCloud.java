@@ -1,4 +1,4 @@
-package io.streamzi.openshift.dataflow.model.crds;
+package io.streamzi.openshift.dataflow.serialization;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -7,7 +7,7 @@ import io.fabric8.kubernetes.api.model.KubernetesResource;
 @JsonDeserialize(
         using = JsonDeserializer.None.class
 )
-public class CloudSpec implements KubernetesResource {
+public class SerializedCloud implements KubernetesResource {
 
     private String description;
 
@@ -20,7 +20,7 @@ public class CloudSpec implements KubernetesResource {
 
     @Override
     public String toString() {
-        return "CloudSpec{" +
+        return "SerializedCloud{" +
                 "description='" + description + '\'' +
                 ", hostname='" + hostname + '\'' +
                 ", port=" + port +

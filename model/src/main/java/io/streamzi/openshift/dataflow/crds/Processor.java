@@ -1,26 +1,26 @@
-package io.streamzi.openshift.dataflow.model.crds;
+package io.streamzi.openshift.dataflow.crds;
 
 import io.fabric8.kubernetes.client.CustomResource;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
+import io.streamzi.openshift.dataflow.serialization.SerializedTemplate;
 
-public class Flow extends CustomResource {
+public class Processor extends CustomResource {
 
-    private SerializedFlow spec;
+    private SerializedTemplate spec;
 
     @Override
     public String toString() {
-        return "Flow{" +
+        return "Processor{" +
                 "apiVersion='" + getApiVersion() + '\'' +
                 ", metadata=" + getMetadata() +
                 ", spec=" + spec +
                 '}';
     }
 
-    public SerializedFlow getSpec() {
+    public SerializedTemplate getSpec() {
         return spec;
     }
 
-    public void setSpec(SerializedFlow spec) {
+    public void setSpec(SerializedTemplate spec) {
         this.spec = spec;
     }
 }
