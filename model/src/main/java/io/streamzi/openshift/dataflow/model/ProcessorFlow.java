@@ -1,7 +1,7 @@
 package io.streamzi.openshift.dataflow.model;
 
-import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedNode;
+import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
+import io.streamzi.openshift.dataflow.serialization.SerializedNode;
 
 import java.io.Serializable;
 import java.util.*;

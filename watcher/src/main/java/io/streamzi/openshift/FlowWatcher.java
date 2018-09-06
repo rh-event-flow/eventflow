@@ -4,9 +4,9 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
-import io.streamzi.openshift.dataflow.model.crds.DoneableFlow;
-import io.streamzi.openshift.dataflow.model.crds.Flow;
-import io.streamzi.openshift.dataflow.model.crds.FlowList;
+import io.streamzi.openshift.dataflow.crds.DoneableFlow;
+import io.streamzi.openshift.dataflow.crds.Flow;
+import io.streamzi.openshift.dataflow.crds.FlowList;
 
 import java.util.logging.Logger;
 

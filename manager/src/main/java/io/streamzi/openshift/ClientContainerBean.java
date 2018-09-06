@@ -4,9 +4,9 @@ import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
-import io.streamzi.openshift.dataflow.model.crds.Cloud;
-import io.streamzi.openshift.dataflow.model.crds.CloudList;
-import io.streamzi.openshift.dataflow.model.crds.DoneableCloud;
+import io.streamzi.openshift.dataflow.crds.Cloud;
+import io.streamzi.openshift.dataflow.crds.CloudList;
+import io.streamzi.openshift.dataflow.crds.DoneableCloud;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

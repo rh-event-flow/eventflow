@@ -8,8 +8,8 @@ import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import io.streamzi.openshift.dataflow.model.crds.*;
-import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
+import io.streamzi.openshift.dataflow.crds.*;
+import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;

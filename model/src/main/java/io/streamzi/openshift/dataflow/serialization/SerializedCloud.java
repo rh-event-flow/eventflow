@@ -1,4 +1,4 @@
-package io.streamzi.openshift.dataflow.model.serialization;
+package io.streamzi.openshift.dataflow.serialization;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
