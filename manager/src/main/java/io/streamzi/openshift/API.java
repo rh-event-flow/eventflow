@@ -7,8 +7,8 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
-import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.crds.*;
+import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
 
 import javax.ejb.EJB;
@@ -121,8 +121,13 @@ public class API {
             SerializedFlow serializedFlow = MAPPER.readValue(flowJson, SerializedFlow.class);
             logger.info("Flow Parsed OK");
 
-            Flow customResource = new Flow();
+            serializedFlow.setName(serializedFlow.getName()
+                    .toLowerCase()
+                    .replace("_", "-")
+                    .replace(" ", "-")
+            );
 
+            Flow customResource = new Flow();
             ObjectMeta metadata = new ObjectMeta();
             metadata.setName(serializedFlow.getName());
             customResource.setMetadata(metadata);
