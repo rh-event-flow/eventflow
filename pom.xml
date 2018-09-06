@@ -38,6 +38,7 @@
         <k8s.model.version>2.0.4</k8s.model.version>
         <jcloudevents.version>0.0.2</jcloudevents.version>
         <version.okhttp3>3.9.1</version.okhttp3>
+        <version.assertj>3.10.0</version.assertj>
     </properties>
 
     <modules>

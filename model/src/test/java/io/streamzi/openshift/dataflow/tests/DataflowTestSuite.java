@@ -13,8 +13,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ModelTest.class,
-    FunctioningFlowTest.class
+        ModelTest.class
 })
 public class DataflowTestSuite {
 

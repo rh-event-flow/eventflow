@@ -1,8 +1,0 @@
----
-name: "Log Data"
-description: "Prints data to console"
-inputs:
-- "input-data"
-outputs:
-imageName: "cef-ops-log-data"
-settings: {}
