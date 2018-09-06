@@ -28,6 +28,9 @@ public class SerializedNode {
     private String processorType;
     private List<String> inputs = new ArrayList<>();
     private List<String> outputs = new ArrayList<>();
+    private Map<String, Integer> targetClouds = new HashMap<>();
+    
+    
     private String imageName;
     private Map<String, String> settings = new HashMap<>();
 
@@ -55,6 +58,10 @@ public class SerializedNode {
         for (ProcessorInputPort input : node.getInputs().values()) {
             this.inputs.add(input.getName());
         }
+        
+        for(String id: node.getTargetClouds().keySet()){
+            this.targetClouds.put(id, node.getTargetClouds().get(id));
+        }
     }
 
     public ProcessorNode createNode() {
@@ -73,6 +80,9 @@ public class SerializedNode {
         }
         for (String output : outputs) {
             node.addOutput(new ProcessorOutputPort(output));
+        }
+        for (String id : targetClouds.keySet()){
+            node.getTargetClouds().put(id, targetClouds.get(id));
         }
 
         return node;
@@ -156,6 +166,14 @@ public class SerializedNode {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public Map<String, Integer> getTargetClouds() {
+        return targetClouds;
+    }
+
+    public void setTargetClouds(Map<String, Integer> targetClouds) {
+        this.targetClouds = targetClouds;
     }
 
     @Override

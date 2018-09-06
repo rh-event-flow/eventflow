@@ -23,7 +23,7 @@ public class ProcessorSpec implements KubernetesResource {
     private List<String> outputs;
 
     private Map<String, String> settings;
-
+    
     @Override
     public String toString() {
         return "ProcessorSpec{" +

@@ -3,6 +3,7 @@ blocks.scale = 1.4;
 var templateMap = {};
 var renameMap = {};
 var defaults = {};
+var clouds = new Array();
 
 // Add a method to get a block by uuid
 blocks.connectorCounter = 0;
@@ -28,22 +29,6 @@ blocks.linkBlocks = function(sourceBlock, sourceOutput, targetBlock, targetInput
         var edgeIndex = this.edges.push(edge)-1;
         this.redraw();
     }
-    /*
-    var data = scene.edges[k];
-    var edge = EdgeImport(self, data);
-
-    self.edgeId = Math.max(self.edgeId, edge.id+1);
-
-    edge.create();
-    self.edges.push(edge);   
-    */
-   
-   
-    /*
-    return new Edge(data.id, block1, ConnectorImport(data.connector1), 
-                             block2, ConnectorImport(data.connector2), blocks);
-             
-     */
 };
 
 Block.prototype.inputExists = function(name){
@@ -54,7 +39,8 @@ Block.prototype.inputExists = function(name){
         }
     }
     return false;    
-}
+};
+
 // Find a connector in a block
 Block.prototype.outputExists = function(name){
     var id = name + "_output";
@@ -91,6 +77,22 @@ blocks.addBlock = function (name, x, y, nodeData) {
                         console.log(fields[j].name);
                     }
                 }                
+                
+                // Add the replicas to the replicas field
+                if(nodeData.targetClouds){
+                    var fieldName;
+                    
+                    var keys = Object.keys(nodeData.targetClouds);
+                    for(var i=0;i<keys.length;i++){
+                        fieldName = "replicas_" + keys[i];
+                        var fields = block.fields.fields;
+                        for(var j=0;j<fields.length;j++){
+                            if(fieldName===fields[j].name){
+                                fields[j].value = nodeData.targetClouds[keys[i]];
+                            }
+                        }
+                    }
+                }
             }
             
             block.create(this.div.find('.blocks'));
@@ -115,11 +117,15 @@ blocks.addBlock = function (name, x, y, nodeData) {
         $('head').append('<script type="text/javascript" src="demo/' + file + '"></script>');
     }
     
+    fetchClouds(function(data){
+        for(var i=0;i<data.length;i++){
+            clouds.push(data[i]);
+        }        
+    });
+    
     fetchNodeYaml(function (data) {
         setupBlocksJs(data);
         blocks.run('#blocks');
-        
-
     });
 
     fetchTopicList(function (data) {
@@ -208,8 +214,10 @@ function exportJson(flowName) {
     var processorJson;
     var inputsArray;
     var outputsArray;
+    var replicas;
     var settings;
     var block;
+    var cloudName;
     var serializedBlock;
 
     for (var i = 0; i < data.blocks.length; i++) {
@@ -218,6 +226,7 @@ function exportJson(flowName) {
         if (block && block._template) {
             inputsArray = new Array();
             outputsArray = new Array();
+            replicas = {};
             settings = {};
 
             if (block._template.inputs) {
@@ -233,15 +242,29 @@ function exportJson(flowName) {
             }
 
             //todo: this will only copy default values
+            var field;
+            var attrs;            
             if (block._template.settings && block.fields.fields) {
-                var field;
-                var attrs;
                 for (var j = 0; j < block.fields.fields.length; j++) {
+                    // Standard property
                     field = block.fields.fields[j];
-                    attrs = field.attrs;
-                    if (attrs && attrs.editable) {
-                        // This can go in the settings
-                        settings[field.name] = field.value;
+                    if(!field.name.startsWith("replicas_")){
+                        attrs = field.attrs;
+                        if (attrs && attrs.editable) {
+                            // This can go in the settings
+                            settings[field.name] = field.value;
+                        }
+                    }
+                }
+            }
+            
+            // Find the replicas data
+            if(block.fields.fields){
+                for(var j=0;j<block.fields.fields.length;j++){
+                    field = block.fields.fields[j];
+                    if(field.name.startsWith("replicas_")){
+                        cloudName = field.name.substring(9);
+                        replicas[cloudName] = field.value;                    
                     }
                 }
             }
@@ -256,7 +279,8 @@ function exportJson(flowName) {
                 uuid: block._uuid,
                 settings: settings,
                 inputs: inputsArray,
-                outputs: outputsArray
+                outputs: outputsArray,
+                targetClouds: replicas
             };
 
             processorArray.push(processorJson);
@@ -476,6 +500,29 @@ function setupBlocksJs(nodeYamlList) {
             }
         }
 
+        // ADD DEPLOYMENT DATA
+        var cloudName;
+        for(var j=0;j<clouds.length;j++){
+            cloudName = clouds[j];
+            if(cloudName==="local"){
+                // Default is 1-local
+                fields.push({
+                    name: "replicas_" + cloudName,
+                    defaultValue: 1,
+                    type: "integer",
+                    attrs: " editable"
+                });
+            } else {
+                // Nothing for anywhere else
+                fields.push({
+                    name: "replicas_" + cloudName,
+                    defaultValue: 0,
+                    type: "integer",
+                    attrs: " editable"
+                });                
+            }
+        }
+        
         blockData.fields = fields;
         console.log(JSON.stringify(blockData));
         blocks.register(blockData);
@@ -504,6 +551,17 @@ function fetchNodeYaml(callback) {
     }).then(function (data) {
         callback(data);
     });
+}
+
+function fetchClouds(callback){
+    var promise = $.ajax({
+        url: "rest/api/clouds/names",
+        type: 'GET',
+        dataType: "json",
+        contentType: "application/json; charset=utf-8"
+    }).then(function (data) {
+        callback(data);
+    });    
 }
 
 function fetchDefaults(callback) {
