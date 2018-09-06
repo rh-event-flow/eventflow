@@ -1,10 +1,11 @@
 package io.streamzi.openshift.dataflow.model.crds;
 
 import io.fabric8.kubernetes.client.CustomResource;
+import io.streamzi.openshift.dataflow.model.serialization.SerializedTemplate;
 
 public class Processor extends CustomResource {
 
-    private ProcessorSpec spec;
+    private SerializedTemplate spec;
 
     @Override
     public String toString() {
@@ -15,11 +16,11 @@ public class Processor extends CustomResource {
                 '}';
     }
 
-    public ProcessorSpec getSpec() {
+    public SerializedTemplate getSpec() {
         return spec;
     }
 
-    public void setSpec(ProcessorSpec spec) {
+    public void setSpec(SerializedTemplate spec) {
         this.spec = spec;
     }
 }

@@ -8,9 +8,7 @@ import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import io.streamzi.openshift.dataflow.model.ProcessorNodeTemplate;
 import io.streamzi.openshift.dataflow.model.crds.*;
-import io.streamzi.openshift.dataflow.model.serialization.ProcessorTemplateYAMLWriter;
 import io.streamzi.openshift.dataflow.model.serialization.SerializedFlow;
 
 import javax.ejb.EJB;
@@ -92,34 +90,21 @@ public class API {
     @GET
     @Path("/processors")
     @Produces("application/json")
-    public List<String> listProcessors() {
+    public String listProcessors() throws Exception {
 
         final CustomResourceDefinition procCRD = container.getOSClient().customResourceDefinitions().withName("processors.streamzi.io").get();
         if (procCRD == null) {
             logger.severe("Can't find CRD");
-            return Collections.emptyList();
+            return "[]";
         }
 
-        return container.getOSClient().customResources(
+        return MAPPER.writeValueAsString(container.getOSClient().customResources(
                 procCRD,
                 Processor.class,
                 ProcessorList.class,
                 DoneableProcessor.class)
                 .inNamespace(container.getOSClient().getNamespace())
-                .list().getItems()
-                .stream()
-                .map(proc -> {
-                    final ProcessorNodeTemplate template = new ProcessorNodeTemplate(proc);
-                    final ProcessorTemplateYAMLWriter writer = new ProcessorTemplateYAMLWriter(template);
-                    try {
-                        return writer.writeToYAMLString();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return "";
-                    }
-
-                })
-                .collect(Collectors.toList());
+                .list().getItems());
     }
 
 

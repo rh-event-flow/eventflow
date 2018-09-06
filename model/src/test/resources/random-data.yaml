@@ -1,5 +1,4 @@
 ---
-id: random-data-source
 name: "Random Source"
 description: "Generates random data"
 inputs:

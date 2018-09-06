@@ -14,7 +14,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ModelTest.class,
-    YAMLTest.class,
     FunctioningFlowTest.class
 })
 public class DataflowTestSuite {
