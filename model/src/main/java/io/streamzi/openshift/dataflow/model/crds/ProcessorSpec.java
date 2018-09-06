@@ -23,8 +23,6 @@ public class ProcessorSpec implements KubernetesResource {
     private List<String> outputs;
 
     private Map<String, String> settings;
-
-    private Map<String, Integer> targetClouds;
     
     @Override
     public String toString() {
@@ -84,13 +82,5 @@ public class ProcessorSpec implements KubernetesResource {
 
     public void setSettings(Map<String, String> settings) {
         this.settings = settings;
-    }
-
-    public Map<String, Integer> getTargetClouds() {
-        return targetClouds;
-    }
-
-    public void setTargetClouds(Map<String, Integer> targetClouds) {
-        this.targetClouds = targetClouds;
     }
 }
