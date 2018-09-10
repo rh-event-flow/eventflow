@@ -4,19 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.util.logging.Logger;
-
 import io.streamzi.cloudevents.CloudEvent;
 import io.streamzi.openshift.dataflow.container.CloudEventOutput;
 import io.streamzi.openshift.dataflow.container.config.EnvironmentResolver;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import java.util.Properties;
-import java.util.logging.Level;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Cloud event output that sends data to Kafka
@@ -47,7 +47,7 @@ public class KafkaCloudEventOutputImpl extends CloudEventOutput {
         if(connected){
             try {
                 String json = mapper.writeValueAsString(event);
-                final ProducerRecord<String,String> record = new ProducerRecord(topicName, event.getEventType(), json);
+                final ProducerRecord<String, String> record = new ProducerRecord(topicName, event.getEventID(), json);
                 producer.send(record);
             } catch (Exception e){
                 logger.log(Level.SEVERE, "Error sending event to Kafka: " + e.getMessage(), e);
