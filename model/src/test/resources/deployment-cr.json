@@ -1,0 +1,75 @@
+{
+  "nodes": [
+    {
+      "displayName": "Random Source",
+      "imageName": "streamziprocessors/cef-ops-random-data",
+      "templateId": "random-data-source",
+      "templateName": "Random Source",
+      "processorType": "DEPLOYABLE_IMAGE",
+      "uuid": "node-1",
+      "targetClouds": {
+        "local": 1
+      },
+      "settings": {},
+      "inputs": [],
+      "outputs": [
+        "output-data"
+      ]
+    },
+    {
+      "displayName": "Filter Data",
+      "imageName": "streamziprocessors/cef-ops-filter-data",
+      "templateId": "log-data",
+      "templateName": "Log Data",
+      "processorType": "DEPLOYABLE_IMAGE",
+      "uuid": "node-2",
+      "targetClouds": {
+        "local": 1,
+        "azure": 2
+      },
+      "settings": {},
+      "inputs": [
+        "input-data"
+      ],
+      "outputs": [
+        "output-data"
+      ]
+    },    
+    {
+      "displayName": "Log Data",
+      "imageName": "streamziprocessors/cef-ops-log-data",
+      "templateId": "log-data",
+      "templateName": "Log Data",
+      "processorType": "DEPLOYABLE_IMAGE",
+      "uuid": "node-3",
+      "targetClouds": {
+        "local": 1
+      },            
+      "settings": {},
+      "inputs": [
+        "input-data"
+      ],
+      "outputs": []
+    }
+  ],
+  "links": [
+    {
+      "sourceUuid": "node-1",
+      "targetUuid": "node-2",
+      "sourcePortName": "output-data",
+      "targetPortName": "input-data"
+    },
+    {
+      "sourceUuid": "node-2",
+      "targetUuid": "node-3",
+      "sourcePortName": "output-data",
+      "targetPortName": "input-data"        
+    }
+  ],
+  "settings": {},
+  "globalSettings": {
+    "STREAMZI_KAFKA_BOOTSTRAP_SERVER": "my-cluster-kafka:9092",
+    "broker.url": "amqp://dispatch.myproject.svc:5672"
+  },
+  "name": "partition-flow"
+}
