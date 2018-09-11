@@ -23,7 +23,7 @@ public class ClientCache {
         OpenShiftClient osClient = new DefaultOpenShiftClient();
         logger.info("Local OpenShift URL: " + osClient.getOpenshiftUrl().toString());
         logger.info("Local OpenShift Namespace: " + osClient.getNamespace());
-        apiClients.put("local", osClient);
+        apiClients.put("default", osClient);
 
         //Get any other OpenShift Clients
         final CustomResourceDefinition cloudCRD = osClient.customResourceDefinitions().withName("clouds.streamzi.io").get();
@@ -38,24 +38,23 @@ public class ClientCache {
                     .inNamespace(osClient.getNamespace())
                     .list()
                     .getItems()
-                    .stream()
-                    .filter(cloud -> !cloud.getMetadata().getName().equals("local"))
                     .forEach(cloud -> {
                         ConfigBuilder configBuilder = new ConfigBuilder();
                         configBuilder.withMasterUrl("https://" + cloud.getSpec().getHostname() + ":" + cloud.getSpec().getPort());
                         configBuilder.withOauthToken(cloud.getSpec().getToken());
+                        configBuilder.withNamespace(cloud.getSpec().getNamespace());
 
                         OpenShiftClient client = new DefaultOpenShiftClient(configBuilder.build());
                         apiClients.put(cloud.getMetadata().getName(), client);
 
-                        logger.info("Remote OpenShift URL (" + cloud.getMetadata().getName() + ": " + client.getOpenshiftUrl().toString());
-                        logger.info("Remote OpenShift Namespace(" + cloud.getMetadata().getName() + ": " + client.getNamespace());
+                        logger.info("OpenShift URL (" + cloud.getMetadata().getName() + "): " + client.getOpenshiftUrl().toString());
+                        logger.info("OpenShift Namespace(" + cloud.getMetadata().getName() + "): " + client.getNamespace());
                     });
         }
     }
 
     public static OpenShiftClient getClient() {
-        return apiClients.get("local");
+        return apiClients.get("default");
     }
 
     public static OpenShiftClient getClient(String name) {

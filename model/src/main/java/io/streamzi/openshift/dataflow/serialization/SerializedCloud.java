@@ -15,6 +15,8 @@ public class SerializedCloud implements KubernetesResource {
 
     private int port;
 
+    private String namespace;
+
     //todo: Should this be a secret?
     private String token;
 
@@ -24,6 +26,7 @@ public class SerializedCloud implements KubernetesResource {
                 "description='" + description + '\'' +
                 ", hostname='" + hostname + '\'' +
                 ", port=" + port +
+                ", namespace='" + namespace + '\'' +
                 ", token='" + token + '\'' +
                 '}';
     }
@@ -50,6 +53,14 @@ public class SerializedCloud implements KubernetesResource {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     public String getToken() {
