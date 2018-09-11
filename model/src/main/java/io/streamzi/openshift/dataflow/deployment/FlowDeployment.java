@@ -32,66 +32,39 @@ import java.util.logging.Logger;
 public class FlowDeployment {
     private static final Logger logger = Logger.getLogger(FlowDeployment.class.getName());
     
-    private String cloudId;
-    private boolean primaryCloud;
+    private String cloud;
     private List<NodeDeployment> nodeDeployments = new ArrayList<>();
     private List<LinkDeployment> linkDeployments = new ArrayList<>();
     
-    public FlowDeployment(String cloudId, boolean primaryCloud, ProcessorFlow flow) {
-        this.cloudId = cloudId;
-        this.primaryCloud = primaryCloud;
+    public FlowDeployment(String cloud, ProcessorFlow flow) {
+        this.cloud = cloud;
         buildFromFlow(flow);
     }
 
-    public boolean isPrimaryCloud() {
-        return primaryCloud;
-    }
-    
     public final void buildFromFlow(ProcessorFlow flow){
         // Add the nodes that are deployed here
         flow.getNodes().stream()
             .filter(node->node.getProcessorType()==ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE)
-            .filter(node->node.getTargetClouds().containsKey(cloudId))
-            .filter(node->node.getTargetClouds().get(cloudId)>0)
-            .forEach(node->nodeDeployments.add(new NodeDeployment(node, node.getTargetClouds().get(cloudId))));
+            .filter(node->node.getTargetClouds().containsKey(cloud))
+            .filter(node->node.getTargetClouds().get(cloud)>0)
+            .forEach(node->nodeDeployments.add(new NodeDeployment(node, node.getTargetClouds().get(cloud))));
         
 
         // Add the links that are not proxied
         flow.getLinks().stream()
             .filter(link->containsNode(link.getSource().getParent()))
             .filter(link->containsNode(link.getTarget().getParent()))
-            .forEach(link->linkDeployments.add(new LinkDeployment(link, LinkDeployment.LinkType.INTERNAL_LINK, cloudId, cloudId)));
+            .forEach(link->linkDeployments.add(new LinkDeployment(link, LinkDeployment.LinkType.INTERNAL_LINK, cloud, cloud)));
                 
         // Add Proxies for the links that cannot be left as they are
         flow.getLinks().stream()
             .filter(link->!containsNode(link.getSource().getParent()) || !containsNode(link.getTarget().getParent()))
             .forEach(link->addProxiedLink(link));
                 
-        // Add Proxies for remote comms if we are the primary cloud
-        if(primaryCloud){
-            flow.getLinks().stream()
-                .filter(link->isDeployedElseWhere(link.getTarget().getParent()))
-                .forEach(link->addOutputProxyToRemoteCloud(link));
-            
-            flow.getLinks().stream()
-                .filter(link->isDeployedElseWhere(link.getSource().getParent()))
-                .forEach(link->addInputProxyFromRemoteCloud(link));
-        }
+
     }
 
-    private void addOutputProxyToRemoteCloud(ProcessorLink link){
-        LinkDeployment deployment = new LinkDeployment(link, LinkDeployment.LinkType.PROXY_TO_REMOTE_CLOUD, cloudId, "");
-        if(!containsLink(deployment)){
-            linkDeployments.add(deployment);
-        }
-    }
-    
-    private void addInputProxyFromRemoteCloud(ProcessorLink link){
-        LinkDeployment deployment = new LinkDeployment(link, LinkDeployment.LinkType.PROXY_FROM_REMOTE_CLOUD, cloudId, "");
-        if(!containsLink(deployment)){
-            linkDeployments.add(deployment);
-        }
-    }
+
     
     private void addProxiedLink(ProcessorLink link){
         // Work out which end of the link refers to this cloud
@@ -100,11 +73,11 @@ public class FlowDeployment {
         
         if(sourceDeploymentsHere>0 && targetDeploymentsHere==0){
             // Link starts here and goes to the remote cloud
-            linkDeployments.add(new LinkDeployment(link, LinkDeployment.LinkType.TO_REMOTE_CLOUD, cloudId, getFirstNonZeroCloudId(link.getTarget().getParent())));
+            linkDeployments.add(new LinkDeployment(link, LinkDeployment.LinkType.REMOTE_LINK, cloud, getFirstNonZeroCloudId(link.getTarget().getParent())));
             
         } else if(sourceDeploymentsHere==0 && targetDeploymentsHere>0){
             // Link comes from outside
-            linkDeployments.add(new LinkDeployment(link, LinkDeployment.LinkType.FROM_REMOTE_CLOUD, getFirstNonZeroCloudId(link.getSource().getParent()), cloudId));
+            linkDeployments.add(new LinkDeployment(link, LinkDeployment.LinkType.REMOTE_LINK, getFirstNonZeroCloudId(link.getSource().getParent()), cloud));
             
         } else {
             logger.log(Level.SEVERE, "Invalid deployment for link");
@@ -114,8 +87,8 @@ public class FlowDeployment {
         }
     }
     
-    public String getCloudId() {
-        return cloudId;
+    public String getCloud() {
+        return cloud;
     }
     
     public String getFirstNonZeroCloudId(ProcessorNode node){
@@ -129,7 +102,7 @@ public class FlowDeployment {
     
     public boolean isDeployedElseWhere(ProcessorNode node){
         for(String id : node.getTargetClouds().keySet()){
-            if(!id.equals(cloudId) && node.getTargetClouds().get(id)>0){
+            if(!id.equals(cloud) && node.getTargetClouds().get(id)>0){
                 return true;
             }
         }
@@ -137,8 +110,8 @@ public class FlowDeployment {
     }
     
     public int getDeploymentsForThisCloud(ProcessorNode node){
-        if(node.getTargetClouds().containsKey(cloudId)){
-            return node.getTargetClouds().get(cloudId);
+        if(node.getTargetClouds().containsKey(cloud)){
+            return node.getTargetClouds().get(cloud);
         } else {
             return 0;
         }
@@ -158,11 +131,7 @@ public class FlowDeployment {
     }
 
     public void print(){
-        if(primaryCloud){
-            System.out.println("PRIMARY: " + cloudId);
-        } else {
-            System.out.println("SECONDARY: " + cloudId);
-        }
+        System.out.println("Cloud: " + cloud);
         for(NodeDeployment node : nodeDeployments){
             System.out.println(node);
         }

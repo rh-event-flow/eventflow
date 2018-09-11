@@ -26,15 +26,9 @@ import java.util.List;
 public class FlowDeploymentListBuilder {
     private ProcessorFlow flow;
     private List<String> clouds = new ArrayList<>();
-    private String primaryCloudId = "local";
     
     public FlowDeploymentListBuilder(ProcessorFlow flow) {
         this.flow = flow;
-    }
-    
-    public FlowDeploymentListBuilder withPrimaryCloudId(String primaryCloudId){
-        this.primaryCloudId = primaryCloudId;
-        return this;
     }
     
     public FlowDeploymentListBuilder addCloud(String cloudId){
@@ -51,14 +45,7 @@ public class FlowDeploymentListBuilder {
     
     public List<FlowDeployment> build(){
         List<FlowDeployment> results = new ArrayList<>();
-        
-        for(String cloudId : clouds){
-            if(cloudId.equals(primaryCloudId)){
-                results.add(new FlowDeployment(cloudId, true, flow));
-            } else {
-                results.add(new FlowDeployment(cloudId, false, flow));
-            }
-        }
+        clouds.stream().forEach(cloud->results.add(new FlowDeployment(cloud, flow)));
         return results;
     }
 }

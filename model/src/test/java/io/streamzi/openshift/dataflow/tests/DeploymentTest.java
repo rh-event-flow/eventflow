@@ -51,10 +51,9 @@ public class DeploymentTest {
             ProcessorFlow flow = new ProcessorFlow(sf);
             List<FlowDeployment> deployments = new FlowDeploymentListBuilder(flow)
                     .detectClouds()
-                    .withPrimaryCloudId("local")
                     .build();
             for(FlowDeployment deployment : deployments){
-                logger.info("Deoployment: " + deployment.getCloudId());
+                logger.info("Deoployment: " + deployment.getCloud());
                 deployment.print();
                 
                 

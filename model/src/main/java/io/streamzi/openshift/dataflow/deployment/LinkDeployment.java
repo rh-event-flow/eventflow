@@ -24,22 +24,19 @@ import io.streamzi.openshift.dataflow.model.ProcessorLink;
 public class LinkDeployment {
     public enum LinkType {
         INTERNAL_LINK,
-        FROM_REMOTE_CLOUD,
-        TO_REMOTE_CLOUD,
-        PROXY_TO_REMOTE_CLOUD,
-        PROXY_FROM_REMOTE_CLOUD
+        REMOTE_LINK
     }
     
     private ProcessorLink link;
     private LinkType type;
-    private String sourceCloudId;
-    private String targetCloudId;
+    private String sourceCloud;
+    private String targetCloud;
     
-    public LinkDeployment(ProcessorLink link, LinkType type, String sourceCloudId, String targetCloudId) {
+    public LinkDeployment(ProcessorLink link, LinkType type, String sourceCloud, String targetCloud) {
         this.link = link;
         this.type = type;
-        this.sourceCloudId = sourceCloudId;
-        this.targetCloudId = targetCloudId;
+        this.sourceCloud = sourceCloud;
+        this.targetCloud = targetCloud;
     }
 
     public ProcessorLink getLink() {
@@ -50,12 +47,12 @@ public class LinkDeployment {
         return type;
     }
 
-    public String getSourceCloudId() {
-        return sourceCloudId;
+    public String getSourceCloud() {
+        return sourceCloud;
     }
 
     public String getTargetCloudId() {
-        return targetCloudId;
+        return targetCloud;
     }
 
     
@@ -65,18 +62,10 @@ public class LinkDeployment {
             case INTERNAL_LINK:
                 return "Internal link from: " + link.getSource().getParent().getDisplayName() + " to: " + link.getTarget().getParent().getDisplayName() + "{" + getTopicName() + "}";
                 
-            case FROM_REMOTE_CLOUD:
-                return "Link from remote cloud: [" + sourceCloudId + "]" + link.getSource().getParent().getDisplayName() + " to: [" + targetCloudId + "] " + link.getTarget().getParent().getDisplayName() + "{" + getTopicName() + "}";
+            case REMOTE_LINK:
+                return "Remote link: [" + sourceCloud + "]" + link.getSource().getParent().getDisplayName() + " to: [" + targetCloud + "] " + link.getTarget().getParent().getDisplayName() + "{" + getTopicName() + "}";
                         
-            case TO_REMOTE_CLOUD:
-                return "Link from: [" + sourceCloudId + "] " + link.getSource().getParent().getDisplayName() + " to: [" + targetCloudId + "]" + link.getTarget().getParent().getDisplayName() + "{" + getTopicName() + "}";
-                        
-            case PROXY_TO_REMOTE_CLOUD:
-                return "Outbound proxy for: " + link.getSource().getParent().getDisplayName() + " output: " + link.getTarget().getName() + "{" + getTopicName() + "}";
-                
-            case PROXY_FROM_REMOTE_CLOUD:
-                return "Inbound proxy for: " + link.getTarget().getParent().getDisplayName() + " input: " + link.getTarget().getName() + "{" + getTopicName() + "}";
-                
+
             default:
                 return "UNDEFINED LINK";
         }
@@ -92,7 +81,7 @@ public class LinkDeployment {
                 return false;
             } else {
                 // Same type
-                if(other.getSourceCloudId().equals(sourceCloudId) && other.getTargetCloudId().equals(targetCloudId)){
+                if(other.getSourceCloud().equals(sourceCloud) && other.getTargetCloudId().equals(targetCloud)){
                     // Same source / target cloud
                     return true;
                     
