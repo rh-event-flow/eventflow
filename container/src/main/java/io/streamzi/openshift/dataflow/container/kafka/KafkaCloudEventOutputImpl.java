@@ -41,13 +41,18 @@ public class KafkaCloudEventOutputImpl extends CloudEventOutput {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);        
     }
-    
+
     @Override
     public void send(CloudEvent event) {
+        send(null, event);
+    }
+
+    @Override
+    public void send(String key, CloudEvent event) {
         if(connected){
             try {
                 String json = mapper.writeValueAsString(event);
-                final ProducerRecord<String, String> record = new ProducerRecord(topicName, event.getEventID(), json);
+                final ProducerRecord<String, String> record = new ProducerRecord(topicName, key, json);
                 producer.send(record);
             } catch (Exception e){
                 logger.log(Level.SEVERE, "Error sending event to Kafka: " + e.getMessage(), e);
