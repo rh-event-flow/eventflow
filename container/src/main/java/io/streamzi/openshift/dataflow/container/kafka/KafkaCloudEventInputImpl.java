@@ -45,7 +45,18 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
 
     public KafkaCloudEventInputImpl(Object consumerObject, Method consumerMethod) {
         super(consumerObject, consumerMethod);
-        bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
+        
+        if(EnvironmentResolver.exists(inputName + "_BOOTSTRAP_SERVERS")){
+            // There is a bootstrap server environment variable
+            logger.info("Bootstrap server Env exists for input: " + inputName);
+            bootstrapServers = EnvironmentResolver.get(inputName + "_BOOTSTRAP_SERVERS");
+        } else {
+            // Use the default / old version
+            logger.warning("No Bootstrap server Env exists for input: " + inputName);
+            bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
+        }
+        
+        
         logger.info("Kafka broker defined at: " + bootstrapServers);
         topicName = EnvironmentResolver.get(inputName);   // Passed if from deployer via env variable
         logger.info("Input will connect to topic: " + topicName);

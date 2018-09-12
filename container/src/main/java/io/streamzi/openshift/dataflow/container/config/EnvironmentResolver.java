@@ -48,4 +48,38 @@ public class EnvironmentResolver {
         }
 
     }
+    
+    public static boolean exists(String key){
+        String resolved = resolve(key);
+        if (resolved != null) {
+            return true;
+        }
+
+        resolved = resolve(key.toUpperCase());
+        if (resolved != null) {
+            return true;
+        }
+
+        resolved = resolve(key.replace(".", "_"));
+        if(resolved != null){
+            return true;
+        }
+
+        resolved = resolve(key.replace(".", "_").replace("-", "_"));
+        if(resolved != null){
+            return true;
+        }
+
+        resolved = resolve(key
+                .replace(".", "_")
+                .replace("-", "_")
+                .toUpperCase());
+
+        if(resolved!=null){
+            return true;
+        } else {
+            return false;
+        }
+        
+    }
 }
