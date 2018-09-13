@@ -16,14 +16,19 @@ import java.util.logging.Logger;
 public class ClientCache {
 
     private static Logger logger = Logger.getLogger(ClientCache.class.getName());
+
     private static final Map<String, OpenShiftClient> apiClients = new HashMap<>();
+
+    private static final Map<String, String> bootstrapServerCache = new HashMap<>();
+
 
     static {
         //Get the local OpenShift Client
         OpenShiftClient osClient = new DefaultOpenShiftClient();
+
         logger.info("Local OpenShift URL: " + osClient.getOpenshiftUrl().toString());
         logger.info("Local OpenShift Namespace: " + osClient.getNamespace());
-        apiClients.put("default", osClient);
+        apiClients.put("local", osClient);
 
         //Get any other OpenShift Clients
         final CustomResourceDefinition cloudCRD = osClient.customResourceDefinitions().withName("clouds.streamzi.io").get();
@@ -47,6 +52,8 @@ public class ClientCache {
                         OpenShiftClient client = new DefaultOpenShiftClient(configBuilder.build());
                         apiClients.put(cloud.getMetadata().getName(), client);
 
+                        bootstrapServerCache.put(cloud.getMetadata().getName(), cloud.getSpec().getBootstrapServers());
+
                         logger.info("OpenShift URL (" + cloud.getMetadata().getName() + "): " + client.getOpenshiftUrl().toString());
                         logger.info("OpenShift Namespace(" + cloud.getMetadata().getName() + "): " + client.getNamespace());
                     });
@@ -54,15 +61,18 @@ public class ClientCache {
     }
 
     public static OpenShiftClient getClient() {
-        return apiClients.get("default");
+        return apiClients.get("local");
     }
 
     public static OpenShiftClient getClient(String name) {
         return apiClients.get(name);
     }
 
-    public Set<String> getOSClientNames() {
+    public static Set<String> getClientNames() {
         return apiClients.keySet();
     }
 
+    public static Map<String, String> getBootstrapServerCache() {
+        return bootstrapServerCache;
+    }
 }

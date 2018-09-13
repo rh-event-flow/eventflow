@@ -14,59 +14,53 @@
  * limitations under the License.
  */
 package io.streamzi.openshift.dataflow.tests;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.fabric8.kubernetes.api.model.extensions.DeploymentListBuilder;
-import io.streamzi.openshift.dataflow.deployment.FlowDeployment;
-import io.streamzi.openshift.dataflow.deployment.FlowDeploymentListBuilder;
-import io.streamzi.openshift.dataflow.model.ProcessorConstants;
-import io.streamzi.openshift.dataflow.model.ProcessorFlow;
-import io.streamzi.openshift.dataflow.model.ProcessorInputPort;
-import io.streamzi.openshift.dataflow.model.ProcessorNode;
-import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
-import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
-import org.junit.*;
 
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.streamzi.openshift.dataflow.deployment.TargetState;
+import io.streamzi.openshift.dataflow.model.ProcessorFlow;
+import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
+import org.junit.Test;
+
 import java.io.InputStream;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for deployments
+ *
  * @author hhiden
  */
 public class DeploymentTest {
     private static final Logger logger = Logger.getLogger(ModelTest.class.getName());
     private ObjectMapper MAPPER = new ObjectMapper();
-    
-    @Test
-    public void deploymentTest() throws Exception {
-        
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("deployment-cr.json");
-        try {
 
-            SerializedFlow sf = MAPPER.readValue(is, SerializedFlow.class);
-            ProcessorFlow flow = new ProcessorFlow(sf);
-            List<FlowDeployment> deployments = new FlowDeploymentListBuilder(flow)
-                    .detectClouds()
-                    .build();
-            for(FlowDeployment deployment : deployments){
-                logger.info("Deoployment: " + deployment.getCloud());
-                deployment.print();
-                
-                
-            }
-            
-            
-            System.out.println("Done");            
-        } catch (Exception e){
-            
-        }
-        
-        
+
+    @Test
+    public void testConversionToDC() throws Exception {
+
+        Map<String, String> bootstrapServerCache = new HashMap<>();
+        bootstrapServerCache.put("local", "my-cluster-kafka:9092");
+        bootstrapServerCache.put("azure", "my-cluster-kafka:9092");
+
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("deployment-cr.json");
+
+        SerializedFlow sf = MAPPER.readValue(is, SerializedFlow.class);
+        ProcessorFlow flow = new ProcessorFlow(sf);
+
+        TargetState localTarget = new TargetState("local", flow, bootstrapServerCache);
+        localTarget.build();
+
+        assertThat(localTarget.getDeploymentConfigs().size()).isEqualTo(3);
+
+        TargetState azureTarget = new TargetState("azure", flow, bootstrapServerCache);
+        azureTarget.build();
+
+        assertThat(azureTarget.getDeploymentConfigs().size()).isEqualTo(1);
+
+        System.out.println("Done");
 
     }
-    
 }
