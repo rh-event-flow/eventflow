@@ -79,9 +79,18 @@ public class TargetState {
     }
 
     public Set<String> getConfigMapNames() {
-        return evConfigMaps.stream()
+        Set<String> topics =
+                topicConfigMaps.stream()
+                        .map(cm -> cm.getMetadata().getName())
+                        .collect(Collectors.toSet());
+
+
+        Set<String> evs = evConfigMaps.stream()
                 .map(cm -> cm.getMetadata().getName())
                 .collect(Collectors.toSet());
+        evs.addAll(topics);
+
+        return evs;
     }
 
     public void build() {
@@ -228,7 +237,7 @@ public class TargetState {
 
         final Map<String, String> data = new HashMap<>();
         data.put("name", topicName);
-        data.put("partitions", "2");
+        data.put("partitions", "20");
         data.put("replicas", "1");
 
         final Map<String, String> labels = new HashMap<>();

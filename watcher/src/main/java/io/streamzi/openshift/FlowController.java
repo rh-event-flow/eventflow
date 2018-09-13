@@ -47,6 +47,13 @@ public class FlowController {
                     TargetState target = new TargetState(cloudName, flow, ClientCache.getBootstrapServerCache());
                     target.build();
 
+                    //create / update Strimzi Topic configmaps
+                    target.getTopicConfigMaps()
+                            .forEach(cm -> client.configMaps()
+                                    .inNamespace(client.getNamespace())
+                                    .withName(cm.getMetadata().getName())
+                                    .createOrReplace(cm));
+
                     //create / update deployments
                     target.getDeploymentConfigs().forEach(dc -> client.deploymentConfigs()
                             .inNamespace(client.getNamespace())
@@ -59,12 +66,6 @@ public class FlowController {
                             .withName(cm.getMetadata().getName())
                             .createOrReplace(cm));
 
-                    //create / update Strimzi Topic configmaps
-                    target.getTopicConfigMaps()
-                            .forEach(cm -> client.configMaps()
-                                    .inNamespace(client.getNamespace())
-                                    .withName(cm.getMetadata().getName())
-                                    .createOrReplace(cm));
                 } else {
                     logger.info("Ignoring Cloud: " + cloudName);
                 }
