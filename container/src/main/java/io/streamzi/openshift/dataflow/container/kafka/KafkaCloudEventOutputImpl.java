@@ -32,7 +32,17 @@ public class KafkaCloudEventOutputImpl extends CloudEventOutput {
     
     public KafkaCloudEventOutputImpl(Object producerObject, String outputName) {
         super(producerObject, outputName);
-        bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
+        
+        if(EnvironmentResolver.exists(outputName + "_BOOTSTRAP_SERVERS")){
+            // There is a bootstrap server environment variable
+            logger.info("Bootstrap server Env exists for input: " + outputName);
+            bootstrapServers = EnvironmentResolver.get(outputName + "_BOOTSTRAP_SERVERS");
+        } else {
+            // Use the default / old version
+            logger.warning("No Bootstrap server Env exists for input: " + outputName);
+            bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
+        }
+        
         topicName = EnvironmentResolver.get(outputName);  // Passed in from deployer
         
         mapper = new ObjectMapper();
