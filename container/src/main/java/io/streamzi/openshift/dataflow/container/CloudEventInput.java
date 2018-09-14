@@ -1,6 +1,7 @@
 package io.streamzi.openshift.dataflow.container;
 
 import io.streamzi.openshift.dataflow.annotations.CloudEventConsumer;
+import io.streamzi.openshift.dataflow.annotations.ObjectType;
 import io.streamzi.openshift.dataflow.container.config.EnvironmentResolver;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import java.lang.reflect.Method;
@@ -17,6 +18,7 @@ public abstract class CloudEventInput {
     protected Method consumerMethod;
     protected String inputName;
     protected String processorUuid;
+    protected ObjectType objectType = ObjectType.OBJECT;
     
     public CloudEventInput(Object consumerObject, Method consumerMethod) {
         this.consumerObject = consumerObject;
@@ -28,6 +30,7 @@ public abstract class CloudEventInput {
         CloudEventConsumer consumerAnnotation = consumerMethod.getAnnotation(CloudEventConsumer.class);
         if(consumerAnnotation!=null){
             inputName = consumerAnnotation.name();
+            objectType = consumerAnnotation.type();
             logger.info("CloudEventInput configured for input name: " + inputName);
         }
     }

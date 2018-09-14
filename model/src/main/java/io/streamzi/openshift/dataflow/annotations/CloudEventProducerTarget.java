@@ -8,9 +8,6 @@ import io.streamzi.cloudevents.CloudEvent;
  * @author hhiden
  */
 public interface CloudEventProducerTarget {
-
-    void send(CloudEvent event);
-
-    void send(String key, CloudEvent event);
-
+    void send(Object event);
+    void send(String key, Object event);
 }
