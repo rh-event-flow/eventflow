@@ -17,6 +17,8 @@ public class SerializedCloud implements KubernetesResource {
 
     private String namespace;
 
+    private String bootstrapServers;
+
     //todo: Should this be a secret?
     private String token;
 
@@ -27,6 +29,7 @@ public class SerializedCloud implements KubernetesResource {
                 ", hostname='" + hostname + '\'' +
                 ", port=" + port +
                 ", namespace='" + namespace + '\'' +
+                ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", token='" + token + '\'' +
                 '}';
     }
@@ -69,5 +72,13 @@ public class SerializedCloud implements KubernetesResource {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getBootstrapServers() {
+        return bootstrapServers;
+    }
+
+    public void setBootstrapServers(String bootstrapServers) {
+        this.bootstrapServers = bootstrapServers;
     }
 }

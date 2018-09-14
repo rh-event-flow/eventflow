@@ -5,6 +5,7 @@ import io.streamzi.openshift.dataflow.serialization.SerializedNode;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Contains a connected graph of processor nodes
@@ -112,6 +113,13 @@ public class ProcessorFlow implements Serializable {
             }
         }
         return null;
+    }
+
+    public Set<String> getCloudNames() {
+        return getNodes().stream()
+                .flatMap(node -> node.getTargetClouds().keySet().stream())
+                .collect(Collectors.toSet());
+
     }
 
 }
