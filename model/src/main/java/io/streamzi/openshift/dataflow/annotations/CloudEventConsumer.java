@@ -13,4 +13,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CloudEventConsumer {
     String name() default "in";
+    ObjectType type() default ObjectType.CLOUDEVENT;
 }

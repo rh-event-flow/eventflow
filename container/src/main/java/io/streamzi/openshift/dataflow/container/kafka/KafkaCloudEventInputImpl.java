@@ -88,9 +88,17 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
                 final ConsumerRecords<String, String> records = consumer.poll(100);
                 for (ConsumerRecord<String, String> r : records) {
                     try {
-                        logger.info("Read: " + r.value());
-                        CloudEvent evt = mapper.readValue(r.value(), CloudEventImpl.class);
-                        consumerMethod.invoke(consumerObject, evt);
+                        switch(objectType){
+                            case CLOUDEVENT:
+                                CloudEvent evt = mapper.readValue(r.value(), CloudEventImpl.class);
+                                consumerMethod.invoke(consumerObject, evt);    
+                                break;
+                            case OBJECT:
+                            default:
+                                Object value = mapper.readValue(r.value(), Object.class);
+                                consumerMethod.invoke(consumerObject, value);                                
+                        }
+
                     } catch (Exception e){
                         logger.warning("Error running consumer method: " + e.getMessage());
                     }

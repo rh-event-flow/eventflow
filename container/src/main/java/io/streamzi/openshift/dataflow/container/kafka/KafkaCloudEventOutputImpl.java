@@ -53,12 +53,12 @@ public class KafkaCloudEventOutputImpl extends CloudEventOutput {
     }
 
     @Override
-    public void send(CloudEvent event) {
+    public void send(Object event) {
         send(null, event);
     }
 
     @Override
-    public void send(String key, CloudEvent event) {
+    public void send(String key, Object event) {
         if(connected){
             try {
                 String json = mapper.writeValueAsString(event);
