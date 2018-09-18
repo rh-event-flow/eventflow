@@ -65,6 +65,8 @@ public class ProcessorNode extends ProcessorObject implements ProcessorConstants
 
     private String displayName;
 
+    private String outputCloud;
+
     public ProcessorNode() {
     }
 
@@ -180,5 +182,13 @@ public class ProcessorNode extends ProcessorObject implements ProcessorConstants
 
     public void setTargetClouds(Map<String, Integer> targetClouds) {
         this.targetClouds = targetClouds;
+    }
+
+    public String getOutputCloud() {
+        return outputCloud;
+    }
+
+    public void setOutputCloud(String outputCloud) {
+        this.outputCloud = outputCloud;
     }
 }

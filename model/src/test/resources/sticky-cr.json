@@ -1,0 +1,54 @@
+{
+  "nodes": [
+    {
+      "displayName": "Random Source",
+      "imageName": "streamziprocessors/cef-ops-random-data",
+      "templateId": "random-data-source",
+      "templateName": "Random Source",
+      "processorType": "DEPLOYABLE_IMAGE",
+      "uuid": "498f6e65-72ae-bede-98f6-47fda5156208",
+      "settings": {},
+      "inputs": [],
+      "outputs": [
+        "output-data"
+      ],
+      "targetClouds": {
+        "local": 1,
+        "azure": 5
+      },
+      "outputCloud": "local"
+    },
+    {
+      "displayName": "Log Data",
+      "imageName": "streamziprocessors/cef-ops-log-data",
+      "templateId": "log-data",
+      "templateName": "Log Data",
+      "processorType": "DEPLOYABLE_IMAGE",
+      "uuid": "ce69066e-35a6-106e-8cef-59169bf65a1b",
+      "settings": {},
+      "inputs": [
+        "input-data"
+      ],
+      "outputs": [],
+      "targetClouds": {
+        "local": 1,
+        "azure": 2
+      },
+      "outputCloud": ""
+    }
+  ],
+  "links": [
+    {
+      "sourceUuid": "498f6e65-72ae-bede-98f6-47fda5156208",
+      "targetUuid": "ce69066e-35a6-106e-8cef-59169bf65a1b",
+      "sourcePortName": "output-data",
+      "targetPortName": "input-data"
+    }
+  ],
+  "settings": {},
+  "globalSettings": {
+    "STREAMZI_KAFKA_BOOTSTRAP_SERVER": "my-cluster-kafka:9092",
+    "broker.url": "amqp://dispatch.myproject.svc:5672"
+  },
+  "name": "f"
+}

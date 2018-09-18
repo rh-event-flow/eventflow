@@ -29,6 +29,7 @@ public class SerializedNode {
     private List<String> inputs = new ArrayList<>();
     private List<String> outputs = new ArrayList<>();
     private Map<String, Integer> targetClouds = new HashMap<>();
+    private String outputCloud;
     
     
     private String imageName;
@@ -45,6 +46,7 @@ public class SerializedNode {
         templateName = node.getTemplateName();
         transport = node.getTransport();
         processorType = node.getProcessorType().toString();
+        outputCloud = node.getOutputCloud();
 
         this.imageName = node.getImageName();
         for (String key : node.getSettings().keySet()) {
@@ -75,6 +77,7 @@ public class SerializedNode {
         node.setTransport(transport);
         node.setProcessorType(ProcessorConstants.ProcessorType.valueOf(processorType));
         node.setDisplayName(displayName);
+        node.setOutputCloud(outputCloud);
         for (String input : inputs) {
             node.addInput(new ProcessorInputPort(input));
         }
@@ -176,18 +179,28 @@ public class SerializedNode {
         this.targetClouds = targetClouds;
     }
 
+    public String getOutputCloud() {
+        return outputCloud;
+    }
+
+    public void setOutputCloud(String outputCloud) {
+        this.outputCloud = outputCloud;
+    }
+
     @Override
     public String toString() {
         return "SerializedNode{" +
                 "node=" + node +
-                ", displayName='" + displayName + '\'' +
                 ", uuid='" + uuid + '\'' +
+                ", displayName='" + displayName + '\'' +
                 ", templateName='" + templateName + '\'' +
                 ", templateId='" + templateId + '\'' +
                 ", transport='" + transport + '\'' +
                 ", processorType='" + processorType + '\'' +
                 ", inputs=" + inputs +
                 ", outputs=" + outputs +
+                ", targetClouds=" + targetClouds +
+                ", outputCloud='" + outputCloud + '\'' +
                 ", imageName='" + imageName + '\'' +
                 ", settings=" + settings +
                 '}';

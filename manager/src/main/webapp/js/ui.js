@@ -12,7 +12,7 @@ blocks.getBlockByUUID = function(uuid){
     for(var i=0;i<this.blocks.length;i++){
         block = this.blocks[i];
         if(block._uuid && block._uuid===uuid){
-            return block;   
+            return block;
         }
     }
     return null;
@@ -38,7 +38,7 @@ Block.prototype.inputExists = function(name){
             return true;
         }
     }
-    return false;    
+    return false;
 };
 
 // Find a connector in a block
@@ -64,7 +64,7 @@ blocks.addBlock = function (name, x, y, nodeData) {
             block.x = x;
             block.y = y;
             block._uuid = guid();
-            
+
             // Add settings if there are any
 
             if(nodeData){
@@ -76,12 +76,12 @@ blocks.addBlock = function (name, x, y, nodeData) {
                         fields[j].value = settings[fields[j].name];
                         console.log(fields[j].name);
                     }
-                }                
-                
+                }
+
                 // Add the replicas to the replicas field
                 if(nodeData.targetClouds){
                     var fieldName;
-                    
+
                     var keys = Object.keys(nodeData.targetClouds);
                     for(var i=0;i<keys.length;i++){
                         fieldName = "replicas_" + keys[i];
@@ -93,8 +93,21 @@ blocks.addBlock = function (name, x, y, nodeData) {
                         }
                     }
                 }
+
+                if (nodeData.outputCloud) {
+
+                    keys = Object.keys(nodeData.targetClouds);
+                    for (i = 0; i < keys.length; i++) {
+                        fields = block.fields.fields;
+                        for (var j = 0; j < fields.length; j++) {
+                            if ("sticky_output" === fields[j].name) {
+                                fields[j].value = nodeData.outputCloud;
+                            }
+                        }
+                    }
+                }
             }
-            
+
             block.create(this.div.find('.blocks'));
 
             // Keep the template with the block so that we can get data
@@ -116,13 +129,13 @@ blocks.addBlock = function (name, x, y, nodeData) {
     function include(file) {
         $('head').append('<script type="text/javascript" src="demo/' + file + '"></script>');
     }
-    
+
     fetchClouds(function(data){
         for(var i=0;i<data.length;i++){
             clouds.push(data[i]);
-        }        
+        }
     });
-    
+
     fetchNodeYaml(function (data) {
         setupBlocksJs(data);
         blocks.run('#blocks');
@@ -177,19 +190,19 @@ function fetchFlowJson(flowName, callback) {
 function importJson(customResource) {
 
     var drawingData = customResource.spec;
-    
+
     // Create the blocks
     var nodeData;
     var block;
     var settings;
     var fields;
-    
+
     for(var i=0;i<drawingData.nodes.length;i++){
         nodeData = drawingData.nodes[i];
         block = blocks.addBlock(nodeData.templateName, 100, 100, nodeData);
         console.log("Template: " + nodeData.templateName);
     }
-    
+
     // Connect everything together
     var link;
     var source;
@@ -243,7 +256,8 @@ function exportJson(flowName) {
 
             //todo: this will only copy default values
             var field;
-            var attrs;            
+            var attrs;
+            var stickyOutput;
             if (block._template.settings && block.fields.fields) {
                 for (var j = 0; j < block.fields.fields.length; j++) {
                     // Standard property
@@ -257,17 +271,27 @@ function exportJson(flowName) {
                     }
                 }
             }
-            
+
             // Find the replicas data
             if(block.fields.fields){
                 for(var j=0;j<block.fields.fields.length;j++){
                     field = block.fields.fields[j];
                     if(field.name.startsWith("replicas_")){
                         cloudName = field.name.substring(9);
-                        replicas[cloudName] = field.value;                    
+                        replicas[cloudName] = field.value;
                     }
                 }
             }
+
+            if (block.fields.fields) {
+                for (var j = 0; j < block.fields.fields.length; j++) {
+                    field = block.fields.fields[j];
+                    if (field.name === "sticky_output") {
+                        stickyOutput = field.value;
+                    }
+                }
+            }
+
 
             processorJson = {
                 displayName: block._template.displayName,
@@ -280,7 +304,8 @@ function exportJson(flowName) {
                 settings: settings,
                 inputs: inputsArray,
                 outputs: outputsArray,
-                targetClouds: replicas
+                targetClouds: replicas,
+                outputCloud: stickyOutput
             };
 
             processorArray.push(processorJson);
@@ -522,10 +547,17 @@ function setupBlocksJs(nodeYamlList) {
                     defaultValue: 0,
                     type: "integer",
                     attrs: " editable"
-                });                
+                });
             }
         }
-        
+
+        fields.push({
+            name: "sticky_output",
+            defaultValue: "",
+            type: "string",
+            attrs: " editable"
+        });
+
         blockData.fields = fields;
         console.log(JSON.stringify(blockData));
         blocks.register(blockData);
@@ -564,7 +596,7 @@ function fetchClouds(callback){
         contentType: "application/json; charset=utf-8"
     }).then(function (data) {
         callback(data);
-    });    
+    });
 }
 
 function fetchDefaults(callback) {
