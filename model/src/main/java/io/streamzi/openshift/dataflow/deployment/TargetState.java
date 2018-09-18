@@ -197,6 +197,7 @@ public class TargetState {
 
         //Output topics
         for (ProcessorOutputPort output : node.getOutputs().values()) {
+
             String bootstrapServers = bootstrapServerCache.get(calculateTopicHost(node));
             envVars.put(FlowUtil.sanitiseEnvVar(output.getName() + "_BOOTSTRAP_SERVERS"), bootstrapServers);
 
@@ -257,6 +258,9 @@ public class TargetState {
 
 
     private String calculateTopicHost(ProcessorNode node) {
+        if (node.getOutputCloud() != null && !node.getOutputCloud().isEmpty()) {
+            return node.getOutputCloud();
+        }
 
         Optional<String> optCloud = node.getTargetClouds().keySet().stream().max(Comparator.comparingInt(key -> node.getTargetClouds().get(key)));
         return optCloud.orElse("UNKNONW");
