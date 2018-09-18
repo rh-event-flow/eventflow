@@ -1,5 +1,6 @@
 package io.streamzi.openshift;
 
+import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -9,6 +10,7 @@ import io.streamzi.openshift.dataflow.crds.CloudList;
 import io.streamzi.openshift.dataflow.crds.DoneableCloud;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -23,12 +25,19 @@ public class ClientCache {
 
 
     static {
+
         //Get the local OpenShift Client
         OpenShiftClient osClient = new DefaultOpenShiftClient();
 
         logger.info("Local OpenShift URL: " + osClient.getOpenshiftUrl().toString());
         logger.info("Local OpenShift Namespace: " + osClient.getNamespace());
         apiClients.put("local", osClient);
+
+        //Try and find a Strimzi installation in this namespace
+        List<Service> strimziServices = osClient.services().inNamespace(osClient.getNamespace()).withLabel("strimzi.io/name").list().getItems();
+        if (strimziServices.size() > 0) {
+            bootstrapServerCache.put("local", strimziServices.get(0).getMetadata().getName() + "." + osClient.getNamespace() + ".svc.cluster.local:9092");
+        }
 
         //Get any other OpenShift Clients
         final CustomResourceDefinition cloudCRD = osClient.customResourceDefinitions().withName("clouds.streamzi.io").get();
