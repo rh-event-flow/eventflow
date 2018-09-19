@@ -1,13 +1,35 @@
 package io.streamzi.openshift.dataflow.deployment;
 
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.streamzi.openshift.dataflow.FlowUtil;
-import io.streamzi.openshift.dataflow.model.*;
 
-import java.util.*;
+import io.streamzi.openshift.dataflow.model.ProcessorConstants;
+import io.streamzi.openshift.dataflow.model.ProcessorFlow;
+import io.streamzi.openshift.dataflow.model.ProcessorInputPort;
+import io.streamzi.openshift.dataflow.model.ProcessorLink;
+import io.streamzi.openshift.dataflow.model.ProcessorNode;
+import io.streamzi.openshift.dataflow.model.ProcessorOutputPort;
+import io.strimzi.api.kafka.model.KafkaTopic;
+import io.strimzi.api.kafka.model.KafkaTopicBuilder;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyMap;
 
 public class TargetState {
 
@@ -21,7 +43,7 @@ public class TargetState {
 
     private Set<DeploymentConfig> deploymentConfigs = new HashSet<>();
 
-    private Set<ConfigMap> topicConfigMaps = new HashSet<>();
+    private Set<CustomResource> topicCrds = new HashSet<>();
 
     private Set<ConfigMap> evConfigMaps = new HashSet<>();
 
@@ -47,12 +69,12 @@ public class TargetState {
         this.deploymentConfigs = deploymentConfigs;
     }
 
-    public Set<ConfigMap> getTopicConfigMaps() {
-        return topicConfigMaps;
+    public Set<CustomResource> getTopicCrds() {
+        return topicCrds;
     }
 
-    public void setTopicConfigMaps(Set<ConfigMap> topicConfigMaps) {
-        this.topicConfigMaps = topicConfigMaps;
+    public void setTopicCrds(Set<CustomResource> topicCrds) {
+        this.topicCrds = topicCrds;
     }
 
     public Set<ConfigMap> getEvConfigMaps() {
@@ -67,8 +89,8 @@ public class TargetState {
         return deploymentConfigs.add(deploymentConfig);
     }
 
-    public boolean add(ConfigMap configMap) {
-        return topicConfigMaps.add(configMap);
+    public boolean add(CustomResource customResource) {
+        return topicCrds.add(customResource);
     }
 
     public Set<String> getDeploymentConfigNames() {
@@ -80,7 +102,7 @@ public class TargetState {
 
     public Set<String> getConfigMapNames() {
         Set<String> topics =
-                topicConfigMaps.stream()
+                topicCrds.stream()
                         .map(cm -> cm.getMetadata().getName())
                         .collect(Collectors.toSet());
 
@@ -109,7 +131,7 @@ public class TargetState {
                         .collect(Collectors.toSet()));
 
 
-        topicConfigMaps.addAll(flow.getLinks().stream()
+        topicCrds.addAll(flow.getLinks().stream()
                 .filter(link -> link.getSource().getParent().getProcessorType().equals(ProcessorConstants.ProcessorType.DEPLOYABLE_IMAGE))
                 .filter(link -> calculateTopicHost(link.getSource().getParent()).equals(cloudName))
                 .map(this::buildTopicConfigMaps)
@@ -232,14 +254,9 @@ public class TargetState {
 
     }
 
-    private ConfigMap buildTopicConfigMaps(ProcessorLink link) {
+    private CustomResource buildTopicConfigMaps(ProcessorLink link) {
 
-        String topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
-
-        final Map<String, String> data = new HashMap<>();
-        data.put("name", topicName);
-        data.put("partitions", "20");
-        data.put("replicas", "1");
+        final String topicName = flow.getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
 
         final Map<String, String> labels = new HashMap<>();
         labels.put("strimzi.io/cluster", "my-cluster");
@@ -247,13 +264,16 @@ public class TargetState {
         labels.put("streamzi.io/source", "autocreated");
         labels.put("app", flow.getName());
 
-        return new ConfigMapBuilder()
-                .withNewMetadata()
-                .withName(topicName)
-                .withLabels(labels)
-                .endMetadata()
-                .withData(data)
+        final KafkaTopic topic = new KafkaTopicBuilder()
+                .withMetadata(new ObjectMetaBuilder().withName(topicName).withLabels(labels).build())
+                .withNewSpec()
+                    .withReplicas(1)
+                    .withPartitions(20)
+                    .withConfig(emptyMap())
+                .endSpec()
                 .build();
+
+        return topic;
     }
 
 
@@ -264,7 +284,6 @@ public class TargetState {
 
         Optional<String> optCloud = node.getTargetClouds().keySet().stream().max(Comparator.comparingInt(key -> node.getTargetClouds().get(key)));
         return optCloud.orElse("UNKNONW");
-
     }
 
 }

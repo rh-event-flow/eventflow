@@ -80,12 +80,12 @@ public class DeploymentTest {
         localTarget.build();
 
         assertThat(localTarget.getDeploymentConfigs().size()).isEqualTo(2);
-        assertThat(localTarget.getTopicConfigMaps().size()).isEqualTo(1);
+        assertThat(localTarget.getTopicCrds().size()).isEqualTo(1);
 
         TargetState azureTarget = new TargetState("azure", flow, bootstrapServerCache);
         azureTarget.build();
 
-        assertThat(azureTarget.getTopicConfigMaps().size()).isEqualTo(0);
+        assertThat(azureTarget.getTopicCrds().size()).isEqualTo(0);
 
         System.out.println("Done");
 

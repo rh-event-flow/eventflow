@@ -150,6 +150,11 @@
             <name>JBoss Thirdparty Releases</name>
             <url>https://repository.jboss.org/nexus/service/local/repositories/thirdparty-releases/content/</url>
         </repository>
+        <repository>
+            <id>jboss-thirdparty-uploads</id>
+            <name>JBoss Thirdparty Uploads</name>
+            <url>https://repository.jboss.org/nexus/service/local/repositories/thirdparty-uploads/content/</url>
+        </repository>
     </repositories>
 
 </project>
