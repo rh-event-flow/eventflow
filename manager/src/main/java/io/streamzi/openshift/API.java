@@ -33,7 +33,7 @@ public class API {
     private ClientContainer container;
 
     /* Global settings that each block gets */
-    private final String bootstrapServersDefault = "my-cluster-kafka:9092";
+    private final String bootstrapServersDefault = "my-cluster-kafka-bootstrap:9092";
     private final String brokerUrlDefault = "amqp://dispatch.myproject.svc:5672";
 
     @GET
