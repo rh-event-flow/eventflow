@@ -42,8 +42,8 @@ public class DeploymentTest {
     public void testConversionToDC() throws Exception {
 
         Map<String, String> bootstrapServerCache = new HashMap<>();
-        bootstrapServerCache.put("local", "my-cluster-kafka:9092");
-        bootstrapServerCache.put("azure", "my-cluster-kafka:9092");
+        bootstrapServerCache.put("local", "my-cluster-kafka-bootstrap:9092");
+        bootstrapServerCache.put("azure", "my-cluster-kafka-bootstrap:9092");
 
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("deployment-cr.json");
 
@@ -68,8 +68,8 @@ public class DeploymentTest {
     public void testStickyCloud() throws Exception {
 
         Map<String, String> bootstrapServerCache = new HashMap<>();
-        bootstrapServerCache.put("local", "my-cluster-kafka:9092");
-        bootstrapServerCache.put("azure", "my-cluster-kafka:9092");
+        bootstrapServerCache.put("local", "my-cluster-kafka-bootstrap:9092");
+        bootstrapServerCache.put("azure", "my-cluster-kafka-bootstrap:9092");
 
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("sticky-cr.json");
 
@@ -80,12 +80,12 @@ public class DeploymentTest {
         localTarget.build();
 
         assertThat(localTarget.getDeploymentConfigs().size()).isEqualTo(2);
-        assertThat(localTarget.getTopicConfigMaps().size()).isEqualTo(1);
+        assertThat(localTarget.getTopicCrds().size()).isEqualTo(1);
 
         TargetState azureTarget = new TargetState("azure", flow, bootstrapServerCache);
         azureTarget.build();
 
-        assertThat(azureTarget.getTopicConfigMaps().size()).isEqualTo(0);
+        assertThat(azureTarget.getTopicCrds().size()).isEqualTo(0);
 
         System.out.println("Done");
 
