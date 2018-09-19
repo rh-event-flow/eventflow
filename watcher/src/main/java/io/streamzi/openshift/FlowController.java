@@ -9,6 +9,10 @@ import io.streamzi.openshift.dataflow.crds.Flow;
 import io.streamzi.openshift.dataflow.crds.FlowList;
 import io.streamzi.openshift.dataflow.deployment.TargetState;
 import io.streamzi.openshift.dataflow.model.ProcessorFlow;
+import io.strimzi.api.kafka.Crds;
+import io.strimzi.api.kafka.KafkaTopicList;
+import io.strimzi.api.kafka.model.DoneableKafkaTopic;
+import io.strimzi.api.kafka.model.KafkaTopic;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -48,11 +52,11 @@ public class FlowController {
                     target.build();
 
                     //create / update Strimzi Topic configmaps
-                    target.getTopicConfigMaps()
-                            .forEach(cm -> client.configMaps()
+                    target.getTopicCrds()
+                            .forEach(cr -> client.customResources(Crds.topic(), KafkaTopic.class, KafkaTopicList.class, DoneableKafkaTopic.class)
                                     .inNamespace(client.getNamespace())
-                                    .withName(cm.getMetadata().getName())
-                                    .createOrReplace(cm));
+                                    .withName(cr.getMetadata().getName())
+                                    .createOrReplace((KafkaTopic) cr));
 
                     //create / update deployments
                     target.getDeploymentConfigs().forEach(dc -> client.deploymentConfigs()

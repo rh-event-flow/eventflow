@@ -47,7 +47,7 @@
   ],
   "settings": {},
   "globalSettings": {
-    "STREAMZI_KAFKA_BOOTSTRAP_SERVER": "my-cluster-kafka:9092",
+    "STREAMZI_KAFKA_BOOTSTRAP_SERVER": "my-cluster-kafka-bootstrap:9092",
     "broker.url": "amqp://dispatch.myproject.svc:5672"
   },
   "name": "f"
