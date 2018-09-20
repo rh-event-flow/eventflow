@@ -63,8 +63,8 @@ public class ProcessorRunner implements Runnable {
             AnnotationDetector detector = new AnnotationDetector(reporter);
             detector.detect();            
         } catch (Exception e){
-            e.printStackTrace();
-        }        
+            logger.log(Level.SEVERE, "Exception", e);
+        }
         
     }
     
@@ -82,15 +82,15 @@ public class ProcessorRunner implements Runnable {
     
     public static void main(String[] args){
         //Print all of the environment variable
-        Map<String, String> env = System.getenv();
+        final Map<String, String> env = System.getenv();
         for(String key : env.keySet()){
-            System.out.println(key + "=" + env.get(key));
+            logger.info(key + "=" + env.get(key));
         }
         ProcessorRunner runner = new ProcessorRunner();
         new Thread(runner).start();
         
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("SHUTDOWN");
+            logger.warning("SHUTDOWN");
             System.exit(0);
         }));                  
     }

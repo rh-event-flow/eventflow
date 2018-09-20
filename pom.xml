@@ -42,6 +42,7 @@
     </properties>
 
     <modules>
+        <module>common</module>
         <module>model</module>
         <module>container</module>
         <module>manager</module>

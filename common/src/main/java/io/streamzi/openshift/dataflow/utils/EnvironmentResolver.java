@@ -1,14 +1,17 @@
-package io.streamzi.openshift.dataflow.container.config;
+package io.streamzi.openshift.dataflow.utils;
 
 /**
  * Simple class to look for an environment variable and then System.properties
  * if it doesn't exist
  *
- * @author hhiden
  */
-public class EnvironmentResolver {
+public final class EnvironmentResolver {
 
-    public static String get(String key) {
+    private EnvironmentResolver() {
+        // no-op
+    }
+
+    public static String get(final String key) {
         String resolved = resolve(key);
         if (resolved != null) {
             return resolved;
@@ -20,12 +23,12 @@ public class EnvironmentResolver {
         }
 
         resolved = resolve(key.replace(".", "_"));
-        if(resolved != null){
+        if (resolved != null) {
             return resolved;
         }
 
         resolved = resolve(key.replace(".", "_").replace("-", "_"));
-        if(resolved != null){
+        if (resolved != null) {
             return resolved;
         }
 
@@ -37,19 +40,7 @@ public class EnvironmentResolver {
         return resolved;
     }
 
-    private static String resolve(String key) {
-
-        String value = System.getenv(key);
-
-        if (value != null) {
-            return value;
-        } else {
-            return System.getProperty(key);
-        }
-
-    }
-    
-    public static boolean exists(String key){
+    public static boolean exists(final String key){
         String resolved = resolve(key);
         if (resolved != null) {
             return true;
@@ -75,11 +66,22 @@ public class EnvironmentResolver {
                 .replace("-", "_")
                 .toUpperCase());
 
-        if(resolved!=null){
+        if(resolved != null){
             return true;
         } else {
             return false;
         }
-        
+    }
+
+    private static String resolve(final String key) {
+
+        final String value = System.getenv(key);
+
+        if (value != null) {
+            return value;
+        } else {
+            return System.getProperty(key);
+        }
+
     }
 }

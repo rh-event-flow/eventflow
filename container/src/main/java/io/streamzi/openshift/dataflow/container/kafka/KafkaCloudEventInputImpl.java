@@ -12,7 +12,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.streamzi.cloudevents.CloudEvent;
 import io.streamzi.cloudevents.impl.CloudEventImpl;
 import io.streamzi.openshift.dataflow.container.CloudEventInput;
-import io.streamzi.openshift.dataflow.container.config.EnvironmentResolver;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -20,6 +19,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.apache.kafka.clients.CommonClientConfigs.*;
+
+import io.streamzi.openshift.dataflow.utils.EnvironmentResolver;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
