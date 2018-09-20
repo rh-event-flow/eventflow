@@ -10,6 +10,10 @@ import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.streamzi.openshift.dataflow.crds.*;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
+import io.strimzi.api.kafka.Crds;
+import io.strimzi.api.kafka.KafkaTopicList;
+import io.strimzi.api.kafka.model.DoneableKafkaTopic;
+import io.strimzi.api.kafka.model.KafkaTopic;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
@@ -33,7 +37,7 @@ public class API {
     private ClientContainer container;
 
     /* Global settings that each block gets */
-    private final String bootstrapServersDefault = "my-cluster-kafka:9092";
+    private final String bootstrapServersDefault = "my-cluster-kafka-bootstrap:9092";
     private final String brokerUrlDefault = "amqp://dispatch.myproject.svc:5672";
 
     @GET
@@ -172,26 +176,20 @@ public class API {
         }
     }
 
-    //todo: Have these been replaced by CRs in Strimzi?
     @GET
     @Path("/topics")
     @Produces("application/json")
-    public List<String> listTopics() {
-        ConfigMapList list = container.getOSClient().configMaps().withLabel("strimzi.io/kind", "topic").list();
+    public List<String> listTopicNames() {
 
-        ArrayList<String> results = new ArrayList<>();
-        for (ConfigMap cm : list.getItems()) {
-            if (cm.getMetadata().getLabels().containsKey("streamzi.io/source")) {
-                // This is one of ours - add it if it wasn't autocreated
-                String source = cm.getMetadata().getLabels().get("streamzi.io/source");
-                if (source == null || source.isEmpty() || !source.equalsIgnoreCase("autocreated")) {
-                    results.add(cm.getMetadata().getName());
-                }
-            } else {
-                results.add(cm.getData().get("name"));
-            }
-        }
-        return results;
+        return container.getOSClient().customResources(
+                Crds.topic(),
+                KafkaTopic.class,
+                KafkaTopicList.class,
+                DoneableKafkaTopic.class)
+                .inNamespace(container.getOSClient().getNamespace()).list().getItems().stream()
+                .filter(kafkaTopic -> (kafkaTopic.getMetadata().getLabels().get("streamzi.io/source") == null ))
+                .map(flow -> flow.getMetadata().getName())
+                .collect(Collectors.toList());
     }
 
     @GET
