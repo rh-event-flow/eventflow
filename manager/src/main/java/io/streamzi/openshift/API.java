@@ -3,13 +3,12 @@ package io.streamzi.openshift;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.streamzi.openshift.dataflow.crds.*;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
 import io.streamzi.openshift.dataflow.serialization.SerializedFlow;
+import io.streamzi.openshift.dataflow.utils.EnvironmentResolver;
 import io.strimzi.api.kafka.Crds;
 import io.strimzi.api.kafka.KafkaTopicList;
 import io.strimzi.api.kafka.model.DoneableKafkaTopic;
@@ -154,14 +153,14 @@ public class API {
     public String getGlobalProperties() {
         final Properties props = new Properties();
 
-        String bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
+        final String bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
         if (bootstrapServers != null && !bootstrapServers.equals("")) {
             props.put(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS, bootstrapServers);
         } else {
             props.put(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS, bootstrapServersDefault);
         }
 
-        String brokerUrl = EnvironmentResolver.get("broker.url");
+        final String brokerUrl = EnvironmentResolver.get("broker.url");
         if (brokerUrl != null && !brokerUrl.equals("")) {
             props.put("broker.url", brokerUrl);
         } else {

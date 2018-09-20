@@ -1,8 +1,9 @@
 package io.streamzi.openshift.dataflow.container;
 
 import io.streamzi.openshift.dataflow.annotations.CloudEventProducerTarget;
-import io.streamzi.openshift.dataflow.container.config.EnvironmentResolver;
 import io.streamzi.openshift.dataflow.model.ProcessorConstants;
+import io.streamzi.openshift.dataflow.utils.EnvironmentResolver;
+
 import java.util.logging.Logger;
 
 /**

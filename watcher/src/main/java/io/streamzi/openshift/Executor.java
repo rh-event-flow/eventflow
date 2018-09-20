@@ -20,8 +20,7 @@ public class Executor {
 
     //Setup the logger nicely
     static {
-        InputStream stream = Executor.class.getClassLoader().
-                getResourceAsStream("logging.properties");
+        InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logging.properties");
         try {
             LogManager.getLogManager().readConfiguration(stream);
             logger = Logger.getLogger(Executor.class.getName());
