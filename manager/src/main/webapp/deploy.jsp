@@ -4,7 +4,7 @@
     Author     : hhiden
 --%>
 
-<%@page import="io.streamzi.openshift.ProcessorFlowManager"%>
+<%@page import="io.streamzi.eventflow.ProcessorFlowManager"%>
 <%@page import="javax.naming.InitialContext"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
