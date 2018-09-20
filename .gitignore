@@ -92,6 +92,9 @@ modules.xml
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+### VS Code ###
+.factorypath
+
 ### Maven ###
 target/
 pom.xml.tag
@@ -115,6 +118,7 @@ dist/
 nbdist/
 .nb-gradle/
 nbactions.xml
+nb-configuration.xml
 
 ### OSX ###
 *.DS_Store
