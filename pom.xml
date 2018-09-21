@@ -47,7 +47,7 @@
         <module>model</module>
         <module>container</module>
         <module>manager</module>
-        <module>watcher</module>
+        <module>operator</module>
     </modules>
 
     <dependencyManagement>

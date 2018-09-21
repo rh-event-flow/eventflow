@@ -6,8 +6,8 @@
         <artifactId>parent</artifactId>
         <version>0.0.4-SNAPSHOT</version>
     </parent>
-    <name>eventflow-watcher</name>
-    <artifactId>watcher</artifactId>
+    <name>eventflow-operator</name>
+    <artifactId>operator</artifactId>
     <packaging>jar</packaging>
 
 
@@ -86,7 +86,7 @@
                     <images>
                         <image>
                             <alias>watcher</alias>
-                            <name>docker.io/streamzi/cef-watcher</name>
+                            <name>docker.io/streamzi/cef-operator</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>
