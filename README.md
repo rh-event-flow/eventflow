@@ -1,5 +1,5 @@
-# cloudevent-flow
-Simple dataflow for CloudEvents
+# EventFlow
+Simple dataflow for CloudEvents, over Kafka and other protocols
 
 ## Manager/Watcher Installation
 
