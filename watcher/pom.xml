@@ -60,7 +60,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.streamzi.openshift.Executor</mainClass>
+                                    <mainClass>io.streamzi.eventflow.Executor</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
