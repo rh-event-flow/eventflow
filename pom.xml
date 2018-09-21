@@ -8,15 +8,16 @@
         <version>27</version>
     </parent>
 
-    <groupId>io.streamzi.cloudevent-flow</groupId>
+    <groupId>io.streamzi.eventflow</groupId>
     <artifactId>parent</artifactId>
+    <name>eventflow-${project.artifactId}</name>
     <version>0.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:git:git://github.com/project-streamzi/cloudevent-flow.git</connection>
-        <developerConnection>scm:git:git@github.com:project-streamzi/cloudevent-flow.git</developerConnection>
-        <url>https://github.com/project-streamzi/cloudevent-flow</url>
+        <connection>scm:git:git://github.com/project-streamzi/eventflow.git</connection>
+        <developerConnection>scm:git:git@github.com:project-streamzi/eventflow.git</developerConnection>
+        <url>https://github.com/project-streamzi/eventflow</url>
         <tag>HEAD</tag>
     </scm>
 
