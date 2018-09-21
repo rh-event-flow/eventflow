@@ -2,22 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.streamzi.cloudevent-flow</groupId>
+        <groupId>io.streamzi.eventflow</groupId>
         <artifactId>parent</artifactId>
         <version>0.0.4-SNAPSHOT</version>
     </parent>
 
-    <name>cloudevent-flow-${project.artifactId}</name>
-    <artifactId>manager</artifactId>
+    <name>eventflow-${project.artifactId}</name>
+    <artifactId>ui</artifactId>
     <packaging>war</packaging>
 
 
     <properties>
         <version.thorntail>2.1.0.Final</version.thorntail>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
@@ -65,22 +61,21 @@
         </dependency>
 
         <dependency>
-            <groupId>io.streamzi.cloudevent-flow</groupId>
-            <artifactId>model</artifactId>
+            <groupId>io.streamzi.eventflow</groupId>
+            <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>io.streamzi.cloudevent-flow</groupId>
-            <artifactId>common</artifactId>
+            <groupId>io.streamzi.eventflow</groupId>
+            <artifactId>model</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.18</version>
-        </dependency>        
+        </dependency>
         
         <dependency>
             <groupId>org.json</groupId>
@@ -94,7 +89,7 @@
     </dependencies>
 
     <build>
-        <finalName>flow-manager</finalName>
+        <finalName>ui</finalName>
         <plugins>
             <plugin>
                 <groupId>io.thorntail</groupId>
@@ -118,13 +113,12 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.26.1</version>
 
                 <configuration>
                     <images>
                         <image>
-                            <alias>manager</alias>
-                            <name>docker.io/streamzi/cef-manager</name>
+                            <alias>ui</alias>
+                            <name>docker.io/streamzi/eventflow-ui</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>

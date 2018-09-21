@@ -8,15 +8,16 @@
         <version>27</version>
     </parent>
 
-    <groupId>io.streamzi.cloudevent-flow</groupId>
+    <groupId>io.streamzi.eventflow</groupId>
     <artifactId>parent</artifactId>
+    <name>eventflow-${project.artifactId}</name>
     <version>0.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:git:git://github.com/project-streamzi/cloudevent-flow.git</connection>
-        <developerConnection>scm:git:git@github.com:project-streamzi/cloudevent-flow.git</developerConnection>
-        <url>https://github.com/project-streamzi/cloudevent-flow</url>
+        <connection>scm:git:git://github.com/project-streamzi/eventflow.git</connection>
+        <developerConnection>scm:git:git@github.com:project-streamzi/eventflow.git</developerConnection>
+        <url>https://github.com/project-streamzi/eventflow</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -31,7 +32,6 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.9.6</jackson.version>
         <openshift.fabric8.version>4.0.4</openshift.fabric8.version>
@@ -43,10 +43,11 @@
 
     <modules>
         <module>common</module>
+        <module>sdk</module>
         <module>model</module>
-        <module>container</module>
-        <module>manager</module>
-        <module>watcher</module>
+        <module>runtime</module>
+        <module>operator</module>
+        <module>ui</module>
     </modules>
 
     <dependencyManagement>
@@ -86,7 +87,13 @@
                 <artifactId>kafka-clients</artifactId>
                 <version>1.0.0</version>
             </dependency>
-            
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.18</version>
+            </dependency>
+
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
@@ -140,6 +147,12 @@
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                         <attachClasses>true</attachClasses>
                     </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.26.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>

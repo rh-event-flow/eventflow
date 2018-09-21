@@ -6,7 +6,7 @@
         <artifactId>parent</artifactId>
         <version>0.0.4-SNAPSHOT</version>
     </parent>
-    <artifactId>common</artifactId>
+    <artifactId>sdk</artifactId>
     <name>eventflow-${project.artifactId}</name>
     <packaging>jar</packaging>
 

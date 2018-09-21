@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.streamzi.cloudevent-flow</groupId>
+        <groupId>io.streamzi.eventflow</groupId>
         <artifactId>parent</artifactId>
         <version>0.0.4-SNAPSHOT</version>
     </parent>
-    <name>cloudevent-flow-watcher</name>
-    <artifactId>watcher</artifactId>
+    <name>eventflow-operator</name>
+    <artifactId>operator</artifactId>
     <packaging>jar</packaging>
 
 
     <dependencies>
         <dependency>
-            <groupId>io.streamzi.cloudevent-flow</groupId>
+            <groupId>io.streamzi.eventflow</groupId>
             <artifactId>model</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -21,7 +21,6 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.18</version>
         </dependency>
 
         <dependency>
@@ -69,24 +68,14 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.26.1</version>
 
                 <configuration>
                     <images>
                         <image>
-                            <alias>watcher</alias>
-                            <name>docker.io/streamzi/cef-watcher</name>
+                            <alias>operator</alias>
+                            <name>docker.io/streamzi/eventflow-operator</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>

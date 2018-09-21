@@ -1,8 +1,6 @@
 package io.streamzi.eventflow.annotations;
 
 
-import io.streamzi.cloudevents.CloudEvent;
-
 /**
  * This interface defines an object that can receive cloud events
  * @author hhiden
