@@ -32,7 +32,6 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.9.6</jackson.version>
         <openshift.fabric8.version>4.0.4</openshift.fabric8.version>
@@ -88,7 +87,13 @@
                 <artifactId>kafka-clients</artifactId>
                 <version>1.0.0</version>
             </dependency>
-            
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.18</version>
+            </dependency>
+
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
@@ -142,6 +147,12 @@
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                         <attachClasses>true</attachClasses>
                     </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.26.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>

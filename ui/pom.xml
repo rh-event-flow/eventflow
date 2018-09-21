@@ -14,7 +14,6 @@
 
     <properties>
         <version.thorntail>2.1.0.Final</version.thorntail>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
     </properties>
 
     <dependencyManagement>
@@ -76,8 +75,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.18</version>
-        </dependency>        
+        </dependency>
         
         <dependency>
             <groupId>org.json</groupId>
@@ -115,7 +113,6 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.26.1</version>
 
                 <configuration>
                     <images>
