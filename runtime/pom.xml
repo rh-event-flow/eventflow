@@ -13,13 +13,19 @@
     <dependencies>
         <dependency>
             <groupId>io.streamzi.eventflow</groupId>
-            <artifactId>model</artifactId>
+            <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.streamzi.eventflow</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>sdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.streamzi.eventflow</groupId>
+            <artifactId>model</artifactId>
             <version>${project.version}</version>
         </dependency>
 
