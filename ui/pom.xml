@@ -66,13 +66,13 @@
 
         <dependency>
             <groupId>io.streamzi.eventflow</groupId>
-            <artifactId>model</artifactId>
+            <artifactId>common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.streamzi.eventflow</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>model</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -123,7 +123,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <alias>manager</alias>
+                            <alias>ui</alias>
                             <name>docker.io/streamzi/eventflow-ui</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>

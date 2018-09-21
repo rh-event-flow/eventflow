@@ -44,10 +44,11 @@
 
     <modules>
         <module>common</module>
+        <module>sdk</module>
         <module>model</module>
         <module>runtime</module>
-        <module>ui</module>
         <module>operator</module>
+        <module>ui</module>
     </modules>
 
     <dependencyManagement>

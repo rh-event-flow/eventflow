@@ -85,7 +85,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <alias>watcher</alias>
+                            <alias>operator</alias>
                             <name>docker.io/streamzi/cef-operator</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
