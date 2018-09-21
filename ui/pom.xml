@@ -8,7 +8,7 @@
     </parent>
 
     <name>eventflow-${project.artifactId}</name>
-    <artifactId>manager</artifactId>
+    <artifactId>ui</artifactId>
     <packaging>war</packaging>
 
 
@@ -94,7 +94,7 @@
     </dependencies>
 
     <build>
-        <finalName>flow-manager</finalName>
+        <finalName>ui</finalName>
         <plugins>
             <plugin>
                 <groupId>io.thorntail</groupId>
@@ -124,7 +124,7 @@
                     <images>
                         <image>
                             <alias>manager</alias>
-                            <name>docker.io/streamzi/cef-manager</name>
+                            <name>docker.io/streamzi/eventflow-ui</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>
