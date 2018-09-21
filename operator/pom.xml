@@ -86,7 +86,7 @@
                     <images>
                         <image>
                             <alias>operator</alias>
-                            <name>docker.io/streamzi/cef-operator</name>
+                            <name>docker.io/streamzi/eventflow-operator</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>

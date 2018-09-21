@@ -7,10 +7,10 @@ else
     echo "Login into Docker Hub ..."
     echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.io
 
-    docker build -t docker.io/streamzi/cef-manager:latest manager
-    docker push docker.io/streamzi/cef-manager:latest
+    docker build -t docker.io/streamzi/eventflow-operator:latest operator
+    docker push docker.io/streamzi/eventflow-operator:latest
 
-    docker build -t docker.io/streamzi/cef-watcher:latest watcher
-    docker push docker.io/streamzi/cef-watcher:latest
+    docker build -t docker.io/streamzi/eventflow-ui:latest ui
+    docker push docker.io/streamzi/eventflow-ui:latest
 
 fi
