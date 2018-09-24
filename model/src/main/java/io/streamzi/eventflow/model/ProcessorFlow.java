@@ -15,7 +15,6 @@ public class ProcessorFlow implements Serializable {
     private List<ProcessorNode> nodes = new ArrayList<>();
     private String name;
     private Map<String, String> settings = new HashMap<>();
-    private Map<String, String> globalSettings = new HashMap<>();
 
     public ProcessorFlow() {
     }
@@ -32,8 +31,6 @@ public class ProcessorFlow implements Serializable {
         flow.getLinks().forEach(link -> this.linkNodes(link.getSourceUuid(), link.getSourcePortName(), link.getTargetUuid(), link.getTargetPortName()));
 
         flow.getSettings().keySet().forEach(key -> this.getSettings().put(key, flow.getSettings().get(key)));
-
-        flow.getGlobalSettings().keySet().forEach(key -> this.getGlobalSettings().put(key, flow.getGlobalSettings().get(key)));
     }
 
     public String getName() {
@@ -44,14 +41,6 @@ public class ProcessorFlow implements Serializable {
         this.name = name;
     }
 
-    public Map<String, String> getGlobalSettings() {
-        return globalSettings;
-    }
-
-    public void setGlobalSettings(Map<String, String> globalSettings) {
-        this.globalSettings = globalSettings;
-    }
-    
     public Map<String, String> getSettings() {
         return settings;
     }

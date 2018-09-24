@@ -43,10 +43,6 @@ public class API {
     @EJB(beanInterface = ClientContainer.class)
     private ClientContainer container;
 
-    /* Global settings that each block gets */
-    private final String bootstrapServersDefault = "my-cluster-kafka-bootstrap:9092";
-    private final String brokerUrlDefault = "amqp://dispatch.myproject.svc:5672";
-
     @GET
     @Path("/pods")
     @Produces("application/json")
@@ -152,34 +148,6 @@ public class API {
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error parsing JSON flow data: " + e.getMessage(), e);
-        }
-    }
-
-    @GET
-    @Path("/globalproperties")
-    @Produces("application/json")
-    public String getGlobalProperties() {
-        final Properties props = new Properties();
-
-        final String bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
-        if (bootstrapServers != null && !bootstrapServers.equals("")) {
-            props.put(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS, bootstrapServers);
-        } else {
-            props.put(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS, bootstrapServersDefault);
-        }
-
-        final String brokerUrl = EnvironmentResolver.get("broker.url");
-        if (brokerUrl != null && !brokerUrl.equals("")) {
-            props.put("broker.url", brokerUrl);
-        } else {
-            props.put("broker.url", brokerUrlDefault);
-        }
-
-        try {
-            return MAPPER.writeValueAsString(props);
-        } catch (JsonProcessingException e) {
-            logger.severe(e.getMessage());
-            return "{}";
         }
     }
 
