@@ -1,41 +1,31 @@
 # EventFlow
-Simple dataflow for CloudEvents, over Kafka and other protocols
+Simple EventFlow implementation based on CloudEvents, over Kafka and other protocols, running on Openshift!
 
-## Manager/Watcher Installation
+## Installation
 
-### Automated
+Use the [OCP Broker](https://github.com/project-streamzi/ocp-broker) to deploy Strimzi and then the EventFlow component.
 
-Use the [OCP Broker](https://github.com/project-streamzi/ocp-broker) to deploy Strimzi and then the CloudEvent flow
 
-### Manual
+### Artifacts
 
-1. Deploy [Strimzi](http://strimzi.io).
+The EventFlow component consists of a few different artifacts:
 
-2. Deploy the EnvironmentVariable Operator as this project uses it to inject the configuration from ConfigMaps
+* `common`: Commonly used classes and generic utilities, shared across different modules. 
+* `model`: An abstract representation of an EventFlow and its associated `Processor`s, their links etc. 
+* `sdk`: APIs and Annotations for developers to implement `Processor` implementations.
+* `runtime`: Simple JavaSE runtime, responsible for instantiating the `Processor` objects and perform the wiring to the underlying transport protocol.
+* `operator`: Java implementation of the [Kubernetes Operator Pattern](https://coreos.com/blog/introducing-operators.html), watching `Flow` and `Processor` custom resources
+* `ui`: very simple editor for creating an EvenFlow based on available (Kafka) `topics` and `Processor` objects.
 
-3. If you have the [OCP Broker](https://github.com/project-streamzi/ocp-broker) installed the Environment Variable Operator will be available from the Service Catalog.
-If not, follow the steps below.
-
-```bash
-$ git clone https://github.com/project-streamzi/EnvironmentVariableOperator.git
-$ cd EnvironmentVariableOperator
-$ oc login -u system:admin
-$ oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:myproject:default
-$ oc login -u developer
-$ mvn clean pacakge fabric8:deploy -Popenshift
-```
-
-Install the Manager and Watcher components by running `mvn clean package fabric8:deploy` in the `manager` and `watcher` directories.
-The Manager contains the UI and API to support it - the API will create a ConfigMap containing the abstract flow in OpenShift. 
-The Watcher will be notified of the presence of the flow `ConfigMap` and will deploy the necessary components (DeploymentConfigs and ConfigMaps).
-
-The Manager can be run outside OpenShift using `mvn clean package thorntail:start`.
-The Watcher can be run outside OpenShift using `mvn clean package; java -jar target/FlowController.jar`.
-
-4. Register the CustomResourceDefinition for the Stream Processors
-
-`oc create -f manager/src/main/resources/processor-crd.ymk`
 
 ## Stream Processors
 
 A number of stream processors are available [here](https://github.com/project-streamzi/event-flow-operation-samples)!
+
+## Maven Archetype
+
+We have a few [Maven archetypes](https://github.com/project-streamzi/processor-archetypes) for getting quickly up to speed with our SDK:
+
+* `source`: Implements a sample for a data source, sending data to the EventFlow
+* `sink`: Implements a sample for a data sink, receiving data from the EventFlow
+* `processor`: Combines a `source` and a `sink`.
