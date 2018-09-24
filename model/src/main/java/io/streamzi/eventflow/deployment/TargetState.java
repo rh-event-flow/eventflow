@@ -9,7 +9,6 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.streamzi.eventflow.FlowUtil;
-
 import io.streamzi.eventflow.model.ProcessorConstants;
 import io.streamzi.eventflow.model.ProcessorFlow;
 import io.streamzi.eventflow.model.ProcessorInputPort;
@@ -262,9 +261,9 @@ public class TargetState {
         final KafkaTopic topic = new KafkaTopicBuilder()
                 .withMetadata(new ObjectMetaBuilder().withName(topicName).withLabels(labels).build())
                 .withNewSpec()
-                    .withReplicas(1)
-                    .withPartitions(20)
-                    .withConfig(emptyMap())
+                .withReplicas(1)
+                .withPartitions(20)
+                .withConfig(emptyMap())
                 .endSpec()
                 .build();
 

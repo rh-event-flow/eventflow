@@ -20,13 +20,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- *
  * @author hhiden
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    POJOTest.class
+        POJOTest.class
 })
 public class ContainerTestSuite {
-    
+
 }

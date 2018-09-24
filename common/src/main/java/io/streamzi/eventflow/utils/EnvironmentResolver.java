@@ -3,7 +3,6 @@ package io.streamzi.eventflow.utils;
 /**
  * Simple class to look for an environment variable and then System.properties
  * if it doesn't exist
- *
  */
 public final class EnvironmentResolver {
 
@@ -40,7 +39,7 @@ public final class EnvironmentResolver {
         return resolved;
     }
 
-    public static boolean exists(final String key){
+    public static boolean exists(final String key) {
         String resolved = resolve(key);
         if (resolved != null) {
             return true;
@@ -52,12 +51,12 @@ public final class EnvironmentResolver {
         }
 
         resolved = resolve(key.replace(".", "_"));
-        if(resolved != null){
+        if (resolved != null) {
             return true;
         }
 
         resolved = resolve(key.replace(".", "_").replace("-", "_"));
-        if(resolved != null){
+        if (resolved != null) {
             return true;
         }
 
@@ -66,7 +65,7 @@ public final class EnvironmentResolver {
                 .replace("-", "_")
                 .toUpperCase());
 
-        if(resolved != null){
+        if (resolved != null) {
             return true;
         } else {
             return false;

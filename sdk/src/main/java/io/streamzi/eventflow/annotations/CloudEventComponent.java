@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a class as able to participate in a CloudEvent processor flow
+ *
  * @author hhiden
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CloudEventComponent {
-    
+
 }

@@ -30,8 +30,8 @@ public class SerializedNode {
     private List<String> outputs = new ArrayList<>();
     private Map<String, Integer> targetClouds = new HashMap<>();
     private String outputCloud;
-    
-    
+
+
     private String imageName;
     private Map<String, String> settings = new HashMap<>();
 
@@ -60,8 +60,8 @@ public class SerializedNode {
         for (ProcessorInputPort input : node.getInputs().values()) {
             this.inputs.add(input.getName());
         }
-        
-        for(String id: node.getTargetClouds().keySet()){
+
+        for (String id : node.getTargetClouds().keySet()) {
             this.targetClouds.put(id, node.getTargetClouds().get(id));
         }
     }
@@ -84,7 +84,7 @@ public class SerializedNode {
         for (String output : outputs) {
             node.addOutput(new ProcessorOutputPort(output));
         }
-        for (String id : targetClouds.keySet()){
+        for (String id : targetClouds.keySet()) {
             node.getTargetClouds().put(id, targetClouds.get(id));
         }
 

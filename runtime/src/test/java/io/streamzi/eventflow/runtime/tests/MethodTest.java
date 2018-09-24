@@ -18,15 +18,14 @@ package io.streamzi.eventflow.runtime.tests;
 import io.streamzi.cloudevents.CloudEvent;
 
 /**
- *
  * @author hhiden
  */
 public class MethodTest {
-    public void send(Object obj){
+    public void send(Object obj) {
         System.out.println("Object");
     }
-    
-    public void send(CloudEvent evt){
+
+    public void send(CloudEvent evt) {
         System.out.println("CloudEvent");
     }
 }

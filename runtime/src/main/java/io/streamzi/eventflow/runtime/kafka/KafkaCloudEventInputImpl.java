@@ -11,15 +11,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.streamzi.cloudevents.CloudEvent;
 import io.streamzi.cloudevents.impl.CloudEventImpl;
-import io.streamzi.eventflow.runtime.CloudEventInput;
 import io.streamzi.eventflow.model.ProcessorConstants;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static org.apache.kafka.clients.CommonClientConfigs.*;
-
+import io.streamzi.eventflow.runtime.CloudEventInput;
 import io.streamzi.eventflow.utils.EnvironmentResolver;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -29,6 +22,14 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
+
 /**
  * Connects to a Kafka topic to get cloud events
  *
@@ -37,7 +38,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnable {
     private static final Logger logger = Logger.getLogger(KafkaCloudEventInputImpl.class.getName());
     private ObjectMapper mapper;
-    
+
     private Consumer<String, String> consumer;
     private String topicName;
     private String bootstrapServers;
@@ -46,8 +47,8 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
 
     public KafkaCloudEventInputImpl(Object consumerObject, Method consumerMethod) {
         super(consumerObject, consumerMethod);
-        
-        if(EnvironmentResolver.exists(inputName + "_BOOTSTRAP_SERVERS")){
+
+        if (EnvironmentResolver.exists(inputName + "_BOOTSTRAP_SERVERS")) {
             // There is a bootstrap server environment variable
             logger.info("Bootstrap server Env exists for input: " + inputName);
             bootstrapServers = EnvironmentResolver.get(inputName + "_BOOTSTRAP_SERVERS");
@@ -56,17 +57,17 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
             logger.warning("No Bootstrap server Env exists for input: " + inputName);
             bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
         }
-        
-        
+
+
         logger.info("Kafka broker defined at: " + bootstrapServers);
         topicName = EnvironmentResolver.get(inputName);   // Passed if from deployer via env variable
         logger.info("Input will connect to topic: " + topicName);
-        
+
         mapper = new ObjectMapper();
         mapper.registerModule(new Jdk8Module());
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);           
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 
     @Override
@@ -89,18 +90,18 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
                 final ConsumerRecords<String, String> records = consumer.poll(100);
                 for (ConsumerRecord<String, String> r : records) {
                     try {
-                        switch(objectType){
+                        switch (objectType) {
                             case CLOUDEVENT:
                                 CloudEvent evt = mapper.readValue(r.value(), CloudEventImpl.class);
-                                consumerMethod.invoke(consumerObject, evt);    
+                                consumerMethod.invoke(consumerObject, evt);
                                 break;
                             case OBJECT:
                             default:
                                 Object value = mapper.readValue(r.value(), Object.class);
-                                consumerMethod.invoke(consumerObject, value);                                
+                                consumerMethod.invoke(consumerObject, value);
                         }
 
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         logger.warning("Error running consumer method: " + e.getMessage());
                     }
                 }
@@ -138,7 +139,7 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
     @Override
     public void stopInput() {
         stopInput = true;
-        if(consumer!=null){
+        if (consumer != null) {
             consumer.wakeup();
         }
     }

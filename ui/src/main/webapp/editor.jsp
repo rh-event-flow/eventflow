@@ -52,11 +52,11 @@
 <script type="text/javascript">
     <%if(request.getParameter("flow")!=null){%>
     var _flowName = "<%=request.getParameter("flow")%>";
-        document.getElementById("deploymentName").value = "<%=request.getParameter("flow")%>";
+    document.getElementById("deploymentName").value = "<%=request.getParameter("flow")%>";
     <%} else {%>
-        var _flowName = null;
+    var _flowName = null;
     <%}%>
-            
+
     function submit() {
         var flowName = document.getElementById("deploymentName").value;
         var json = exportJson(flowName);

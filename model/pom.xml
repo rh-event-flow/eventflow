@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.streamzi.eventflow</groupId>
@@ -9,7 +10,7 @@
     <artifactId>model</artifactId>
     <packaging>jar</packaging>
     <name>eventflow-${project.artifactId}</name>
-    
+
     <dependencies>
         <dependency>
             <groupId>io.strimzi</groupId>
@@ -21,7 +22,7 @@
             <groupId>io.streamzi</groupId>
             <artifactId>jcloudevents-api</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -31,12 +32,12 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
@@ -68,9 +69,9 @@
             <artifactId>kubernetes-client</artifactId>
         </dependency>
     </dependencies>
-    
+
     <build>
-        
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -83,5 +84,5 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>        
+    </build>
 </project>

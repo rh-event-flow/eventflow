@@ -8,6 +8,7 @@ import io.streamzi.eventflow.model.ProcessorFlow;
 import io.streamzi.eventflow.model.ProcessorLink;
 import io.streamzi.eventflow.model.ProcessorNode;
 import io.streamzi.eventflow.model.ProcessorOutputPort;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 /**
  * Serialized form of flow
+ *
  * @author hhiden
  */
 @JsonDeserialize(
@@ -24,7 +26,7 @@ public class SerializedFlow implements KubernetesResource {
 
     @JsonIgnore
     private ProcessorFlow flow;
-    
+
     private String name;
 
     private List<SerializedNode> nodes = new ArrayList<>();
@@ -39,20 +41,20 @@ public class SerializedFlow implements KubernetesResource {
     public SerializedFlow(ProcessorFlow flow) {
         this.flow = flow;
         this.name = flow.getName();
-        for(ProcessorNode n : flow.getNodes()){
+        for (ProcessorNode n : flow.getNodes()) {
             nodes.add(new SerializedNode(n));
-            
-            for(ProcessorOutputPort output : n.getOutputs().values()){
-                for(ProcessorLink link : output.getLinks()){
+
+            for (ProcessorOutputPort output : n.getOutputs().values()) {
+                for (ProcessorLink link : output.getLinks()) {
                     links.add(new SerializedLink(link));
                 }
             }
         }
-        
-        for(String key : flow.getSettings().keySet()){
+
+        for (String key : flow.getSettings().keySet()) {
             settings.put(key, flow.getSettings().get(key));
         }
-        
+
     }
 
     public String getName() {
@@ -71,7 +73,7 @@ public class SerializedFlow implements KubernetesResource {
         this.settings = settings;
     }
 
-    public List<SerializedNode> getNodes(){
+    public List<SerializedNode> getNodes() {
         return nodes;
     }
 

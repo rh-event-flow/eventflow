@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 package io.streamzi.eventflow.runtime.tests;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.streamzi.cloudevents.CloudEvent;
 import io.streamzi.cloudevents.CloudEventBuilder;
+import org.junit.Test;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Test;
+
 /**
- *
  * @author hhiden
  */
 public class POJOTest {
@@ -30,14 +32,14 @@ public class POJOTest {
     public void test() throws Exception {
         HashMap<String, Object> data = new HashMap<>();
         data.put("K1", "Value1");
-        data.put("K2",45.02);
+        data.put("K2", 45.02);
         data.put("K3", 34);
-        
+
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(data);
         Object result = mapper.readValue(json, Object.class);
         System.out.println(result.getClass().getName());
-        
+
         MethodTest mt = new MethodTest();
         mt.send(data);
         final Map<String, String> contents = new HashMap<>();
