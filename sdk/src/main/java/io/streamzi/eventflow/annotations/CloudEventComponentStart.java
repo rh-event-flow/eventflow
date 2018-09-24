@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Labels a method to be called when a cloud event component is started
+ *
  * @author hhiden
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CloudEventComponentStart {
-    
+
 }

@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Method run periodically to send data
+ *
  * @author hhiden
  */
 @Target(ElementType.METHOD)

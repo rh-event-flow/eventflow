@@ -261,9 +261,9 @@ public class TargetState {
         final KafkaTopic topic = new KafkaTopicBuilder()
                 .withMetadata(new ObjectMetaBuilder().withName(topicName).withLabels(labels).build())
                 .withNewSpec()
-                    .withReplicas(1)
-                    .withPartitions(20)
-                    .withConfig(emptyMap())
+                .withReplicas(1)
+                .withPartitions(20)
+                .withConfig(emptyMap())
                 .endSpec()
                 .build();
 

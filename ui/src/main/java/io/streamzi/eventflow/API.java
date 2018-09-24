@@ -167,7 +167,7 @@ public class API {
                 KafkaTopicList.class,
                 DoneableKafkaTopic.class)
                 .inNamespace(container.getOSClient().getNamespace()).list().getItems().stream()
-                .filter(kafkaTopic -> (kafkaTopic.getMetadata().getLabels().get("streamzi.io/source") == null ))
+                .filter(kafkaTopic -> (kafkaTopic.getMetadata().getLabels().get("streamzi.io/source") == null))
                 .map(flow -> flow.getMetadata().getName())
                 .collect(Collectors.toList());
     }

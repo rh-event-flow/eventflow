@@ -51,11 +51,11 @@ public class ProcessorNode extends ProcessorObject implements ProcessorConstants
      */
     private ProcessorFlow parent;
 
-    /** 
+    /**
      * Deployment locations
      */
     private Map<String, Integer> targetClouds = new HashMap<>();
-    
+
     /**
      * What type of processor is this
      */

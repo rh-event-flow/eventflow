@@ -2,6 +2,7 @@ package io.streamzi.eventflow.model;
 
 /**
  * An output
+ *
  * @author hhiden
  */
 public class ProcessorOutputPort extends ProcessorPort {
@@ -18,5 +19,5 @@ public class ProcessorOutputPort extends ProcessorPort {
     public void addLink(ProcessorLink link) {
         links.add(link);
     }
-    
+
 }

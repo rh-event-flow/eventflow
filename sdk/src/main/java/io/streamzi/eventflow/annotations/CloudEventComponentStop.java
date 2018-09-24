@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method to be called when a component needs to be stopped
+ *
  * @author hhiden
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CloudEventComponentStop {
-    
+
 }

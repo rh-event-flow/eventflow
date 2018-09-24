@@ -17,8 +17,9 @@ package io.streamzi.eventflow.annotations;
 
 /**
  * Type of object to pass between processors
+ *
  * @author hhiden
  */
 public enum ObjectType {
-    CLOUDEVENT,OBJECT
+    CLOUDEVENT, OBJECT
 }

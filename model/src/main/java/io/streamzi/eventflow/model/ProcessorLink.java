@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Represents a link between two processor nodes
+ *
  * @author hhiden
  */
 public class ProcessorLink extends ProcessorObject {
 
     private ProcessorOutputPort source;
-    
+
     private ProcessorInputPort target;
 
     public void setSource(ProcessorOutputPort source) {

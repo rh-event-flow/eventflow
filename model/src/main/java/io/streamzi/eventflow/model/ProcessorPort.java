@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * Represents a connection "port" that can send / receive events
+ *
  * @author hhiden
  */
 public abstract class ProcessorPort {
@@ -15,12 +16,12 @@ public abstract class ProcessorPort {
     public ProcessorPort() {
     }
 
-    
+
     public ProcessorPort(String name) {
         this.name = name;
     }
-    
-    
+
+
     public String getName() {
         return name;
     }
@@ -44,8 +45,8 @@ public abstract class ProcessorPort {
     public void setParent(ProcessorNode parent) {
         this.parent = parent;
     }
-    
-    
+
+
     public abstract void addLink(ProcessorLink link);
-    
+
 }

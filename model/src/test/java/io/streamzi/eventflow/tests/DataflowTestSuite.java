@@ -8,13 +8,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- *
  * @author hhiden
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ModelTest.class,
-    DeploymentTest.class
+        ModelTest.class,
+        DeploymentTest.class
 })
 public class DataflowTestSuite {
 
@@ -33,5 +32,5 @@ public class DataflowTestSuite {
     @After
     public void tearDown() throws Exception {
     }
-    
+
 }

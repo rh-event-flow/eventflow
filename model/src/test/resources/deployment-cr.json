@@ -34,7 +34,7 @@
       "outputs": [
         "output-data"
       ]
-    },    
+    },
     {
       "displayName": "Log Data",
       "imageName": "streamziprocessors/cef-ops-log-data",
@@ -44,7 +44,7 @@
       "uuid": "node-3",
       "targetClouds": {
         "local": 1
-      },            
+      },
       "settings": {},
       "inputs": [
         "input-data"
@@ -63,7 +63,7 @@
       "sourceUuid": "node-2",
       "targetUuid": "node-3",
       "sourcePortName": "output-data",
-      "targetPortName": "input-data"        
+      "targetPortName": "input-data"
     }
   ],
   "settings": {},

@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Mark an object as a receiver of cloud events
+ *
  * @author hhiden
  */
 @Target(ElementType.FIELD)

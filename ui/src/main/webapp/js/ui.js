@@ -7,34 +7,34 @@ var clouds = new Array();
 
 // Add a method to get a block by uuid
 blocks.connectorCounter = 0;
-blocks.getBlockByUUID = function(uuid){
+blocks.getBlockByUUID = function (uuid) {
     var block;
-    for(var i=0;i<this.blocks.length;i++){
+    for (var i = 0; i < this.blocks.length; i++) {
         block = this.blocks[i];
-        if(block._uuid && block._uuid===uuid){
+        if (block._uuid && block._uuid === uuid) {
             return block;
         }
     }
     return null;
 };
 
-blocks.linkBlocks = function(sourceBlock, sourceOutput, targetBlock, targetInput){
-    if(sourceBlock.outputExists(sourceOutput) && targetBlock.inputExists(targetInput)){
+blocks.linkBlocks = function (sourceBlock, sourceOutput, targetBlock, targetInput) {
+    if (sourceBlock.outputExists(sourceOutput) && targetBlock.inputExists(targetInput)) {
         console.log("Can link");
         var id = this.edgeId++;
         var connectorA = new Connector(sourceOutput, "output");
         var connectorB = new Connector(targetInput, "input");
         var edge = new Edge(id, sourceBlock, connectorA, targetBlock, connectorB, this);
         edge.create();
-        var edgeIndex = this.edges.push(edge)-1;
+        var edgeIndex = this.edges.push(edge) - 1;
         this.redraw();
     }
 };
 
-Block.prototype.inputExists = function(name){
+Block.prototype.inputExists = function (name) {
     var id = name + "_input";
-    for(var i=0 ;i<this.connectors.length;i++){
-        if(this.connectors[i]===id){
+    for (var i = 0; i < this.connectors.length; i++) {
+        if (this.connectors[i] === id) {
             return true;
         }
     }
@@ -42,10 +42,10 @@ Block.prototype.inputExists = function(name){
 };
 
 // Find a connector in a block
-Block.prototype.outputExists = function(name){
+Block.prototype.outputExists = function (name) {
     var id = name + "_output";
-    for(var i=0 ;i<this.connectors.length;i++){
-        if(this.connectors[i]===id){
+    for (var i = 0; i < this.connectors.length; i++) {
+        if (this.connectors[i] === id) {
             return true;
         }
     }
@@ -67,27 +67,27 @@ blocks.addBlock = function (name, x, y, nodeData) {
 
             // Add settings if there are any
 
-            if(nodeData){
+            if (nodeData) {
                 var settings = nodeData.settings;
                 block._uuid = nodeData.uuid;
                 var fields = block.fields.fields;
-                for(var j=0;j<fields.length;j++){
-                    if(settings[fields[j].name]){
+                for (var j = 0; j < fields.length; j++) {
+                    if (settings[fields[j].name]) {
                         fields[j].value = settings[fields[j].name];
                         console.log(fields[j].name);
                     }
                 }
 
                 // Add the replicas to the replicas field
-                if(nodeData.targetClouds){
+                if (nodeData.targetClouds) {
                     var fieldName;
 
                     var keys = Object.keys(nodeData.targetClouds);
-                    for(var i=0;i<keys.length;i++){
+                    for (var i = 0; i < keys.length; i++) {
                         fieldName = "replicas_" + keys[i];
                         var fields = block.fields.fields;
-                        for(var j=0;j<fields.length;j++){
-                            if(fieldName===fields[j].name){
+                        for (var j = 0; j < fields.length; j++) {
+                            if (fieldName === fields[j].name) {
                                 fields[j].value = nodeData.targetClouds[keys[i]];
                             }
                         }
@@ -130,8 +130,8 @@ blocks.addBlock = function (name, x, y, nodeData) {
         $('head').append('<script type="text/javascript" src="demo/' + file + '"></script>');
     }
 
-    fetchClouds(function(data){
-        for(var i=0;i<data.length;i++){
+    fetchClouds(function (data) {
+        for (var i = 0; i < data.length; i++) {
             clouds.push(data[i]);
         }
     });
@@ -160,11 +160,12 @@ blocks.addBlock = function (name, x, y, nodeData) {
             exportJson();
         }, 'export');
 
-        if(_flowName){
-            fetchFlowJson(_flowName, function(result){
+        if (_flowName) {
+            fetchFlowJson(_flowName, function (result) {
                 importJson(result);
             })
-        };
+        }
+        ;
     });
 
 
@@ -197,7 +198,7 @@ function importJson(customResource) {
     var settings;
     var fields;
 
-    for(var i=0;i<drawingData.nodes.length;i++){
+    for (var i = 0; i < drawingData.nodes.length; i++) {
         nodeData = drawingData.nodes[i];
         block = blocks.addBlock(nodeData.templateName, 100, 100, nodeData);
         console.log("Template: " + nodeData.templateName);
@@ -207,11 +208,11 @@ function importJson(customResource) {
     var link;
     var source;
     var target;
-    for(var i=0;i<drawingData.links.length;i++){
+    for (var i = 0; i < drawingData.links.length; i++) {
         link = drawingData.links[i];
         source = blocks.getBlockByUUID(link.sourceUuid);
         target = blocks.getBlockByUUID(link.targetUuid);
-        if(source && target){
+        if (source && target) {
             console.log("Linking:" + source._uuid + " to " + target._uuid);
             blocks.linkBlocks(source, link.sourcePortName, target, link.targetPortName);
         }
@@ -262,7 +263,7 @@ function exportJson(flowName) {
                 for (var j = 0; j < block.fields.fields.length; j++) {
                     // Standard property
                     field = block.fields.fields[j];
-                    if(!field.name.startsWith("replicas_")){
+                    if (!field.name.startsWith("replicas_")) {
                         attrs = field.attrs;
                         if (attrs && attrs.editable) {
                             // This can go in the settings
@@ -273,10 +274,10 @@ function exportJson(flowName) {
             }
 
             // Find the replicas data
-            if(block.fields.fields){
-                for(var j=0;j<block.fields.fields.length;j++){
+            if (block.fields.fields) {
+                for (var j = 0; j < block.fields.fields.length; j++) {
                     field = block.fields.fields[j];
-                    if(field.name.startsWith("replicas_")){
+                    if (field.name.startsWith("replicas_")) {
                         cloudName = field.name.substring(9);
                         replicas[cloudName] = field.value;
                     }
@@ -529,9 +530,9 @@ function setupBlocksJs(nodeYamlList) {
 
         // ADD DEPLOYMENT DATA
         var cloudName;
-        for(var j=0;j<clouds.length;j++){
+        for (var j = 0; j < clouds.length; j++) {
             cloudName = clouds[j];
-            if(cloudName==="local"){
+            if (cloudName === "local") {
                 // Default is 1-local
                 fields.push({
                     name: "replicas_" + cloudName,
@@ -587,7 +588,7 @@ function fetchNodeYaml(callback) {
     });
 }
 
-function fetchClouds(callback){
+function fetchClouds(callback) {
     var promise = $.ajax({
         url: "rest/api/clouds/names",
         type: 'GET',
@@ -614,9 +615,10 @@ function fetchDefaults(callback) {
 function guid() {
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
-                .toString(16)
-                .substring(1);
+            .toString(16)
+            .substring(1);
     }
+
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 
 }
@@ -633,11 +635,9 @@ function replaceall(str, replace, with_this) {
 
     for (var i = 0; i < str.length; i++) // not need to be equal. it causes the last change: undefined..
     {
-        if (str[i] == replace)
-        {
+        if (str[i] == replace) {
             temp = with_this;
-        } else
-        {
+        } else {
             temp = str[i];
         }
 
