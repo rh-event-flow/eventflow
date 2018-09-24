@@ -51,7 +51,6 @@ public class ModelTest {
 
             ProcessorFlow flow = new ProcessorFlow(sf);
             assertThat(flow.getNodes().size()).isEqualTo(2);
-            assertThat(flow.getGlobalSettings().size()).isEqualTo(2);
 
         } catch (IOException e) {
             e.printStackTrace();

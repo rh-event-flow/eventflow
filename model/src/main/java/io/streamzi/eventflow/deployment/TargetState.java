@@ -183,7 +183,7 @@ public class TargetState {
 
     }
 
-    private Map<String, String> getNodeEnvVars(ProcessorNode node) {
+    private Map<String, String> getNodeEnvVars(final ProcessorNode node) {
 
         Map<String, String> envVars = new HashMap<>();
 
@@ -194,15 +194,9 @@ public class TargetState {
             envVars.put(FlowUtil.sanitiseEnvVar(key), node.getSettings().get(key));
         }
 
-        // Add environment variables for the flow global settings
-        for (String key : node.getParent().getGlobalSettings().keySet()) {
-            envVars.put(FlowUtil.sanitiseEnvVar(key), node.getParent().getGlobalSettings().get(key));
-        }
-
-
         //Input topics
-        for (ProcessorInputPort input : node.getInputs().values()) {
-            for (ProcessorLink link : input.getLinks()) {
+        for (final ProcessorInputPort input : node.getInputs().values()) {
+            for (final ProcessorLink link : input.getLinks()) {
                 ProcessorNode sourceNode = link.getSource().getParent();
                 String bootstrapServers = bootstrapServerCache.get(calculateTopicHost(sourceNode));
                 if (sourceNode.getProcessorType() == ProcessorConstants.ProcessorType.TOPIC_ENDPOINT) {
@@ -218,7 +212,7 @@ public class TargetState {
         }
 
         //Output topics
-        for (ProcessorOutputPort output : node.getOutputs().values()) {
+        for (final ProcessorOutputPort output : node.getOutputs().values()) {
 
             String bootstrapServers = bootstrapServerCache.get(calculateTopicHost(node));
             envVars.put(FlowUtil.sanitiseEnvVar(output.getName() + "_BOOTSTRAP_SERVERS"), bootstrapServers);

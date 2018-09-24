@@ -33,8 +33,6 @@ public class SerializedFlow implements KubernetesResource {
 
     private Map<String, String> settings = new HashMap<>();
 
-    private Map<String, String> globalSettings = new HashMap<>();
-
     public SerializedFlow() {
     }
 
@@ -55,9 +53,6 @@ public class SerializedFlow implements KubernetesResource {
             settings.put(key, flow.getSettings().get(key));
         }
         
-        for(String key : flow.getGlobalSettings().keySet()){
-            globalSettings.put(key, flow.getGlobalSettings().get(key));
-        }
     }
 
     public String getName() {
@@ -74,14 +69,6 @@ public class SerializedFlow implements KubernetesResource {
 
     public void setSettings(Map<String, String> settings) {
         this.settings = settings;
-    }
-
-    public Map<String, String> getGlobalSettings() {
-        return globalSettings;
-    }
-
-    public void setGlobalSettings(Map<String, String> globalSettings) {
-        this.globalSettings = globalSettings;
     }
 
     public List<SerializedNode> getNodes(){
@@ -108,7 +95,6 @@ public class SerializedFlow implements KubernetesResource {
                 ", nodes=" + nodes +
                 ", links=" + links +
                 ", settings=" + settings +
-                ", globalSettings=" + globalSettings +
                 '}';
     }
 }

@@ -384,8 +384,7 @@ function exportJson(flowName) {
     var result = {
         nodes: processorArray,
         links: linksArray,
-        settings: {},
-        globalSettings: defaults
+        settings: {}
     };
 
     if (flowName) {
