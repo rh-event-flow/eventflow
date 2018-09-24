@@ -3,7 +3,12 @@ package io.streamzi.eventflow.tests;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.streamzi.eventflow.model.ProcessorFlow;
 import io.streamzi.eventflow.serialization.SerializedFlow;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;

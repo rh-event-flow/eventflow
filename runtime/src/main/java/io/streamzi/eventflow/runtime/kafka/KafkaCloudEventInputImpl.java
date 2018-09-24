@@ -11,15 +11,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.streamzi.cloudevents.CloudEvent;
 import io.streamzi.cloudevents.impl.CloudEventImpl;
-import io.streamzi.eventflow.runtime.CloudEventInput;
 import io.streamzi.eventflow.model.ProcessorConstants;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static org.apache.kafka.clients.CommonClientConfigs.*;
-
+import io.streamzi.eventflow.runtime.CloudEventInput;
 import io.streamzi.eventflow.utils.EnvironmentResolver;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -28,6 +21,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG;
 
 /**
  * Connects to a Kafka topic to get cloud events

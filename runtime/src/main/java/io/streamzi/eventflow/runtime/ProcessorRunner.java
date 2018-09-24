@@ -2,6 +2,7 @@ package io.streamzi.eventflow.runtime;
 
 import eu.infomas.annotation.AnnotationDetector;
 import io.streamzi.eventflow.annotations.CloudEventComponent;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;

@@ -4,7 +4,12 @@ import io.streamzi.eventflow.serialization.SerializedFlow;
 import io.streamzi.eventflow.serialization.SerializedNode;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**

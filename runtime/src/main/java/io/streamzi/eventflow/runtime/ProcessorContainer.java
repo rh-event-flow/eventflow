@@ -1,10 +1,10 @@
 package io.streamzi.eventflow.runtime;
 
-import io.streamzi.eventflow.runtime.kafka.KafkaCloudEventInputImpl;
-import io.streamzi.eventflow.runtime.kafka.KafkaCloudEventOutputImpl;
 import io.streamzi.eventflow.annotations.CloudEventComponentTimer;
 import io.streamzi.eventflow.annotations.CloudEventConsumer;
 import io.streamzi.eventflow.annotations.CloudEventProducer;
+import io.streamzi.eventflow.runtime.kafka.KafkaCloudEventInputImpl;
+import io.streamzi.eventflow.runtime.kafka.KafkaCloudEventOutputImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

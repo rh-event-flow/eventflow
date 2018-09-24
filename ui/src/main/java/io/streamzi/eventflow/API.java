@@ -1,7 +1,6 @@
 package io.streamzi.eventflow;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
@@ -14,9 +13,7 @@ import io.streamzi.eventflow.crds.Flow;
 import io.streamzi.eventflow.crds.FlowList;
 import io.streamzi.eventflow.crds.Processor;
 import io.streamzi.eventflow.crds.ProcessorList;
-import io.streamzi.eventflow.model.ProcessorConstants;
 import io.streamzi.eventflow.serialization.SerializedFlow;
-import io.streamzi.eventflow.utils.EnvironmentResolver;
 import io.strimzi.api.kafka.Crds;
 import io.strimzi.api.kafka.KafkaTopicList;
 import io.strimzi.api.kafka.model.DoneableKafkaTopic;
@@ -24,8 +21,16 @@ import io.strimzi.api.kafka.model.KafkaTopic;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.*;
-import java.util.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;

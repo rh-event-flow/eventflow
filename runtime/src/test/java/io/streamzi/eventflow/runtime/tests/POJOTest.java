@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 package io.streamzi.eventflow.runtime.tests;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.streamzi.cloudevents.CloudEvent;
 import io.streamzi.cloudevents.CloudEventBuilder;
+import org.junit.Test;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Test;
 /**
  *
  * @author hhiden
