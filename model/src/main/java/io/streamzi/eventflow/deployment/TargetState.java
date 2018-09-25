@@ -198,12 +198,12 @@ public class TargetState {
             for (final ProcessorLink link : input.getLinks()) {
                 ProcessorNode sourceNode = link.getSource().getParent();
                 String bootstrapServers = bootstrapServerCache.get(calculateTopicHost(sourceNode));
+                envVars.put(FlowUtil.sanitiseEnvVar(input.getName() + "_BOOTSTRAP_SERVERS"), bootstrapServers);
                 if (sourceNode.getProcessorType() == ProcessorConstants.ProcessorType.TOPIC_ENDPOINT) {
                     // This is a pre-existing topic
                     envVars.put(FlowUtil.sanitiseEnvVar(input.getName()), link.getSource().getName());
                 } else {
                     // This topic will be created
-                    envVars.put(FlowUtil.sanitiseEnvVar(input.getName() + "_BOOTSTRAP_SERVERS"), bootstrapServers);
                     String topicName = node.getParent().getName() + "-" + link.getSource().getParent().getUuid() + "-" + link.getSource().getName();
                     envVars.put(FlowUtil.sanitiseEnvVar(input.getName()), topicName);
                 }
@@ -211,15 +211,22 @@ public class TargetState {
         }
 
         //Output topics
-        for (final ProcessorOutputPort output : node.getOutputs().values()) {
+        for (ProcessorOutputPort output : node.getOutputs().values()) {
+            for (ProcessorLink link : output.getLinks()) {
 
-            String bootstrapServers = bootstrapServerCache.get(calculateTopicHost(node));
-            envVars.put(FlowUtil.sanitiseEnvVar(output.getName() + "_BOOTSTRAP_SERVERS"), bootstrapServers);
+                ProcessorNode sinkNode = link.getTarget().getParent();
+                String bootstrapServers = bootstrapServerCache.get(calculateTopicHost(node));
+                envVars.put(FlowUtil.sanitiseEnvVar(output.getName() + "_BOOTSTRAP_SERVERS"), bootstrapServers);
 
-            String topicName = node.getParent().getName() + "-" + node.getUuid() + "-" + output.getName();
-            envVars.put(FlowUtil.sanitiseEnvVar(output.getName()), topicName);
+                if (sinkNode.getProcessorType() == ProcessorConstants.ProcessorType.TOPIC_ENDPOINT) {
+                    // This is a pre-existing topic
+                    envVars.put(FlowUtil.sanitiseEnvVar(output.getName()), link.getTarget().getName());
+                } else {
+                    String topicName = node.getParent().getName() + "-" + node.getUuid() + "-" + output.getName();
+                    envVars.put(FlowUtil.sanitiseEnvVar(output.getName()), topicName);
+                }
+            }
         }
-
         return envVars;
     }
 
