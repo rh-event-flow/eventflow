@@ -27,6 +27,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -159,23 +160,26 @@ public class API {
     @GET
     @Path("/topics")
     @Produces("application/json")
-    public List<String> listTopicNames() {
+    public String listTopicNames() throws Exception {
 
-        return container.getOSClient().customResources(
+        return MAPPER.writeValueAsString(container.getOSClient().customResources(
                 Crds.topic(),
                 KafkaTopic.class,
                 KafkaTopicList.class,
                 DoneableKafkaTopic.class)
                 .inNamespace(container.getOSClient().getNamespace()).list().getItems().stream()
                 .filter(kafkaTopic -> (kafkaTopic.getMetadata().getLabels().get("streamzi.io/source") == null))
-                .map(flow -> flow.getMetadata().getName())
-                .collect(Collectors.toList());
+                .map(topic -> {
+                    return new TopicDetails(topic.getMetadata().getName(), "local");
+                })
+                .collect(Collectors.toList()));
+
     }
 
     @GET
     @Path("/clouds")
     @Produces("application/json")
-    public String getClouds() throws Exception {
+    public String getClouds() {
 
         final CustomResourceDefinition cloudCRD = container.getOSClient().customResourceDefinitions().withName("clouds.streamzi.io").get();
         if (cloudCRD == null) {
@@ -183,16 +187,21 @@ public class API {
             return "[]";
         }
 
-        return MAPPER.writeValueAsString(new ArrayList<>(container.getOSClient().customResources(
-                cloudCRD,
-                Cloud.class,
-                CloudList.class,
-                DoneableCloud.class)
-                .inNamespace(container.getOSClient().getNamespace())
-                .list().getItems())
-                .stream().peek(cloud -> cloud.getSpec().setToken(null))
-                .collect(Collectors.toList())
-        );
+        try {
+            return MAPPER.writeValueAsString(new ArrayList<>(container.getOSClient().customResources(
+                    cloudCRD,
+                    Cloud.class,
+                    CloudList.class,
+                    DoneableCloud.class)
+                    .inNamespace(container.getOSClient().getNamespace())
+                    .list().getItems())
+                    .stream().peek(cloud -> cloud.getSpec().setToken(null))
+                    .collect(Collectors.toList())
+            );
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error writing JSON topic data: " + e.getMessage(), e);
+            return "";
+        }
     }
 
     @GET
@@ -247,5 +256,31 @@ public class API {
             return "{}";
         }
     }
+}
 
+class TopicDetails implements Serializable {
+
+    private String name;
+    private String cloud;
+
+    public TopicDetails(String name, String cloud) {
+        this.name = name;
+        this.cloud = cloud;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCloud() {
+        return cloud;
+    }
+
+    public void setCloud(String cloud) {
+        this.cloud = cloud;
+    }
 }

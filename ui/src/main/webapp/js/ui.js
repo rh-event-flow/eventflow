@@ -52,6 +52,7 @@ Block.prototype.outputExists = function (name) {
     return false;
 };
 
+
 // Override the addBlock method to add some more stuff
 blocks.addBlock = function (name, x, y, nodeData) {
     console.log("Add blocks:" + name);
@@ -100,7 +101,7 @@ blocks.addBlock = function (name, x, y, nodeData) {
                     for (i = 0; i < keys.length; i++) {
                         fields = block.fields.fields;
                         for (var j = 0; j < fields.length; j++) {
-                            if ("sticky_output" === fields[j].name) {
+                            if ("outputCloud" === fields[j].name) {
                                 fields[j].value = nodeData.outputCloud;
                             }
                         }
@@ -124,49 +125,44 @@ blocks.addBlock = function (name, x, y, nodeData) {
     }
 };
 
-
 (function () {
     function include(file) {
         $('head').append('<script type="text/javascript" src="demo/' + file + '"></script>');
     }
 
-    fetchClouds(function (data) {
-        for (var i = 0; i < data.length; i++) {
-            clouds.push(data[i]);
-        }
-    });
+    Promise.all([
 
-    fetchNodeYaml(function (data) {
-        setupBlocksJs(data);
-        blocks.run('#blocks');
-    });
+        fetchTopicList(function (data) {
+            setupTopicBlocksJs(data);
+        }),
 
-    fetchTopicList(function (data) {
-        setupTopicBlocksJs(data);
-    });
+        fetchClouds(function (data) {
+            for (var i = 0; i < data.length; i++) {
+                clouds.push(data[i]);
+            }
+        }),
 
-    fetchDefaults(function (data) {
-        defaults = data;
-        console.log(defaults);
-    });
+        fetchNodeYaml(function (data) {
+            setupBlocksJs(data);
+            blocks.run('#blocks');
+        })
+    ])
+        .then(function (p) {
 
-    //setupBlocksJs(data);
+            blocks.ready(function () {
+                blocks.menu.addAction('Export', function (blocks) {
+                    //alert($.toJSON(blocks.export()));
+                    exportJson();
+                }, 'export');
 
-
-    blocks.ready(function () {
-
-        blocks.menu.addAction('Export', function (blocks) {
-            //alert($.toJSON(blocks.export()));
-            exportJson();
-        }, 'export');
-
-        if (_flowName) {
-            fetchFlowJson(_flowName, function (result) {
-                importJson(result);
+                if (_flowName) {
+                    console.log("About to fetch Flow");
+                    fetchFlowJson(_flowName, function (result) {
+                        importJson(result);
+                    })
+                }
             })
-        }
-        ;
-    });
+        });
 
 
     blocks.types.addCompatibility('string', 'number');
@@ -175,7 +171,9 @@ blocks.addBlock = function (name, x, y, nodeData) {
     blocks.types.addCompatibility('bool', 'integer');
     blocks.types.addCompatibility('bool', 'string');
 
-})();
+})
+();
+
 
 function fetchFlowJson(flowName, callback) {
     var promise = $.ajax({
@@ -258,7 +256,7 @@ function exportJson(flowName) {
             //todo: this will only copy default values
             var field;
             var attrs;
-            var stickyOutput;
+            var outputCloud;
             if (block._template.settings && block.fields.fields) {
                 for (var j = 0; j < block.fields.fields.length; j++) {
                     // Standard property
@@ -285,14 +283,13 @@ function exportJson(flowName) {
             }
 
             if (block.fields.fields) {
-                for (var j = 0; j < block.fields.fields.length; j++) {
+                for (j = 0; j < block.fields.fields.length; j++) {
                     field = block.fields.fields[j];
-                    if (field.name === "sticky_output") {
-                        stickyOutput = field.value;
+                    if (field.name === "outputcloud") {
+                        outputCloud = field.value;
                     }
                 }
             }
-
 
             processorJson = {
                 displayName: block._template.displayName,
@@ -306,7 +303,7 @@ function exportJson(flowName) {
                 inputs: inputsArray,
                 outputs: outputsArray,
                 targetClouds: replicas,
-                outputCloud: stickyOutput
+                outputCloud: outputCloud
             };
 
             processorArray.push(processorJson);
@@ -405,24 +402,39 @@ function setupTopicBlocksJs(topicList) {
     var outputName;
 
     for (var i = 0; i < topicList.length; i++) {
-        fields = new Array();
+        fields = [];
         blockData = {
-            name: topicList[i],
+            name: topicList[i].name,
             description: "Kafka Topic",
-            family: "Input Topics"
+            family: "Topics"
         };
 
         // Fix names and add to the rename map so that we can fix later
         //outputName = replaceall(topicList[i], ".", "-");
-        outputName = sanitize(topicList[i]);
-        renameMap[outputName] = topicList[i];
+        outputName = sanitize(topicList[i].name);
+        renameMap[outputName] = topicList[i].name;
+
+        fields.push({
+            name: outputName,
+            type: "string",
+            attrs: "input",
+            topicName: topicList[i].name
+
+        });
 
         fields.push({
             name: outputName,
             type: "string",
             attrs: "output",
-            topicName: +topicList[i]
+            topicName: topicList[i].name
 
+        });
+
+        fields.push({
+            name: "outputCloud",
+            defaultValue: topicList[i].cloud,
+            type: "string",
+            attrs: "editable"
         });
 
         fields.push({
@@ -433,21 +445,25 @@ function setupTopicBlocksJs(topicList) {
         blockData.fields = fields;
 
         // Dummy template
-        templateMap[topicList[i]] = {
+        templateMap[topicList[i].name] = {
             displayName: "",
             imageName: "none",
             templateId: "none",
-            templateName: topicList[i],
+            name: topicList[i].name,
             transport: "kafka",
             uuid: "none",
             processorType: "TOPIC_ENDPOINT",
+            inputs: [
+                topicList[i].name
+            ],
             outputs: [
-                topicList[i]
+                topicList[i].name
             ]
 
         };
         blocks.register(blockData);
     }
+    console.log("Loaded topics")
 }
 
 
@@ -552,7 +568,7 @@ function setupBlocksJs(nodeYamlList) {
         }
 
         fields.push({
-            name: "sticky_output",
+            name: "outputCloud",
             defaultValue: "",
             type: "string",
             attrs: " editable"
@@ -566,7 +582,7 @@ function setupBlocksJs(nodeYamlList) {
 }
 
 function fetchTopicList(callback) {
-    var promise = $.ajax({
+    return $.ajax({
         url: "rest/api/topics",
         type: 'GET',
         dataType: "json",
@@ -578,7 +594,7 @@ function fetchTopicList(callback) {
 
 function fetchNodeYaml(callback) {
 
-    var promise = $.ajax({
+    return $.ajax({
         url: "rest/api/processors",
         type: 'GET',
         dataType: "json",
@@ -589,20 +605,8 @@ function fetchNodeYaml(callback) {
 }
 
 function fetchClouds(callback) {
-    var promise = $.ajax({
+    return $.ajax({
         url: "rest/api/clouds/names",
-        type: 'GET',
-        dataType: "json",
-        contentType: "application/json; charset=utf-8"
-    }).then(function (data) {
-        callback(data);
-    });
-}
-
-function fetchDefaults(callback) {
-
-    var promise = $.ajax({
-        url: "rest/api/globalproperties",
         type: 'GET',
         dataType: "json",
         contentType: "application/json; charset=utf-8"
