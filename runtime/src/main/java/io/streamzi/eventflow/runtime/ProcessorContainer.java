@@ -3,8 +3,11 @@ package io.streamzi.eventflow.runtime;
 import io.streamzi.eventflow.annotations.CloudEventComponentTimer;
 import io.streamzi.eventflow.annotations.CloudEventConsumer;
 import io.streamzi.eventflow.annotations.CloudEventProducer;
+import io.streamzi.eventflow.model.ProcessorConstants;
 import io.streamzi.eventflow.runtime.kafka.KafkaCloudEventInputImpl;
 import io.streamzi.eventflow.runtime.kafka.KafkaCloudEventOutputImpl;
+import io.streamzi.eventflow.runtime.noop.NoopCloutEventOutput;
+import io.streamzi.eventflow.utils.EnvironmentResolver;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -54,9 +57,22 @@ public class ProcessorContainer {
 
                     // Create an output implementation and set it
                     f.setAccessible(true);
-                    KafkaCloudEventOutputImpl output = new KafkaCloudEventOutputImpl(processorObject, producerAnnotation.name());
-                    f.set(processorObject, output);
-                    outputs.add(output);
+
+                    final String outputName = producerAnnotation.name();
+                    CloudEventOutput cloudEventOutput = null;
+                    if (EnvironmentResolver.exists(outputName + "_BOOTSTRAP_SERVERS")) {
+                        // There is a bootstrap server environment variable
+                        logger.info("Bootstrap server Env exists for input: " + outputName);
+
+                        cloudEventOutput = new KafkaCloudEventOutputImpl(processorObject, producerAnnotation.name());
+                    } else {
+                        // Use the default / old version
+                        logger.warning("Using NoopOutput impl., since there is no Bootstrap server Env exists for input: " + outputName);
+                        cloudEventOutput = new NoopCloutEventOutput();
+                    }
+
+                    f.set(processorObject, cloudEventOutput);
+                    outputs.add(cloudEventOutput);
                 }
             }
 

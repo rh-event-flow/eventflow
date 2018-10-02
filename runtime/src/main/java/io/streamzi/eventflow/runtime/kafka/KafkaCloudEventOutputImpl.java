@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.streamzi.eventflow.model.ProcessorConstants;
 import io.streamzi.eventflow.runtime.CloudEventOutput;
 import io.streamzi.eventflow.utils.EnvironmentResolver;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -33,16 +32,7 @@ public class KafkaCloudEventOutputImpl extends CloudEventOutput {
     public KafkaCloudEventOutputImpl(Object producerObject, String outputName) {
         super(producerObject, outputName);
 
-        if (EnvironmentResolver.exists(outputName + "_BOOTSTRAP_SERVERS")) {
-            // There is a bootstrap server environment variable
-            logger.info("Bootstrap server Env exists for input: " + outputName);
-            bootstrapServers = EnvironmentResolver.get(outputName + "_BOOTSTRAP_SERVERS");
-        } else {
-            // Use the default / old version
-            logger.warning("No Bootstrap server Env exists for input: " + outputName);
-            bootstrapServers = EnvironmentResolver.get(ProcessorConstants.KAFKA_BOOTSTRAP_SERVERS);
-        }
-
+        bootstrapServers = EnvironmentResolver.get(outputName + "_BOOTSTRAP_SERVERS");
         topicName = EnvironmentResolver.get(outputName);  // Passed in from deployer
 
         mapper = new ObjectMapper();
