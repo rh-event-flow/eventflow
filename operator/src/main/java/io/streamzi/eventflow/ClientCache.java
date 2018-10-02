@@ -8,6 +8,9 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import io.streamzi.eventflow.crds.Cloud;
 import io.streamzi.eventflow.crds.CloudList;
 import io.streamzi.eventflow.crds.DoneableCloud;
+import io.strimzi.api.kafka.KafkaAssemblyList;
+import io.strimzi.api.kafka.model.DoneableKafka;
+import io.strimzi.api.kafka.model.Kafka;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +37,27 @@ public class ClientCache {
         apiClients.put("local", osClient);
 
         //Try and find a Strimzi installation in this namespace
-        List<Service> strimziServices = osClient.services().inNamespace(osClient.getNamespace()).withLabel("strimzi.io/name").list().getItems();
-        if (strimziServices.size() > 0) {
-            bootstrapServerCache.put("local", strimziServices.get(0).getMetadata().getName() + "." + osClient.getNamespace() + ".svc.cluster.local:9092");
+        final CustomResourceDefinition kafkaCRD = osClient.customResourceDefinitions().withName("kafkas.kafka.strimzi.io").get();
+        if (kafkaCRD == null) {
+            logger.info("Can't find Kafka CRD - Not setting BOOTSTRAP_SERVERS");
+        } else {
+            List<Kafka> kafkas = osClient.customResources(
+                    kafkaCRD,
+                    Kafka.class,
+                    KafkaAssemblyList.class,
+                    DoneableKafka.class)
+                    .inNamespace(osClient.getNamespace())
+                    .list()
+                    .getItems();
+
+            if (kafkas.size() > 0) {
+                String localBs = kafkas.get(0).getMetadata().getName() + "-kafka-bootstrap." + kafkas.get(0).getMetadata().getNamespace() + ".svc.cluster.local:9092";
+                logger.info("Setting BOOTSTRAP_SERVERS for local to " + localBs);
+                bootstrapServerCache.put("local", localBs);
+            } else {
+                logger.info("Can't find Kafka installation - Not setting BOOTSTRAP_SERVERS");
+
+            }
         }
 
         //Get any other OpenShift Clients
