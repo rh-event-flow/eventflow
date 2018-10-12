@@ -16,9 +16,9 @@
     <packaging>pom</packaging>
 
     <scm>
-        <connection>scm:git:git://github.com/project-streamzi/eventflow.git</connection>
-        <developerConnection>scm:git:git@github.com:project-streamzi/eventflow.git</developerConnection>
-        <url>https://github.com/project-streamzi/eventflow</url>
+        <connection>scm:git:git://github.com/rh-event-flow/eventflow.git</connection>
+        <developerConnection>scm:git:git@github.com:rh-event-flow/eventflow.git</developerConnection>
+        <url>https://github.com/rh-event-flow/eventflow</url>
         <tag>HEAD</tag>
     </scm>
 
