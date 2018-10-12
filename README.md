@@ -3,7 +3,7 @@ Simple EventFlow implementation based on CloudEvents, over Kafka and other proto
 
 ## Installation
 
-Use the [OCP Broker](https://github.com/project-streamzi/ocp-broker) to deploy Strimzi and then the EventFlow component.
+Use the [OCP Broker](https://github.com/rh-event-flow/ocp-broker) to deploy Strimzi and then the EventFlow component.
 
 
 ### Artifacts
@@ -20,11 +20,11 @@ The EventFlow component consists of a few different artifacts:
 
 ## Stream Processors
 
-A number of stream processors are available [here](https://github.com/project-streamzi/event-flow-operation-samples)!
+A number of stream processors are available [here](https://github.com/rh-event-flow/event-flow-operation-samples)!
 
 ## Maven Archetype
 
-We have a few [Maven archetypes](https://github.com/project-streamzi/processor-archetypes) for getting quickly up to speed with our SDK:
+We have a few [Maven archetypes](https://github.com/rh-event-flow/processor-archetypes) for getting quickly up to speed with our SDK:
 
 * `source`: Implements a sample for a data source, sending data to the EventFlow
 * `sink`: Implements a sample for a data sink, receiving data from the EventFlow
