@@ -119,7 +119,7 @@
                     <images>
                         <image>
                             <alias>ui</alias>
-                            <name>docker.io/streamzi/eventflow-ui</name>
+                            <name>docker.io/rheventflow/eventflow-ui</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>

@@ -77,7 +77,7 @@
                     <images>
                         <image>
                             <alias>operator</alias>
-                            <name>docker.io/streamzi/eventflow-operator</name>
+                            <name>docker.io/rheventflow/eventflow-operator</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                             </build>
