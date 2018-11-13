@@ -15,7 +15,8 @@
  */
 package io.streamzi.eventflow.runtime.tests;
 
-import io.streamzi.cloudevents.CloudEvent;
+
+import io.cloudevents.CloudEvent;
 
 /**
  * @author hhiden

@@ -16,8 +16,8 @@
 package io.streamzi.eventflow.runtime.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.streamzi.cloudevents.CloudEvent;
-import io.streamzi.cloudevents.CloudEventBuilder;
+import io.cloudevents.CloudEvent;
+import io.cloudevents.CloudEventBuilder;
 import org.junit.Test;
 
 import java.net.URI;
