@@ -37,8 +37,7 @@
         <jackson.version>2.9.6</jackson.version>
         <openshift.fabric8.version>4.0.5</openshift.fabric8.version>
         <k8s.model.version>2.0.4</k8s.model.version>
-        <jcloudevents.version>0.0.2</jcloudevents.version>
-        <io.cloudevents.version>0.0.1</io.cloudevents.version>
+        <io.cloudevents.version>0.2.0</io.cloudevents.version>
         <version.okhttp3>3.9.1</version.okhttp3>
         <version.assertj>3.10.0</version.assertj>
     </properties>
@@ -87,7 +86,7 @@
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
-                <version>2.0.0</version>
+                <version>2.1.0</version>
             </dependency>
 
             <dependency>

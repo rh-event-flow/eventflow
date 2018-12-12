@@ -23,6 +23,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -87,7 +88,7 @@ public class KafkaCloudEventInputImpl extends CloudEventInput implements Runnabl
         try {
             while (!stopInput) {
 
-                final ConsumerRecords<String, String> records = consumer.poll(100);
+                final ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                 for (ConsumerRecord<String, String> r : records) {
                     try {
                         switch (objectType) {

@@ -46,8 +46,8 @@ public class POJOTest {
         contents.put("value", Double.toString(Math.random()));
 
         final CloudEvent<Map<String, String>> simpleKeyValueEvent = new CloudEventBuilder()
-                .eventType("AType")
-                .eventID("12345")
+                .type("AType")
+                .id("12345")
                 .source(new URI("/somewhere"))
                 .data(contents)
                 .build();
