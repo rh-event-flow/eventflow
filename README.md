@@ -10,8 +10,8 @@ Use the [OCP Broker](https://github.com/rh-event-flow/ocp-broker) to deploy Stri
 
 The EventFlow component consists of a few different artifacts:
 
-* `common`: Commonly used classes and generic utilities, shared across different modules. 
-* `model`: An abstract representation of an EventFlow and its associated `Processor`s, their links etc. 
+* `common`: Commonly used classes and generic utilities, shared across different modules.
+* `model`: An abstract representation of an EventFlow and its associated `Processor`s, their links etc.
 * `sdk`: APIs and Annotations for developers to implement `Processor` implementations.
 * `runtime`: Simple JavaSE runtime, responsible for instantiating the `Processor` objects and perform the wiring to the underlying transport protocol.
 * `operator`: Java implementation of the [Kubernetes Operator Pattern](https://coreos.com/blog/introducing-operators.html), watching `Flow` and `Processor` custom resources
@@ -20,7 +20,7 @@ The EventFlow component consists of a few different artifacts:
 
 ## Stream Processors
 
-A number of stream processors are available [here](https://github.com/rh-event-flow/event-flow-operation-samples)!
+A number of stream processors are available [here](https://github.com/rh-event-flow/eventflow-processor-samples)!
 
 ## Maven Archetype
 
